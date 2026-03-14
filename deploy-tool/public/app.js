@@ -14,6 +14,8 @@
   const btnPreview = $("#btnPreview");
   const btnDeploy = $("#btnDeploy");
   const btnLogs = $("#btnLogs");
+  const btnSaveConfig = $("#btnSaveConfig");
+  const saveFeedback = $("#saveFeedback");
 
   const outputCard = $("#outputCard");
   const outputTitle = $("#outputTitle");
@@ -29,6 +31,14 @@
 
   let config = null;
 
+  // ── Map list keys to their DOM containers and input fields ──
+  const listMap = {
+    targets:      { container: cfgTargets,  input: $("#addTarget") },
+    excludeFiles: { container: cfgExFiles,  input: $("#addExFile") },
+    excludeDirs:  { container: cfgExDirs,   input: $("#addExDir") },
+    subfolders:   { container: cfgSubs,     input: $("#addSub") },
+  };
+
   // ── Helpers ───────────────────────────────────────────────
 
   function setStatus(state, text) {
@@ -38,13 +48,20 @@
     label.textContent = text;
   }
 
-  function tags(container, items, cls) {
+  /** Render tags with × remove buttons */
+  function renderTags(listKey) {
+    const { container } = listMap[listKey];
+    const items = config[listKey];
     container.innerHTML = "";
-    items.forEach((item) => {
+    items.forEach((item, idx) => {
       const li = document.createElement("li");
-      li.textContent = item;
+      li.innerHTML = `${escapeHtml(item)}<button class="tag-remove" data-list="${listKey}" data-index="${idx}" title="Remove">×</button>`;
       container.appendChild(li);
     });
+  }
+
+  function renderAllTags() {
+    Object.keys(listMap).forEach(renderTags);
   }
 
   function setLoading(btn, loading) {
@@ -91,6 +108,13 @@
     return div.innerHTML;
   }
 
+  function flashFeedback(msg, isError) {
+    saveFeedback.textContent = msg;
+    saveFeedback.style.color = isError ? "var(--red)" : "var(--green)";
+    saveFeedback.classList.add("show");
+    setTimeout(() => saveFeedback.classList.remove("show"), 2500);
+  }
+
   // ── Config toggle ────────────────────────────────────────
   const configHeader = document.querySelector('[data-toggle="configBody"]');
   const configBody = $("#configBody");
@@ -104,16 +128,80 @@
     try {
       const res = await fetch("/api/config");
       config = await res.json();
-      cfgSource.textContent = config.source;
-      tags(cfgTargets, config.targets);
-      tags(cfgExFiles, config.excludeFiles);
-      tags(cfgExDirs, config.excludeDirs);
-      tags(cfgSubs, config.subfolders);
+      cfgSource.value = config.source;
+      renderAllTags();
     } catch (e) {
-      cfgSource.textContent = "Error loading config";
+      cfgSource.value = "";
+      cfgSource.placeholder = "Error loading config";
       console.error(e);
     }
   }
+
+  // ── Add item to a list ────────────────────────────────────
+  function addItem(listKey) {
+    const { input } = listMap[listKey];
+    const value = input.value.trim();
+    if (!value) return;
+    if (config[listKey].includes(value)) {
+      flashFeedback("Already exists!", true);
+      return;
+    }
+    config[listKey].push(value);
+    input.value = "";
+    renderTags(listKey);
+  }
+
+  // ── Remove item from a list ──────────────────────────────
+  function removeItem(listKey, index) {
+    config[listKey].splice(index, 1);
+    renderTags(listKey);
+  }
+
+  // ── Event: Add buttons ───────────────────────────────────
+  document.querySelectorAll(".btn-add").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      addItem(btn.dataset.list);
+    });
+  });
+
+  // ── Event: Enter key in add inputs ────────────────────────
+  Object.entries(listMap).forEach(([key, { input }]) => {
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        addItem(key);
+      }
+    });
+  });
+
+  // ── Event: Remove buttons (delegated) ─────────────────────
+  document.addEventListener("click", (e) => {
+    if (e.target.classList.contains("tag-remove")) {
+      const listKey = e.target.dataset.list;
+      const index = parseInt(e.target.dataset.index, 10);
+      removeItem(listKey, index);
+    }
+  });
+
+  // ── Save Config ──────────────────────────────────────────
+  btnSaveConfig.addEventListener("click", async () => {
+    config.source = cfgSource.value.trim();
+    setLoading(btnSaveConfig, true);
+    try {
+      const res = await fetch("/api/config", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(config),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      flashFeedback("✓ Config saved");
+    } catch (e) {
+      flashFeedback("Save failed: " + e.message, true);
+    } finally {
+      setLoading(btnSaveConfig, false);
+    }
+  });
 
   // ── Preview ──────────────────────────────────────────────
   btnPreview.addEventListener("click", async () => {

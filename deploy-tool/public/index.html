@@ -41,26 +41,49 @@
       </div>
       <div class="card-body" id="configBody">
         <div class="config-grid">
-          <div class="config-item">
+          <div class="config-item full-width">
             <label>Source</label>
-            <div class="config-value mono" id="cfgSource">—</div>
+            <input type="text" class="config-input mono" id="cfgSource" placeholder="\\\\server\\path" />
           </div>
           <div class="config-item full-width">
             <label>Targets</label>
             <ul class="tag-list" id="cfgTargets"></ul>
+            <div class="tag-add-row">
+              <input type="text" class="tag-add-input mono" id="addTarget" placeholder="\\\\server\\path\\folder" />
+              <button class="btn-add" data-list="targets" title="Add target">+</button>
+            </div>
           </div>
           <div class="config-item">
             <label>Excluded Files</label>
             <ul class="tag-list tags-muted" id="cfgExFiles"></ul>
+            <div class="tag-add-row">
+              <input type="text" class="tag-add-input mono" id="addExFile" placeholder="*.ext" />
+              <button class="btn-add" data-list="excludeFiles" title="Add exclude file">+</button>
+            </div>
           </div>
           <div class="config-item">
             <label>Excluded Dirs</label>
             <ul class="tag-list tags-muted" id="cfgExDirs"></ul>
+            <div class="tag-add-row">
+              <input type="text" class="tag-add-input mono" id="addExDir" placeholder="dirname" />
+              <button class="btn-add" data-list="excludeDirs" title="Add exclude dir">+</button>
+            </div>
           </div>
           <div class="config-item">
             <label>Subfolders</label>
             <ul class="tag-list" id="cfgSubs"></ul>
+            <div class="tag-add-row">
+              <input type="text" class="tag-add-input mono" id="addSub" placeholder="subfolder" />
+              <button class="btn-add" data-list="subfolders" title="Add subfolder">+</button>
+            </div>
           </div>
+        </div>
+        <div class="config-actions">
+          <button class="btn btn-save" id="btnSaveConfig">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Save Config
+          </button>
+          <span class="save-feedback" id="saveFeedback"></span>
         </div>
       </div>
     </section>
