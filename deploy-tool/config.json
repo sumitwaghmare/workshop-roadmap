@@ -1,0 +1,12 @@
+{
+  "source": "\\\\acevs125.acedesigners.co.in\\htdocs\\jetAdminReport-test3",
+  "targets": [
+    "\\\\acevs125.acedesigners.co.in\\htdocs\\projeX",
+    "\\\\acevs125.acedesigners.co.in\\htdocs\\projeX-IT",
+    "\\\\acevs125.acedesigners.co.in\\htdocs\\projeX-PMG",
+    "\\\\acevs125.acedesigners.co.in\\htdocs\\jetAdminReport"
+  ],
+  "excludeFiles": ["*.env", "*.json", "*.log"],
+  "excludeDirs": [".git", ".vscode", "node_modules", "cache"],
+  "subfolders": ["partials", "cron"]
+}
