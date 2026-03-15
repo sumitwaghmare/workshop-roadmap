@@ -21,7 +21,7 @@ export async function GET(
     const mappedFinals = finals.map((fp: { 
       projectName: string; 
       projectDescription: string;
-      [key: string]: any 
+      [key: string]: unknown 
     }) => ({
       ...fp,
       project: {
