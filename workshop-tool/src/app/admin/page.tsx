@@ -320,25 +320,52 @@ export default function AdminPage() {
       reader.onload = async (event) => {
         try {
           const json = JSON.parse(event.target?.result as string);
-          const res = await fetch("/api/sessions/import", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              items: json.items,
-              sessionName: json.sessionName || file.name.replace(".json", ""),
-            }),
-          });
-          
-          if (!res.ok) throw new Error("Import failed");
-          
-          const result = await res.json();
-          toast.success(`Imported ${result.projectCount} projects into new session`);
-          await loadSessions();
-          // Find the new session and set it active
-          const resSessions = await fetch("/api/sessions");
-          const allSessions = await resSessions.json();
-          const newSession = allSessions.find((s: Session) => s.id === result.sessionId);
-          if (newSession) setActiveSession(newSession);
+          if (!json.items || !Array.isArray(json.items)) throw new Error("Invalid JSON");
+
+          const items = json.items;
+          const chunkSize = 10;
+          const totalChunks = Math.ceil(items.length / chunkSize);
+          let currentSessionId = activeSession?.id;
+
+          const summary = {
+            added: 0,
+            updated: 0,
+            placements: 0
+          };
+
+          for (let i = 0; i < totalChunks; i++) {
+            const chunk = items.slice(i * chunkSize, (i + 1) * chunkSize);
+            toast.info(`Importing batch ${i + 1} of ${totalChunks}...`);
+
+            const res = await fetch("/api/sessions/import", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                items: chunk,
+                sessionId: currentSessionId,
+                sessionName: json.sessionName || file.name.replace(".json", ""),
+              }),
+            });
+
+            if (!res.ok) throw new Error(`Batch ${i + 1} failed`);
+            
+            const result = await res.json();
+            currentSessionId = result.sessionId;
+            summary.added += result.summary.projectsAdded;
+            summary.updated += result.summary.projectsUpdated;
+            summary.placements += result.summary.placementsUpdated;
+
+            // Trigger partial refresh to "show updates"
+            await loadSessions();
+            if (currentSessionId) {
+              await loadProjects(currentSessionId);
+              await loadRoadmap(currentSessionId);
+            }
+          }
+
+          toast.success(
+            `Import complete: Added ${summary.added}, Updated ${summary.updated} projects, Sync'd ${summary.placements} placements.`
+          );
         } catch {
           toast.error("Invalid JSON format or import error");
         }
