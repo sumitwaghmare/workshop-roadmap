@@ -10,20 +10,25 @@ export async function GET(
     const { sessionId } = await params;
 
     // 1. Get total group count for this session
-    const groupRows = await query(
+    const groupRows = await query<{ total: number }>(
       "SELECT COUNT(*) as total FROM \`Group\` WHERE sessionId = ?",
       [sessionId]
     );
-    const totalGroups = groupRows[0].total;
+    const totalGroups = groupRows[0]?.total || 0;
 
     // 2. Get all projects in this session
-    const projects = await query(
+    const projects = await query<{ id: string; name: string }>(
       "SELECT * FROM Project WHERE sessionId = ?",
       [sessionId]
     );
 
     // 3. Get all placements for this session with group names
-    const placements = await query(`
+    const placements = await query<{ 
+      projectId: string; 
+      groupName: string; 
+      horizon: number | null; 
+      status: string | null 
+    }>(`
       SELECT p.*, g.name as groupName
       FROM Placement p
       JOIN \`Group\` g ON p.groupId = g.id

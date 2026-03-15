@@ -6,7 +6,14 @@ import { v4 as uuidv4 } from "uuid";
 
 export async function GET() {
   try {
-    const sessions = await query(`
+    const sessions = await query<{
+      id: string;
+      name: string;
+      active: number | boolean;
+      createdAt: Date;
+      projectCount: number;
+      groupCount: number;
+    }>(`
       SELECT s.*, 
              (SELECT COUNT(*) FROM Project p WHERE p.sessionId = s.id) as projectCount,
              (SELECT COUNT(*) FROM \`Group\` g WHERE g.sessionId = s.id) as groupCount
@@ -50,7 +57,7 @@ export async function POST(req: Request) {
       [id, name, true, new Date()]
     );
     
-    const [session] = await query("SELECT * FROM Session WHERE id = ?", [id]);
+    const [session] = await query<Record<string, unknown>>("SELECT * FROM Session WHERE id = ?", [id]);
     return NextResponse.json(session, { status: 201 });
   } catch (error: unknown) {
     console.error("POST /api/sessions error:", error);

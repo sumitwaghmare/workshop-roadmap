@@ -10,7 +10,12 @@ export async function GET(
 ) {
   try {
     const { sessionId } = await params;
-    const finals = await query(`
+    const finals = await query<{
+      id: string;
+      projectName: string;
+      projectDescription: string;
+      [key: string]: unknown;
+    }>(`
       SELECT fp.*, p.name as projectName, p.description as projectDescription
       FROM FinalPlacement fp
       JOIN Project p ON fp.projectId = p.id
@@ -18,11 +23,7 @@ export async function GET(
     `, [sessionId]);
     
     // To match frontend expectations where 'project' is an object
-    const mappedFinals = finals.map((fp: { 
-      projectName: string; 
-      projectDescription: string;
-      [key: string]: unknown 
-    }) => ({
+    const mappedFinals = finals.map((fp) => ({
       ...fp,
       project: {
         name: fp.projectName,
