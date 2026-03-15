@@ -39,3 +39,41 @@ export async function DELETE(
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
+
+export async function PATCH(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  if (!(await isAdmin())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const { id: sessionId } = await params;
+    const body = await req.json();
+    
+    if (typeof body.active !== "undefined") {
+      await query("UPDATE Session SET active = ? WHERE id = ?", [body.active, sessionId]);
+    }
+    
+    if (typeof body.name !== "undefined") {
+      await query("UPDATE Session SET name = ? WHERE id = ?", [body.name, sessionId]);
+    }
+
+    const [updatedSession] = await query<Record<string, unknown>>("SELECT * FROM Session WHERE id = ?", [sessionId]);
+    if (!updatedSession) {
+      return NextResponse.json({ error: "Session not found" }, { status: 404 });
+    }
+
+    // Ensure active is returned as a boolean as frontend code expects
+    const formattedSession = {
+      ...updatedSession,
+      active: !!updatedSession.active
+    };
+
+    return NextResponse.json(formattedSession);
+  } catch (error: unknown) {
+    console.error("PATCH /api/sessions error:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}
