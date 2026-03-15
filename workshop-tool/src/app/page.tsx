@@ -37,28 +37,28 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
-          <h1 className="text-5xl font-bold tracking-tight text-primary">
+    <div className="flex min-h-screen items-center justify-center p-4">
+      <div className="w-full max-w-md space-y-8 animate-in fade-in zoom-in duration-700">
+        <div className="text-center space-y-2">
+          <h1 className="text-5xl font-extrabold tracking-tighter text-primary text-glow italic">
             Workshop Roadmap
           </h1>
-          <p className="mt-3 text-lg text-muted-foreground">
-            Strategic Technology Roadmap Planning Tool
+          <p className="text-lg text-muted-foreground font-medium">
+            Strategic Technology Planning Tool
           </p>
         </div>
 
-        <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle className="text-xl">Admin Login</CardTitle>
-            <CardDescription>
-              Enter your credentials to access the admin dashboard
+        <Card className="glass border-white/10 shadow-2xl backdrop-blur-xl overflow-hidden">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-2xl font-bold text-foreground">Admin Login</CardTitle>
+            <CardDescription className="text-slate-400">
+              Authorized access only. Enter credentials to proceed.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
+            <form onSubmit={handleLogin} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
+                <Label htmlFor="username" className="text-slate-300 font-medium ml-1">Username</Label>
                 <Input
                   id="username"
                   type="text"
@@ -66,29 +66,29 @@ export default function LoginPage() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   required
-                  className="bg-background/50"
+                  className="bg-white/5 border-white/10 h-11 focus:ring-primary/50 transition-all"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="text-slate-300 font-medium ml-1">Password</Label>
                 <Input
                   id="password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="bg-background/50"
+                  className="bg-white/5 border-white/10 h-11 focus:ring-primary/50 transition-all"
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Signing in..." : "Sign In"}
+              <Button type="submit" className="w-full h-11 text-lg font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all active:scale-95" disabled={loading}>
+                {loading ? "Verifying..." : "Unlock Dashboard"}
               </Button>
             </form>
           </CardContent>
         </Card>
 
-        <p className="text-center text-sm text-muted-foreground">
-          Group leaders: Use your unique link provided by the admin
+        <p className="text-center text-sm text-slate-500 font-medium">
+          Group leaders: Use the unique link provided for your session.
         </p>
       </div>
     </div>
