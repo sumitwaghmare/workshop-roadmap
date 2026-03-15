@@ -144,6 +144,7 @@ export default function AdminPage() {
   const [fitView, setFitView] = useState(false);
   const [yAxisEnabled, setYAxisEnabled] = useState(true);
   const [activeTab, setActiveTab] = useState<"projects" | "groups" | "table" | "roadmap">("projects");
+  const [filteredBu, setFilteredBu] = useState<string | null>(null);
 
   // Roadmap Item Details (locked session editing)
   const [selectedRoadmapItem, setSelectedRoadmapItem] = useState<RoadmapResult | null>(null);
@@ -787,8 +788,36 @@ export default function AdminPage() {
               <div className="mt-auto hidden lg:block p-4">
                 <div className="rounded-lg bg-blue-500/10 border border-blue-500/20 p-3">
                   <p className="text-[10px] text-blue-500 dark:text-blue-400 uppercase tracking-widest font-bold mb-1">Session Data</p>
-                  <p className="text-xs text-muted-foreground">{projects.length} Projects</p>
-                  <p className="text-xs text-muted-foreground">{groups.length} Groups</p>
+                  <button 
+                    onClick={() => setFilteredBu(null)}
+                    className="block w-full text-left"
+                  >
+                    <p className={`text-xs ${!filteredBu ? 'text-blue-500 font-bold' : 'text-muted-foreground'} hover:text-blue-400 transition-colors`}>{projects.length} Projects</p>
+                  </button>
+                  <p className="text-xs text-muted-foreground mb-2">{groups.length} Groups</p>
+                  
+                  {Object.entries(
+                    projects.reduce((acc, p) => {
+                      const bu = p.bu || "None";
+                      acc[bu] = (acc[bu] || 0) + 1;
+                      return acc;
+                    }, {} as Record<string, number>)
+                  ).map(([bu, count]) => (
+                    <button
+                      key={bu}
+                      onClick={() => {
+                        setFilteredBu(bu);
+                        setActiveTab("projects");
+                      }}
+                      className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium mr-1 mb-1 transition-all ${
+                        filteredBu === bu 
+                          ? 'bg-blue-600 text-white' 
+                          : 'bg-blue-500/10 text-blue-500 hover:bg-blue-500/20'
+                      }`}
+                    >
+                      {bu} ({count})
+                    </button>
+                  ))}
                 </div>
               </div>
             )}
@@ -808,12 +837,17 @@ export default function AdminPage() {
           <TabsContent value="projects" className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-semibold">Projects</h2>
+                <h2 className="text-xl font-semibold">Projects {filteredBu && <span className="text-blue-500">— {filteredBu}</span>}</h2>
                 <p className="text-sm text-muted-foreground">
-                  Manage the list of projects/initiatives for this session
+                  {filteredBu ? `Showing projects for ${filteredBu}` : 'Manage the list of projects/initiatives for this session'}
                 </p>
               </div>
               <div className="flex gap-2">
+                {filteredBu && (
+                  <Button variant="ghost" onClick={() => setFilteredBu(null)}>
+                    Clear Filter
+                  </Button>
+                )}
                 <Button
                   onClick={() => {
                     setEditProject(null);
@@ -828,7 +862,13 @@ export default function AdminPage() {
             </div>
 
             <div className="grid gap-3">
-              {projects.map((p) => {
+              {projects
+                .filter(p => {
+                  if (!filteredBu) return true;
+                  if (filteredBu === "None") return !p.bu;
+                  return p.bu === filteredBu;
+                })
+                .map((p) => {
                 const priorityColor = p.priority && PRIORITY_COLORS[p.priority] ? PRIORITY_COLORS[p.priority] : null;
                 return (
                   <Card 
