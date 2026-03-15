@@ -38,27 +38,27 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-8 animate-in fade-in zoom-in duration-700">
+      <div className="w-full max-w-md space-y-8 animate-in fade-in duration-500">
         <div className="text-center space-y-2">
-          <h1 className="text-5xl font-extrabold tracking-tighter text-primary text-glow italic">
+          <h1 className="text-5xl font-extrabold tracking-tighter text-blue-500">
             Workshop Roadmap
           </h1>
-          <p className="text-lg text-muted-foreground font-medium">
+          <p className="text-lg text-slate-300 font-bold">
             Strategic Technology Planning Tool
           </p>
         </div>
 
-        <Card className="glass border-white/10 shadow-2xl backdrop-blur-xl overflow-hidden">
+        <Card className="bg-slate-800 border-slate-700 shadow-2xl overflow-hidden">
           <CardHeader className="pb-4">
-            <CardTitle className="text-2xl font-bold text-foreground">Admin Login</CardTitle>
-            <CardDescription className="text-slate-400">
+            <CardTitle className="text-2xl font-bold text-white">Admin Login</CardTitle>
+            <CardDescription className="text-slate-400 font-medium">
               Authorized access only. Enter credentials to proceed.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="username" className="text-slate-300 font-medium ml-1">Username</Label>
+                <Label htmlFor="username" className="ml-1">Username</Label>
                 <Input
                   id="username"
                   type="text"
@@ -66,28 +66,26 @@ export default function LoginPage() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   required
-                  className="bg-white/5 border-white/10 h-11 focus:ring-primary/50 transition-all"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-slate-300 font-medium ml-1">Password</Label>
+                <Label htmlFor="password" className="ml-1">Password</Label>
                 <Input
                   id="password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="bg-white/5 border-white/10 h-11 focus:ring-primary/50 transition-all"
                 />
               </div>
-              <Button type="submit" className="w-full h-11 text-lg font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all active:scale-95" disabled={loading}>
+              <Button type="submit" className="w-full h-11 text-lg font-bold shadow-lg active:scale-[0.98]" disabled={loading}>
                 {loading ? "Verifying..." : "Unlock Dashboard"}
               </Button>
             </form>
           </CardContent>
         </Card>
 
-        <p className="text-center text-sm text-slate-500 font-medium">
+        <p className="text-center text-sm text-slate-500 font-bold">
           Group leaders: Use the unique link provided for your session.
         </p>
       </div>

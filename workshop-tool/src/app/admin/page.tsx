@@ -290,6 +290,68 @@ export default function AdminPage() {
     router.push("/");
   };
 
+  const handleExportJSON = async () => {
+    if (!activeSession) return;
+    try {
+      const res = await fetch(`/api/sessions/${activeSession.id}/export`);
+      if (!res.ok) throw new Error("Export failed");
+      const data = await res.json();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${activeSession.name.replace(/\s+/g, "_")}_roadmap.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success("Roadmap exported successfully");
+    } catch {
+      toast.error("Failed to export roadmap");
+    }
+  };
+
+  const handleImportJSON = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        try {
+          const json = JSON.parse(event.target?.result as string);
+          const res = await fetch("/api/sessions/import", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              items: json.items,
+              sessionName: json.sessionName || file.name.replace(".json", ""),
+            }),
+          });
+          
+          if (!res.ok) throw new Error("Import failed");
+          
+          const result = await res.json();
+          toast.success(`Imported ${result.projectCount} projects into new session`);
+          await loadSessions();
+          // Find the new session and set it active
+          const resSessions = await fetch("/api/sessions");
+          const allSessions = await resSessions.json();
+          const newSession = allSessions.find((s: Session) => s.id === result.sessionId);
+          if (newSession) setActiveSession(newSession);
+        } catch {
+          toast.error("Invalid JSON format or import error");
+        }
+      };
+      reader.readAsText(file);
+    } catch {
+      toast.error("Failed to read file");
+    } finally {
+      // Clear input so same file can be imported again
+      e.target.value = "";
+    }
+  };
+
   // Table view helpers
   const getPlacementForCell = (projectId: string, groupId: string) => {
     return placements.find(
@@ -317,12 +379,12 @@ export default function AdminPage() {
       {/* Header */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-border/50 pb-4">
         <div>
-          <h1 className="text-4xl font-bold text-primary tracking-tight text-glow">Workshop Roadmap</h1>
-          <p className="text-sm text-muted-foreground font-medium">Admin Dashboard</p>
+          <h1 className="text-4xl font-extrabold text-blue-500 tracking-tight">Workshop Roadmap</h1>
+          <p className="text-sm text-slate-300 font-bold">Admin Dashboard</p>
         </div>
         <div className="flex items-center gap-3">
           <select
-            className="rounded-md border border-border bg-card/80 px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 outline-none"
+            className="rounded-md border border-white/20 bg-slate-900 px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 outline-none cursor-pointer"
             value={activeSession?.id || ""}
             onChange={(e) => {
               const s = sessions.find((s) => s.id === e.target.value);
@@ -335,9 +397,25 @@ export default function AdminPage() {
               </option>
             ))}
           </select>
-          <Button variant="outline" size="sm" onClick={handleLogout} className="glass border-primary/20 hover:bg-primary/10 transition-all">
-            Logout
-          </Button>
+          <div className="flex items-center gap-2">
+            <label className="cursor-pointer">
+              <input
+                type="file"
+                accept=".json"
+                className="hidden"
+                onChange={handleImportJSON}
+              />
+              <div className="flex h-8 items-center gap-2 px-3 rounded-md border border-slate-700 bg-slate-800 text-white text-sm font-bold hover:bg-slate-700 transition-colors cursor-pointer">
+                Import JSON
+              </div>
+            </label>
+            <Button variant="outline" size="sm" onClick={handleExportJSON} className="bg-slate-800 border-slate-700 text-white font-bold hover:bg-slate-700">
+              Export JSON
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleLogout} className="bg-slate-800 border-slate-700 text-white font-bold hover:bg-slate-700">
+              Logout
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -358,11 +436,11 @@ export default function AdminPage() {
 
       {activeSession && (
         <Tabs defaultValue="projects" className="space-y-6">
-          <TabsList className="glass p-1 h-auto gap-1">
-            <TabsTrigger value="projects" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary rounded-md px-6 py-2 transition-all">Projects</TabsTrigger>
-            <TabsTrigger value="groups" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary rounded-md px-6 py-2 transition-all">Groups</TabsTrigger>
-            <TabsTrigger value="table" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary rounded-md px-6 py-2 transition-all">Table View</TabsTrigger>
-            <TabsTrigger value="roadmap" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary rounded-md px-6 py-2 transition-all">Roadmap View</TabsTrigger>
+          <TabsList className="bg-slate-800 p-1 h-auto gap-1 border border-slate-700">
+            <TabsTrigger value="projects" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-300 rounded-sm px-6 py-2 transition-all font-bold">Projects</TabsTrigger>
+            <TabsTrigger value="groups" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-300 rounded-sm px-6 py-2 transition-all font-bold">Groups</TabsTrigger>
+            <TabsTrigger value="table" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-300 rounded-sm px-6 py-2 transition-all font-bold">Table View</TabsTrigger>
+            <TabsTrigger value="roadmap" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-300 rounded-sm px-6 py-2 transition-all font-bold">Roadmap View</TabsTrigger>
           </TabsList>
 
           {/* === PROJECTS TAB === */}
@@ -390,12 +468,12 @@ export default function AdminPage() {
 
             <div className="grid gap-3">
               {projects.map((p) => (
-                <Card key={p.id} className="glass-card overflow-hidden">
-                  <CardContent className="flex items-center justify-between p-4">
+                <Card key={p.id} className="bg-slate-800 border-slate-700 overflow-hidden shadow-md">
+                  <CardContent className="flex items-center justify-between p-5">
                     <div className="space-y-1">
-                      <div className="font-semibold text-foreground text-lg">{p.name}</div>
+                      <div className="font-bold text-white text-lg">{p.name}</div>
                       {p.description && (
-                        <div className="text-sm text-muted-foreground line-clamp-2 max-w-2xl">{p.description}</div>
+                         <div className="text-sm text-slate-300 font-medium line-clamp-2 max-w-2xl">{p.description}</div>
                       )}
                     </div>
                     <div className="flex gap-2">
@@ -512,7 +590,7 @@ export default function AdminPage() {
               </Button>
             </div>
 
-            <div className="overflow-x-auto rounded-xl border border-border/50 glass">
+            <div className="overflow-x-auto rounded-lg border border-slate-700 bg-slate-800">
               <Table className="premium-table">
                 <TableHeader>
                   <TableRow>
