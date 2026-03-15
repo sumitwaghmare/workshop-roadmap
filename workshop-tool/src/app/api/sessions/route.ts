@@ -4,11 +4,21 @@ import { prisma } from "@/lib/prisma";
 import { isAdmin } from "@/lib/auth";
 
 export async function GET() {
-  const sessions = await prisma.session.findMany({
-    orderBy: { createdAt: "desc" },
-    include: { _count: { select: { projects: true, groups: true } } },
-  });
-  return NextResponse.json(sessions);
+  try {
+    const sessions = await prisma.session.findMany({
+      orderBy: { createdAt: "desc" },
+      include: { _count: { select: { projects: true, groups: true } } },
+    });
+    return NextResponse.json(sessions);
+  } catch (error: any) {
+    console.error("GET /api/sessions runtime error:", error);
+    return NextResponse.json({ 
+      error: "Internal Server Error", 
+      message: error.message,
+      code: error.code,
+      meta: error.meta 
+    }, { status: 500 });
+  }
 }
 
 export async function POST(req: Request) {
