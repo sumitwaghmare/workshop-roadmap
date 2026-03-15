@@ -85,6 +85,7 @@ export default function AdminPage() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [activeSession, setActiveSession] = useState<Session | null>(null);
   const [newSessionName, setNewSessionName] = useState("");
+  const [isNewSessionDialogOpen, setIsNewSessionDialogOpen] = useState(false);
 
   // Projects
   const [projects, setProjects] = useState<Project[]>([]);
@@ -186,6 +187,7 @@ export default function AdminPage() {
     if (res.ok) {
       const session = await res.json();
       setNewSessionName("");
+      setIsNewSessionDialogOpen(false);
       await loadSessions();
       setActiveSession(session);
       toast.success("Session created");
@@ -501,16 +503,24 @@ export default function AdminPage() {
               className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 outline-none cursor-pointer"
               value={activeSession?.id || ""}
               onChange={(e) => {
-                const s = sessions.find((s) => s.id === e.target.value);
-                setActiveSession(s || null);
+                const val = e.target.value;
+                if (val === "NEW_SESSION") {
+                  setIsNewSessionDialogOpen(true);
+                } else {
+                  const s = sessions.find((s) => s.id === val);
+                  setActiveSession(s || null);
+                }
               }}
             >
-              <option value="">Select Session...</option>
+              <option value="" disabled>Select Session...</option>
               {sessions.map((s) => (
                 <option key={s.id} value={s.id} className="bg-background text-foreground">
                   {s.name} {s.active ? "🟢" : "🔴"}
                 </option>
               ))}
+              <option value="NEW_SESSION" className="bg-background text-foreground font-bold text-blue-500">
+                + Add New Session
+              </option>
             </select>
             {activeSession && (
               <Button 
@@ -523,6 +533,29 @@ export default function AdminPage() {
                 <Trash2 className="size-4" />
               </Button>
             )}
+
+            <Dialog open={isNewSessionDialogOpen} onOpenChange={setIsNewSessionDialogOpen}>
+              <DialogContent className="glass border-border shadow-2xl backdrop-blur-2xl">
+                <DialogHeader>
+                  <DialogTitle>Create New Session</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <p className="text-sm text-muted-foreground">
+                    Enter a name for the new session.
+                  </p>
+                  <Input
+                    placeholder="Session name (e.g., Season III Workshop)"
+                    value={newSessionName}
+                    onChange={(e) => setNewSessionName(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && createSession()}
+                    autoFocus
+                  />
+                  <Button className="w-full" onClick={createSession}>
+                    Create Session
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
           <div className="flex items-center gap-2">
             <label className="cursor-pointer">
