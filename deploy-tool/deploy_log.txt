@@ -1,0 +1,1483 @@
+Deployment Started: 14/3/2026, 8:19:18 pm
+============================================================
+
+>>> UPDATING TARGET: \\acevs125.acedesigners.co.in\htdocs\projeX
+
+-------------------------------------------------------------------------------
+   ROBOCOPY     ::     Robust File Copy for Windows                              
+-------------------------------------------------------------------------------
+
+  Started : 14 March 2026 08:19 PM
+   Source : \\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\
+     Dest : \\acevs125.acedesigners.co.in\htdocs\projeX\
+
+    Files : *.*
+	    
+Exc Files : *.env
+	    *.json
+	    *.log
+	    
+ Exc Dirs : .git
+	    .vscode
+	    node_modules
+	    cache
+	    
+  Options : *.* /V /DCOPY:DA /COPY:DAT /XO /LEV:1 /R:2 /W:2 
+
+------------------------------------------------------------------------------
+
+	                 203	\\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\
+	  *EXTRA File 		      96	.env.copy
+	  *EXTRA File 		     327	check_schema.php
+	  *EXTRA File 		    1395	db_diagnostic.php
+	  *EXTRA File 		     237	dns_result.txt
+	  *EXTRA File 		    2405	generate_schema.php
+	  *EXTRA File 		     280	gen_log.txt
+	  *EXTRA File 		    5439	init_db.php
+	  *EXTRA File 		  416946	light_gantt_app_original.php
+	  *EXTRA File 		   45455	projex.sql
+	  *EXTRA File 		     646	temp_migrate_audit.php
+	  *EXTRA File 		     301	temp_migrate_qg.php
+	  *EXTRA File 		    1196	test_db_conn.php
+	  *EXTRA File 		     100	test_php.php
+	         named		     235	.env
+	         named		    3700	options.json
+	         named		   36160	package-lock.json
+	         named		      52	package.json
+	         named		     640	settings.json
+	         named		   18148	sync_config.json
+	         older		     175	script_log.txt
+	      modified		    1404	add_idea.php
+	      modified		    3337	add_issue.php
+	      modified		     551	add_last_activity_column.php
+	      modified		    6508	add_mom.php
+	      modified		    3620	add_project.php
+	      modified		    1300	add_project_update.php
+	      modified		    1646	add_risk.php
+	      modified		    3364	add_todo.php
+	      modified		   88433	admin.php
+	      modified		   18324	ajax_member_dashboard.php
+	      modified		     545	api_app_status.php
+	      modified		    4928	api_backup_handler.php
+	      modified		    9084	api_budget_handler.php
+	      modified		    4306	api_checklist_handler.php
+	      modified		   16361	api_comments_handler.php
+	      modified		    7180	api_daily_check.php
+	      modified		   17023	api_dashboard_stats.php
+	      modified		    3937	api_export_csv.php
+	      modified		    9555	api_fmea_handler.php
+	      modified		   12822	api_gamification.php
+	      modified		    1332	api_goals.php
+	      modified		    1958	api_log_performance.php
+	      modified		     809	api_options_handler.php
+	      modified		    4697	api_productivity_metrics.php
+	      modified		    3424	api_project_handler.php
+	      modified		    6254	api_project_insight_json.php
+	      modified		   24118	api_project_status.php
+	      modified		   21355	api_quality_gates.php
+	      modified		    3599	api_roadmap.php
+	      modified		    2955	api_saved_urls.php
+	      modified		   10324	api_send_reminder.php
+	      modified		    1367	api_settings_handler.php
+	      modified		   13585	api_technology_gates.php
+	      modified		    1714	api_update_ccpm.php
+	      modified		     708	api_view_logs.php
+	      modified		   21148	ccpm_help.html
+	      modified		    6802	change-password.php
+	      modified		     415	check_fk.php
+	      modified		     579	check_logout.php
+	      modified		     198	check_npd.php
+	      modified		     311	check_risk.php
+	      modified		     961	check_tables.php
+	      modified		   20602	comments_modal.php
+	      modified		    1796	create_comment_tables.php
+	      modified		      56	cron.php
+	      modified		    4916	cron_weekly_summary.php
+	      modified		   16762	cxo_selection.php
+	      modified		  309623	dashboard.php
+	      modified		    4797	db.php
+	      modified		     249	debug_idf.php
+	      modified		    4700	debug_perf.php
+	      modified		     598	debug_schema.php
+	      modified		     184	debug_schema_temp.php
+	      modified		     302	debug_tables.php
+	      modified		    1345	debug_tasks.php
+	      modified		     634	debug_todo.php
+	      modified		     633	debug_users.php
+	      modified		    1742	delete_calendar_entry.php
+	      modified		    1450	delete_mom.php
+	      modified		   16843	email_notifications.php
+	      modified		  489122	enterprise_resource.php
+	      modified		    3171	error.php
+	      modified		     970	execute_phase1_db.php
+	      modified		    6951	favicon.ico
+	      modified		  238672	favicon.png
+	      modified		   80516	fmea.php
+	      modified		    6330	forgot-password.php
+	      modified		   43656	gantt_api.php
+	      modified		   33733	gantt_styel.css
+	      modified		    6000	Gemini.md
+	      modified		    4794	get_calendar_entries.php
+	      modified		    1666	get_followup_todos.php
+	      modified		    1790	get_issues.php
+	      modified		    5099	get_milestones.php
+	      modified		     830	get_mom.php
+	      modified		    1327	get_mom_by_id.php
+	      modified		     354	get_projects.php
+	      modified		    1029	get_project_updates.php
+	      modified		    1916	get_project_wise_effort.php
+	      modified		    1502	get_raw_saw_data.php
+	      modified		    4186	get_report_data.php
+	      modified		    5422	get_resource_histogram_data.php
+	      modified		     708	get_risks.php
+	      modified		    4164	get_sankey_data.php
+	      modified		    2115	get_timeline_data.php
+	      modified		    2638	get_time_analysis.php
+	      modified		    1639	get_time_entries.php
+	      modified		    2173	get_time_entry_dashboard_data.php
+	      modified		    3374	get_time_trend.php
+	      modified		    1179	get_todos.php
+	      modified		    1238	get_todos_by_proj_id.php
+	      modified		    3067	get_todos_for_project.php
+	      modified		    7165	get_user_insights_data.php
+	      modified		    4119	get_user_todos.php
+	      modified		    5778	get_user_work_breakdown.php
+	      modified		    5923	get_workload_forecast.php
+	      modified		   32658	goal_tree_r1.php
+	      modified		   25878	gui_sync.py
+	      modified		   15659	identity_migration_manager.php
+	      modified		    2039	index.php
+	      modified		     807	inspect_db.php
+	      modified		  110520	interactive_roadmap.php
+	      modified		  416376	light_gantt_app.php
+	      modified		    4316	lock_mom.php
+	      modified		    9682	login.php
+	      modified		     290	logout.php
+	      modified		    1662	log_update_mom.txt
+	      modified		   24772	magic_quadrant.php
+	      modified		  503025	master_gantt_app.php
+	      modified		   16753	momGen.php
+	      modified		   87059	my-page-2.php
+	      modified		    3811	performance_monitor.js
+	      modified		   12841	performance_report.php
+	      modified		  107321	pmo-dashboard.php
+	      modified		   21727	pmo-insights.php
+	      modified		   29700	pmo-user-insights.php
+	      modified		   12594	pmo-user-work-breakdown.php
+	      modified		    4909	print_gate.php
+	      modified		   66903	program_gantt_app.php
+	      modified		   13816	program_manager.php
+	      modified		   59098	project-overview.jpg
+	      modified		    9912	projectlibre_api.php
+	      modified		    5252	project_analysis.md
+	      modified		   24958	project_overview.php
+	      modified		   65454	project_status_report.php
+	      modified		   13809	qg_gate_r1.php
+	      modified		   73735	quality_check.php
+	      modified		   27963	quality_gate_summary_wireframe.html
+	      modified		   37996	raw_saw_app.html
+	      modified		   48827	raw_saw_assessment.php
+	      modified		    2738	README.md
+	      modified		    7607	register.php
+	      modified		    5152	resource_data.php
+	      modified		   12714	resource_histogram.php
+	      modified		   27578	resource_management.php
+	      modified		    4648	save_goal_appraisal.php
+	      modified		    1772	save_mgr_goal_review.php
+	      modified		    3704	save_raw_saw_data.php
+	      modified		    4415	save_time_entry.php
+	      modified		     760	scan_db_usage.php
+	      modified		    1091	search_users.php
+	      modified		    2507	send_followup_email.php
+	      modified		   11228	send_mom_email.php
+	      modified		    7121	send_reminder_email.php
+	      modified		    7617	send_user_insight_email.php
+	      modified		     917	send_welcome_email.php
+	      modified		     858	setup_performance_db.php
+	      modified		    8460	setup_trl_db.php
+	      modified		   35523	team_management.php
+	      modified		   57564	technology_check.php
+	      modified		    1290	test_fmea.php
+	      modified		    8847	time_entry_readme.md
+	      modified		   14309	time_tracker.css
+	      modified		   48472	time_tracker.js
+	      modified		   17132	time_tracker.php
+	      modified		    3696	todo.md
+	      modified		     991	update_activity.php
+	      modified		    4368	update_calendar_entry.php
+	      modified		    5722	update_combined_status.php
+	      modified		    1408	update_goal_status.php
+	      modified		    1394	update_idf_status.php
+	      modified		    6637	update_issue.php
+	      modified		    4384	update_milestone.php
+	      modified		    7547	update_mom.php
+	      modified		    4960	update_profile.php
+	      modified		    4330	update_project.php
+	      modified		    3581	update_project_todo.php
+	      modified		    1757	update_project_update.php
+	      modified		    2782	update_resource_task.php
+	      modified		    4042	update_risk.php
+	      modified		     399	update_schema.php
+	      modified		     749	update_schema_fmea.php
+	      modified		     345	update_schema_lock_mom.php
+	      modified		    1390	update_schema_sdr.php
+	      modified		    2201	update_todo_date.php
+	      modified		    4328	update_todo_status.php
+	      modified		    1118	utils.php
+	      modified		    6045	verify_gates.php
+	      modified		     521	verify_trl.php
+	          same		     255	.gitignore
+	          same		     117	.htaccess
+	          same		      57	2026-02-27 12-33-13.txt
+	          same		    4106	api_user_handler.php
+	          same		   59165	cxo_project_slides.php
+	          same		    7028	git_diff.txt
+	          same		   10249	goal_statistics.php
+	          same		  416946	light_gantt_app_.php
+	          same		  416946	light_gantt_app_v0.php
+	          same		   75685	log.txt
+	          same		  185931	my-page.php
+	          same		    8457	PROGRAM_MANAGEMENT_FEATURE.md
+	          same		   30902	schema.sql
+	          same		    2589	setup_program_mgmt.php
+	          same		    2376	sync_me.bat
+	          same		     622	update_schema_task_comments.php
+	          same		    1417	upload.php
+
+------------------------------------------------------------------------------
+
+               Total    Copied   Skipped  Mismatch    FAILED    Extras
+    Dirs :         1         0         1         0         0         0
+   Files :       203         0       203         0         0        13
+   Bytes :    5.01 m         0    5.01 m         0         0   463.6 k
+   Times :   0:00:00   0:00:00                       0:00:00   0:00:00
+   Ended : 14 March 2026 08:19 PM
+
+
+-------------------------------------------------------------------------------
+   ROBOCOPY     ::     Robust File Copy for Windows                              
+-------------------------------------------------------------------------------
+
+  Started : 14 March 2026 08:19 PM
+   Source : \\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\partials\
+     Dest : \\acevs125.acedesigners.co.in\htdocs\projeX\partials\
+
+    Files : *.*
+	    
+Exc Files : *.env
+	    *.json
+	    *.log
+	    
+ Exc Dirs : .git
+	    .vscode
+	    node_modules
+	    cache
+	    
+  Options : *.* /V /S /E /DCOPY:DA /COPY:DAT /XO /R:2 /W:2 
+
+------------------------------------------------------------------------------
+
+	                   5	\\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\partials\
+	      modified		   20944	admin_performance_tab.php
+	      modified		   25192	dashboard_projects_grid.php
+	      modified		   14961	dashboard_projects_list.php
+	      modified		   13608	user_profile_modal.php
+	          same		   14585	header_nav.php
+
+------------------------------------------------------------------------------
+
+               Total    Copied   Skipped  Mismatch    FAILED    Extras
+    Dirs :         1         0         1         0         0         0
+   Files :         5         0         5         0         0         0
+   Bytes :    87.1 k         0    87.1 k         0         0         0
+   Times :   0:00:00   0:00:00                       0:00:00   0:00:00
+   Ended : 14 March 2026 08:19 PM
+
+
+-------------------------------------------------------------------------------
+   ROBOCOPY     ::     Robust File Copy for Windows                              
+-------------------------------------------------------------------------------
+
+  Started : 14 March 2026 08:19 PM
+   Source : \\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\cron\
+     Dest : \\acevs125.acedesigners.co.in\htdocs\projeX\cron\
+
+    Files : *.*
+	    
+Exc Files : *.env
+	    *.json
+	    *.log
+	    
+ Exc Dirs : .git
+	    .vscode
+	    node_modules
+	    cache
+	    
+  Options : *.* /V /S /E /DCOPY:DA /COPY:DAT /XO /R:2 /W:2 
+
+------------------------------------------------------------------------------
+
+	                  11	\\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\cron\
+	   *named file		    1703	daily_email_log_2025-12-28.json
+	   *named file		    1703	daily_email_log_2025-12-29.json
+	   *named file		    1703	daily_email_log_2025-12-30.json
+	   *named file		    1703	daily_email_log_2025-12-31.json
+	   *named file		    1703	daily_email_log_2026-01-02.json
+	   *named file		    1703	daily_email_log_2026-01-03.json
+	   *named file		    1703	daily_email_log_2026-01-04.json
+	   *named file		    1703	daily_email_log_2026-01-05.json
+	   *named file		    1703	daily_email_log_2026-01-06.json
+	   *named file		    1703	daily_email_log_2026-01-07.json
+	   *named file		    1703	daily_email_log_2026-01-08.json
+	   *named file		    1703	daily_email_log_2026-01-09.json
+	   *named file		    1703	daily_email_log_2026-01-10.json
+	   *named file		    1703	daily_email_log_2026-01-13.json
+	   *named file		    1703	daily_email_log_2026-01-14.json
+	   *named file		    1703	daily_email_log_2026-01-15.json
+	   *named file		    1703	daily_email_log_2026-01-16.json
+	   *named file		    1703	daily_email_log_2026-01-17.json
+	   *named file		    1703	daily_email_log_2026-01-18.json
+	   *named file		    1703	daily_email_log_2026-01-19.json
+	   *named file		    1703	daily_email_log_2026-01-20.json
+	   *named file		    1703	daily_email_log_2026-01-21.json
+	   *named file		    1703	daily_email_log_2026-01-22.json
+	   *named file		    1703	daily_email_log_2026-01-23.json
+	   *named file		    1703	daily_email_log_2026-01-24.json
+	   *named file		    1703	daily_email_log_2026-01-25.json
+	   *named file		    1703	daily_email_log_2026-01-26.json
+	   *named file		    1703	daily_email_log_2026-01-27.json
+	   *named file		    1703	daily_email_log_2026-01-29.json
+	   *named file		    1703	daily_email_log_2026-01-30.json
+	   *named file		    1703	daily_email_log_2026-01-31.json
+	   *named file		    1703	daily_email_log_2026-02-01.json
+	   *named file		    1703	daily_email_log_2026-02-02.json
+	   *named file		    1703	daily_email_log_2026-02-06.json
+	   *named file		    1703	daily_email_log_2026-02-07.json
+	   *named file		    1703	daily_email_log_2026-02-08.json
+	   *named file		    1703	daily_email_log_2026-02-12.json
+	   *named file		    1703	daily_email_log_2026-02-13.json
+	   *named file		    1703	daily_email_log_2026-02-15.json
+	   *named file		    1703	daily_email_log_2026-02-16.json
+	   *named file		    1703	daily_email_log_2026-02-17.json
+	   *named file		    1703	daily_email_log_2026-02-18.json
+	   *named file		    1703	daily_email_log_2026-02-19.json
+	   *named file		    1703	daily_email_log_2026-02-20.json
+	   *named file		    1703	daily_email_log_2026-02-21.json
+	   *named file		    1703	daily_email_log_2026-02-22.json
+	   *named file		    1703	daily_email_log_2026-02-23.json
+	   *named file		    1703	daily_email_log_2026-02-24.json
+	   *named file		    1703	daily_email_log_2026-02-28.json
+	   *named file		    1703	daily_email_log_2026-03-01.json
+	   *named file		    1703	daily_email_log_2026-03-02.json
+	   *named file		    1703	daily_email_log_2026-03-03.json
+	   *named file		    1703	daily_email_log_2026-03-04.json
+	   *named file		    1703	daily_email_log_2026-03-05.json
+	   *named file		    1703	daily_email_log_2026-03-06.json
+	   *named file		    1703	daily_email_log_2026-03-07.json
+	   *named file		    1703	daily_email_log_2026-03-08.json
+	   *named file		    1703	daily_email_log_2026-03-09.json
+	   *named file		    1703	daily_email_log_2026-03-10.json
+	   *named file		    1703	daily_email_log_2026-03-11.json
+	         named		    1703	daily_email_log_2025-12-25.json
+	         named		    1703	daily_email_log_2025-12-26.json
+	         named		    1703	daily_email_log_2025-12-27.json
+	         older		     773	log_backup.txt
+	         older		   45094	log_cleanup.txt
+	         older		     232	log_daily_digest.txt
+	      modified		    2234	cron.php
+	      modified		    5264	cron_backup.php
+	      modified		    2030	cron_cleanup.php
+	      modified		   34240	cron_daily.php
+	      modified		   10574	cron_unreplied_comments.php
+
+------------------------------------------------------------------------------
+
+               Total    Copied   Skipped  Mismatch    FAILED    Extras
+    Dirs :         1         0         1         0         0         0
+   Files :        11         0        11         0         0        60
+   Bytes :   103.0 k         0   103.0 k         0         0    99.7 k
+   Times :   0:00:00   0:00:00                       0:00:00   0:00:00
+   Ended : 14 March 2026 08:19 PM
+
+
+>>> UPDATING TARGET: \\acevs125.acedesigners.co.in\htdocs\projeX-IT
+
+-------------------------------------------------------------------------------
+   ROBOCOPY     ::     Robust File Copy for Windows                              
+-------------------------------------------------------------------------------
+
+  Started : 14 March 2026 08:19 PM
+   Source : \\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\
+     Dest : \\acevs125.acedesigners.co.in\htdocs\projeX-IT\
+
+    Files : *.*
+	    
+Exc Files : *.env
+	    *.json
+	    *.log
+	    
+ Exc Dirs : .git
+	    .vscode
+	    node_modules
+	    cache
+	    
+  Options : *.* /V /DCOPY:DA /COPY:DAT /XO /LEV:1 /R:2 /W:2 
+
+------------------------------------------------------------------------------
+
+	                 203	\\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\
+	  *EXTRA File 		     212	.env.bk
+	  *EXTRA File 		      96	.env.copy
+	  *EXTRA File 		     327	check_schema.php
+	  *EXTRA File 		    2405	generate_schema.php
+	  *EXTRA File 		     280	gen_log.txt
+	  *EXTRA File 		    5439	init_db.php
+	  *EXTRA File 		    1288	inspect_gantt.php
+	  *EXTRA File 		   45455	projex.sql
+	  *EXTRA File 		    1196	test_db_conn.php
+	  *EXTRA File 		     100	test_php.php
+	         named		     235	.env
+	         named		    3700	options.json
+	         named		   36160	package-lock.json
+	         named		      52	package.json
+	         named		     640	settings.json
+	         named		   18148	sync_config.json
+	         older		     175	script_log.txt
+	      modified		      57	2026-02-27 12-33-13.txt
+	      modified		    1404	add_idea.php
+	      modified		     551	add_last_activity_column.php
+	      modified		    3620	add_project.php
+	      modified		    1300	add_project_update.php
+	      modified		    1646	add_risk.php
+	      modified		     545	api_app_status.php
+	      modified		    4928	api_backup_handler.php
+	      modified		    9084	api_budget_handler.php
+	      modified		    4306	api_checklist_handler.php
+	      modified		   16361	api_comments_handler.php
+	      modified		    7180	api_daily_check.php
+	      modified		   17023	api_dashboard_stats.php
+	      modified		    3937	api_export_csv.php
+	      modified		    9555	api_fmea_handler.php
+	      modified		    1332	api_goals.php
+	      modified		    1958	api_log_performance.php
+	      modified		     809	api_options_handler.php
+	      modified		    4697	api_productivity_metrics.php
+	      modified		    6254	api_project_insight_json.php
+	      modified		   24118	api_project_status.php
+	      modified		    3599	api_roadmap.php
+	      modified		    2955	api_saved_urls.php
+	      modified		   10324	api_send_reminder.php
+	      modified		    1367	api_settings_handler.php
+	      modified		    1714	api_update_ccpm.php
+	      modified		     708	api_view_logs.php
+	      modified		   21148	ccpm_help.html
+	      modified		    6802	change-password.php
+	      modified		     415	check_fk.php
+	      modified		     579	check_logout.php
+	      modified		     198	check_npd.php
+	      modified		     311	check_risk.php
+	      modified		     961	check_tables.php
+	      modified		   20602	comments_modal.php
+	      modified		    1796	create_comment_tables.php
+	      modified		      56	cron.php
+	      modified		    4916	cron_weekly_summary.php
+	      modified		   59165	cxo_project_slides.php
+	      modified		     249	debug_idf.php
+	      modified		    4700	debug_perf.php
+	      modified		     598	debug_schema.php
+	      modified		     184	debug_schema_temp.php
+	      modified		     302	debug_tables.php
+	      modified		    1345	debug_tasks.php
+	      modified		     634	debug_todo.php
+	      modified		     633	debug_users.php
+	      modified		    1742	delete_calendar_entry.php
+	      modified		    1450	delete_mom.php
+	      modified		  489122	enterprise_resource.php
+	      modified		     970	execute_phase1_db.php
+	      modified		    6951	favicon.ico
+	      modified		  238672	favicon.png
+	      modified		   80516	fmea.php
+	      modified		    6330	forgot-password.php
+	      modified		   33733	gantt_styel.css
+	      modified		    1790	get_issues.php
+	      modified		    5099	get_milestones.php
+	      modified		     354	get_projects.php
+	      modified		    1029	get_project_updates.php
+	      modified		    1916	get_project_wise_effort.php
+	      modified		    1502	get_raw_saw_data.php
+	      modified		    4186	get_report_data.php
+	      modified		    5422	get_resource_histogram_data.php
+	      modified		     708	get_risks.php
+	      modified		    4164	get_sankey_data.php
+	      modified		    2115	get_timeline_data.php
+	      modified		    2638	get_time_analysis.php
+	      modified		    1639	get_time_entries.php
+	      modified		    2173	get_time_entry_dashboard_data.php
+	      modified		    3374	get_time_trend.php
+	      modified		    1179	get_todos.php
+	      modified		    1238	get_todos_by_proj_id.php
+	      modified		    7165	get_user_insights_data.php
+	      modified		    4119	get_user_todos.php
+	      modified		    5778	get_user_work_breakdown.php
+	      modified		    5923	get_workload_forecast.php
+	      modified		    7028	git_diff.txt
+	      modified		   32658	goal_tree_r1.php
+	      modified		   25878	gui_sync.py
+	      modified		   15659	identity_migration_manager.php
+	      modified		    2039	index.php
+	      modified		     807	inspect_db.php
+	      modified		  110520	interactive_roadmap.php
+	      modified		  416946	light_gantt_app_.php
+	      modified		  416946	light_gantt_app_v0.php
+	      modified		    4316	lock_mom.php
+	      modified		     290	logout.php
+	      modified		    1662	log_update_mom.txt
+	      modified		   24772	magic_quadrant.php
+	      modified		  503025	master_gantt_app.php
+	      modified		   87059	my-page-2.php
+	      modified		  185931	my-page.php
+	      modified		    3811	performance_monitor.js
+	      modified		   12841	performance_report.php
+	      modified		  107321	pmo-dashboard.php
+	      modified		   21727	pmo-insights.php
+	      modified		   29700	pmo-user-insights.php
+	      modified		   12594	pmo-user-work-breakdown.php
+	      modified		    4909	print_gate.php
+	      modified		   66903	program_gantt_app.php
+	      modified		    8457	PROGRAM_MANAGEMENT_FEATURE.md
+	      modified		   13816	program_manager.php
+	      modified		   59098	project-overview.jpg
+	      modified		    9912	projectlibre_api.php
+	      modified		    5252	project_analysis.md
+	      modified		   24958	project_overview.php
+	      modified		   13809	qg_gate_r1.php
+	      modified		   27963	quality_gate_summary_wireframe.html
+	      modified		   37996	raw_saw_app.html
+	      modified		   48827	raw_saw_assessment.php
+	      modified		    5152	resource_data.php
+	      modified		   12714	resource_histogram.php
+	      modified		   27578	resource_management.php
+	      modified		    4648	save_goal_appraisal.php
+	      modified		    1772	save_mgr_goal_review.php
+	      modified		    3704	save_raw_saw_data.php
+	      modified		    4415	save_time_entry.php
+	      modified		     760	scan_db_usage.php
+	      modified		    1091	search_users.php
+	      modified		   11228	send_mom_email.php
+	      modified		    7121	send_reminder_email.php
+	      modified		    7617	send_user_insight_email.php
+	      modified		     917	send_welcome_email.php
+	      modified		     858	setup_performance_db.php
+	      modified		    2589	setup_program_mgmt.php
+	      modified		    8460	setup_trl_db.php
+	      modified		    1290	test_fmea.php
+	      modified		    8847	time_entry_readme.md
+	      modified		    3696	todo.md
+	      modified		     991	update_activity.php
+	      modified		    1408	update_goal_status.php
+	      modified		    1394	update_idf_status.php
+	      modified		    4384	update_milestone.php
+	      modified		    4330	update_project.php
+	      modified		    3581	update_project_todo.php
+	      modified		    1757	update_project_update.php
+	      modified		    2782	update_resource_task.php
+	      modified		    4042	update_risk.php
+	      modified		     399	update_schema.php
+	      modified		     749	update_schema_fmea.php
+	      modified		     345	update_schema_lock_mom.php
+	      modified		    1390	update_schema_sdr.php
+	      modified		     622	update_schema_task_comments.php
+	      modified		    2201	update_todo_date.php
+	      modified		    1118	utils.php
+	      modified		    6045	verify_gates.php
+	      modified		     521	verify_trl.php
+	          same		     255	.gitignore
+	          same		     117	.htaccess
+	          same		    3337	add_issue.php
+	          same		    6508	add_mom.php
+	          same		    3364	add_todo.php
+	          same		   88433	admin.php
+	          same		   18324	ajax_member_dashboard.php
+	          same		   12822	api_gamification.php
+	          same		    3424	api_project_handler.php
+	          same		   21355	api_quality_gates.php
+	          same		   13585	api_technology_gates.php
+	          same		    4106	api_user_handler.php
+	          same		   16762	cxo_selection.php
+	          same		  309623	dashboard.php
+	          same		    4797	db.php
+	          same		   16843	email_notifications.php
+	          same		    3171	error.php
+	          same		   43656	gantt_api.php
+	          same		    6000	Gemini.md
+	          same		    4794	get_calendar_entries.php
+	          same		    1666	get_followup_todos.php
+	          same		     830	get_mom.php
+	          same		    1327	get_mom_by_id.php
+	          same		    3067	get_todos_for_project.php
+	          same		   10249	goal_statistics.php
+	          same		  416376	light_gantt_app.php
+	          same		   75685	log.txt
+	          same		    9682	login.php
+	          same		   16753	momGen.php
+	          same		   65454	project_status_report.php
+	          same		   73735	quality_check.php
+	          same		    2738	README.md
+	          same		    7607	register.php
+	          same		   30902	schema.sql
+	          same		    2507	send_followup_email.php
+	          same		   35523	team_management.php
+	          same		   57564	technology_check.php
+	          same		   14309	time_tracker.css
+	          same		   48472	time_tracker.js
+	          same		   17132	time_tracker.php
+	          same		    4368	update_calendar_entry.php
+	          same		    5722	update_combined_status.php
+	          same		    6637	update_issue.php
+	          same		    7547	update_mom.php
+	          same		    4960	update_profile.php
+	          same		    4328	update_todo_status.php
+	          same		    1417	upload.php
+	    New File  		    2376	sync_me.bat100%  
+
+------------------------------------------------------------------------------
+
+               Total    Copied   Skipped  Mismatch    FAILED    Extras
+    Dirs :         1         0         1         0         0         0
+   Files :       203         1       202         0         0        10
+   Bytes :    5.01 m     2.3 k    5.01 m         0         0    55.4 k
+   Times :   0:00:00   0:00:00                       0:00:00   0:00:00
+
+
+   Speed :              13,813 Bytes/sec.
+   Speed :               0.790 MegaBytes/min.
+   Ended : 14 March 2026 08:19 PM
+
+
+-------------------------------------------------------------------------------
+   ROBOCOPY     ::     Robust File Copy for Windows                              
+-------------------------------------------------------------------------------
+
+  Started : 14 March 2026 08:19 PM
+   Source : \\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\partials\
+     Dest : \\acevs125.acedesigners.co.in\htdocs\projeX-IT\partials\
+
+    Files : *.*
+	    
+Exc Files : *.env
+	    *.json
+	    *.log
+	    
+ Exc Dirs : .git
+	    .vscode
+	    node_modules
+	    cache
+	    
+  Options : *.* /V /S /E /DCOPY:DA /COPY:DAT /XO /R:2 /W:2 
+
+------------------------------------------------------------------------------
+
+	                   5	\\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\partials\
+	          same		   20944	admin_performance_tab.php
+	          same		   25192	dashboard_projects_grid.php
+	          same		   14961	dashboard_projects_list.php
+	          same		   14585	header_nav.php
+	          same		   13608	user_profile_modal.php
+
+------------------------------------------------------------------------------
+
+               Total    Copied   Skipped  Mismatch    FAILED    Extras
+    Dirs :         1         0         1         0         0         0
+   Files :         5         0         5         0         0         0
+   Bytes :    87.1 k         0    87.1 k         0         0         0
+   Times :   0:00:00   0:00:00                       0:00:00   0:00:00
+   Ended : 14 March 2026 08:19 PM
+
+
+-------------------------------------------------------------------------------
+   ROBOCOPY     ::     Robust File Copy for Windows                              
+-------------------------------------------------------------------------------
+
+  Started : 14 March 2026 08:19 PM
+   Source : \\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\cron\
+     Dest : \\acevs125.acedesigners.co.in\htdocs\projeX-IT\cron\
+
+    Files : *.*
+	    
+Exc Files : *.env
+	    *.json
+	    *.log
+	    
+ Exc Dirs : .git
+	    .vscode
+	    node_modules
+	    cache
+	    
+  Options : *.* /V /S /E /DCOPY:DA /COPY:DAT /XO /R:2 /W:2 
+
+------------------------------------------------------------------------------
+
+	                  11	\\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\cron\
+	   *named file		    1703	daily_email_log_2025-12-28.json
+	   *named file		    1703	daily_email_log_2025-12-29.json
+	   *named file		    1703	daily_email_log_2025-12-30.json
+	   *named file		    1703	daily_email_log_2025-12-31.json
+	   *named file		    1703	daily_email_log_2026-01-02.json
+	   *named file		    1703	daily_email_log_2026-01-03.json
+	   *named file		    1703	daily_email_log_2026-01-04.json
+	   *named file		    1703	daily_email_log_2026-01-05.json
+	   *named file		    1703	daily_email_log_2026-01-06.json
+	   *named file		    1703	daily_email_log_2026-01-07.json
+	   *named file		    1703	daily_email_log_2026-01-08.json
+	   *named file		     266	daily_email_log_2026-03-11.json
+	   *named file		     266	daily_email_log_2026-03-12.json
+	         named		    1703	daily_email_log_2025-12-25.json
+	         named		    1703	daily_email_log_2025-12-26.json
+	         named		    1703	daily_email_log_2025-12-27.json
+	         older		     773	log_backup.txt
+	         older		   45094	log_cleanup.txt
+	         older		     232	log_daily_digest.txt
+	      modified		    2234	cron.php
+	      modified		    5264	cron_backup.php
+	      modified		    2030	cron_cleanup.php
+	      modified		   34240	cron_daily.php
+	      modified		   10574	cron_unreplied_comments.php
+
+------------------------------------------------------------------------------
+
+               Total    Copied   Skipped  Mismatch    FAILED    Extras
+    Dirs :         1         0         1         0         0         0
+   Files :        11         0        11         0         0        13
+   Bytes :   103.0 k         0   103.0 k         0         0    18.8 k
+   Times :   0:00:00   0:00:00                       0:00:00   0:00:00
+   Ended : 14 March 2026 08:19 PM
+
+
+>>> UPDATING TARGET: \\acevs125.acedesigners.co.in\htdocs\projeX-PMG
+
+-------------------------------------------------------------------------------
+   ROBOCOPY     ::     Robust File Copy for Windows                              
+-------------------------------------------------------------------------------
+
+  Started : 14 March 2026 08:19 PM
+   Source : \\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\
+     Dest : \\acevs125.acedesigners.co.in\htdocs\projeX-PMG\
+
+    Files : *.*
+	    
+Exc Files : *.env
+	    *.json
+	    *.log
+	    
+ Exc Dirs : .git
+	    .vscode
+	    node_modules
+	    cache
+	    
+  Options : *.* /V /DCOPY:DA /COPY:DAT /XO /LEV:1 /R:2 /W:2 
+
+------------------------------------------------------------------------------
+
+	                 203	\\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\
+	  *EXTRA File 		     327	check_schema.php
+	         named		     235	.env
+	         named		    3700	options.json
+	         named		   36160	package-lock.json
+	         named		      52	package.json
+	         named		     640	settings.json
+	         named		   18148	sync_config.json
+	      modified		   59165	cxo_project_slides.php
+	      modified		  185931	my-page.php
+	          same		     255	.gitignore
+	          same		     117	.htaccess
+	          same		      57	2026-02-27 12-33-13.txt
+	          same		    1404	add_idea.php
+	          same		    3337	add_issue.php
+	          same		     551	add_last_activity_column.php
+	          same		    6508	add_mom.php
+	          same		    3620	add_project.php
+	          same		    1300	add_project_update.php
+	          same		    1646	add_risk.php
+	          same		    3364	add_todo.php
+	          same		   88433	admin.php
+	          same		   18324	ajax_member_dashboard.php
+	          same		     545	api_app_status.php
+	          same		    4928	api_backup_handler.php
+	          same		    9084	api_budget_handler.php
+	          same		    4306	api_checklist_handler.php
+	          same		   16361	api_comments_handler.php
+	          same		    7180	api_daily_check.php
+	          same		   17023	api_dashboard_stats.php
+	          same		    3937	api_export_csv.php
+	          same		    9555	api_fmea_handler.php
+	          same		   12822	api_gamification.php
+	          same		    1332	api_goals.php
+	          same		    1958	api_log_performance.php
+	          same		     809	api_options_handler.php
+	          same		    4697	api_productivity_metrics.php
+	          same		    3424	api_project_handler.php
+	          same		    6254	api_project_insight_json.php
+	          same		   24118	api_project_status.php
+	          same		   21355	api_quality_gates.php
+	          same		    3599	api_roadmap.php
+	          same		    2955	api_saved_urls.php
+	          same		   10324	api_send_reminder.php
+	          same		    1367	api_settings_handler.php
+	          same		   13585	api_technology_gates.php
+	          same		    1714	api_update_ccpm.php
+	          same		    4106	api_user_handler.php
+	          same		     708	api_view_logs.php
+	          same		   21148	ccpm_help.html
+	          same		    6802	change-password.php
+	          same		     415	check_fk.php
+	          same		     579	check_logout.php
+	          same		     198	check_npd.php
+	          same		     311	check_risk.php
+	          same		     961	check_tables.php
+	          same		   20602	comments_modal.php
+	          same		    1796	create_comment_tables.php
+	          same		      56	cron.php
+	          same		    4916	cron_weekly_summary.php
+	          same		   16762	cxo_selection.php
+	          same		  309623	dashboard.php
+	          same		    4797	db.php
+	          same		     249	debug_idf.php
+	          same		    4700	debug_perf.php
+	          same		     598	debug_schema.php
+	          same		     184	debug_schema_temp.php
+	          same		     302	debug_tables.php
+	          same		    1345	debug_tasks.php
+	          same		     634	debug_todo.php
+	          same		     633	debug_users.php
+	          same		    1742	delete_calendar_entry.php
+	          same		    1450	delete_mom.php
+	          same		   16843	email_notifications.php
+	          same		  489122	enterprise_resource.php
+	          same		    3171	error.php
+	          same		     970	execute_phase1_db.php
+	          same		    6951	favicon.ico
+	          same		  238672	favicon.png
+	          same		   80516	fmea.php
+	          same		    6330	forgot-password.php
+	          same		   43656	gantt_api.php
+	          same		   33733	gantt_styel.css
+	          same		    6000	Gemini.md
+	          same		    4794	get_calendar_entries.php
+	          same		    1666	get_followup_todos.php
+	          same		    1790	get_issues.php
+	          same		    5099	get_milestones.php
+	          same		     830	get_mom.php
+	          same		    1327	get_mom_by_id.php
+	          same		     354	get_projects.php
+	          same		    1029	get_project_updates.php
+	          same		    1916	get_project_wise_effort.php
+	          same		    1502	get_raw_saw_data.php
+	          same		    4186	get_report_data.php
+	          same		    5422	get_resource_histogram_data.php
+	          same		     708	get_risks.php
+	          same		    4164	get_sankey_data.php
+	          same		    2115	get_timeline_data.php
+	          same		    2638	get_time_analysis.php
+	          same		    1639	get_time_entries.php
+	          same		    2173	get_time_entry_dashboard_data.php
+	          same		    3374	get_time_trend.php
+	          same		    1179	get_todos.php
+	          same		    1238	get_todos_by_proj_id.php
+	          same		    3067	get_todos_for_project.php
+	          same		    7165	get_user_insights_data.php
+	          same		    4119	get_user_todos.php
+	          same		    5778	get_user_work_breakdown.php
+	          same		    5923	get_workload_forecast.php
+	          same		    7028	git_diff.txt
+	          same		   10249	goal_statistics.php
+	          same		   32658	goal_tree_r1.php
+	          same		   25878	gui_sync.py
+	          same		   15659	identity_migration_manager.php
+	          same		    2039	index.php
+	          same		     807	inspect_db.php
+	          same		  110520	interactive_roadmap.php
+	          same		  416376	light_gantt_app.php
+	          same		  416946	light_gantt_app_.php
+	          same		  416946	light_gantt_app_v0.php
+	          same		    4316	lock_mom.php
+	          same		   75685	log.txt
+	          same		    9682	login.php
+	          same		     290	logout.php
+	          same		    1662	log_update_mom.txt
+	          same		   24772	magic_quadrant.php
+	          same		  503025	master_gantt_app.php
+	          same		   16753	momGen.php
+	          same		   87059	my-page-2.php
+	          same		    3811	performance_monitor.js
+	          same		   12841	performance_report.php
+	          same		  107321	pmo-dashboard.php
+	          same		   21727	pmo-insights.php
+	          same		   29700	pmo-user-insights.php
+	          same		   12594	pmo-user-work-breakdown.php
+	          same		    4909	print_gate.php
+	          same		   66903	program_gantt_app.php
+	          same		    8457	PROGRAM_MANAGEMENT_FEATURE.md
+	          same		   13816	program_manager.php
+	          same		   59098	project-overview.jpg
+	          same		    9912	projectlibre_api.php
+	          same		    5252	project_analysis.md
+	          same		   24958	project_overview.php
+	          same		   65454	project_status_report.php
+	          same		   13809	qg_gate_r1.php
+	          same		   73735	quality_check.php
+	          same		   27963	quality_gate_summary_wireframe.html
+	          same		   37996	raw_saw_app.html
+	          same		   48827	raw_saw_assessment.php
+	          same		    2738	README.md
+	          same		    7607	register.php
+	          same		    5152	resource_data.php
+	          same		   12714	resource_histogram.php
+	          same		   27578	resource_management.php
+	          same		    4648	save_goal_appraisal.php
+	          same		    1772	save_mgr_goal_review.php
+	          same		    3704	save_raw_saw_data.php
+	          same		    4415	save_time_entry.php
+	          same		     760	scan_db_usage.php
+	          same		   30902	schema.sql
+	          same		     175	script_log.txt
+	          same		    1091	search_users.php
+	          same		    2507	send_followup_email.php
+	          same		   11228	send_mom_email.php
+	          same		    7121	send_reminder_email.php
+	          same		    7617	send_user_insight_email.php
+	          same		     917	send_welcome_email.php
+	          same		     858	setup_performance_db.php
+	          same		    2589	setup_program_mgmt.php
+	          same		    8460	setup_trl_db.php
+	          same		   35523	team_management.php
+	          same		   57564	technology_check.php
+	          same		    1290	test_fmea.php
+	          same		    8847	time_entry_readme.md
+	          same		   14309	time_tracker.css
+	          same		   48472	time_tracker.js
+	          same		   17132	time_tracker.php
+	          same		    3696	todo.md
+	          same		     991	update_activity.php
+	          same		    4368	update_calendar_entry.php
+	          same		    5722	update_combined_status.php
+	          same		    1408	update_goal_status.php
+	          same		    1394	update_idf_status.php
+	          same		    6637	update_issue.php
+	          same		    4384	update_milestone.php
+	          same		    7547	update_mom.php
+	          same		    4960	update_profile.php
+	          same		    4330	update_project.php
+	          same		    3581	update_project_todo.php
+	          same		    1757	update_project_update.php
+	          same		    2782	update_resource_task.php
+	          same		    4042	update_risk.php
+	          same		     399	update_schema.php
+	          same		     749	update_schema_fmea.php
+	          same		     345	update_schema_lock_mom.php
+	          same		    1390	update_schema_sdr.php
+	          same		     622	update_schema_task_comments.php
+	          same		    2201	update_todo_date.php
+	          same		    4328	update_todo_status.php
+	          same		    1417	upload.php
+	          same		    1118	utils.php
+	          same		    6045	verify_gates.php
+	          same		     521	verify_trl.php
+	    New File  		    2376	sync_me.bat100%  
+
+------------------------------------------------------------------------------
+
+               Total    Copied   Skipped  Mismatch    FAILED    Extras
+    Dirs :         1         0         1         0         0         0
+   Files :       203         1       202         0         0         1
+   Bytes :    5.01 m     2.3 k    5.01 m         0         0       327
+   Times :   0:00:00   0:00:00                       0:00:00   0:00:00
+
+
+   Speed :              15,037 Bytes/sec.
+   Speed :               0.860 MegaBytes/min.
+   Ended : 14 March 2026 08:19 PM
+
+
+-------------------------------------------------------------------------------
+   ROBOCOPY     ::     Robust File Copy for Windows                              
+-------------------------------------------------------------------------------
+
+  Started : 14 March 2026 08:19 PM
+   Source : \\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\partials\
+     Dest : \\acevs125.acedesigners.co.in\htdocs\projeX-PMG\partials\
+
+    Files : *.*
+	    
+Exc Files : *.env
+	    *.json
+	    *.log
+	    
+ Exc Dirs : .git
+	    .vscode
+	    node_modules
+	    cache
+	    
+  Options : *.* /V /S /E /DCOPY:DA /COPY:DAT /XO /R:2 /W:2 
+
+------------------------------------------------------------------------------
+
+	                   5	\\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\partials\
+	          same		   20944	admin_performance_tab.php
+	          same		   25192	dashboard_projects_grid.php
+	          same		   14961	dashboard_projects_list.php
+	          same		   14585	header_nav.php
+	          same		   13608	user_profile_modal.php
+
+------------------------------------------------------------------------------
+
+               Total    Copied   Skipped  Mismatch    FAILED    Extras
+    Dirs :         1         0         1         0         0         0
+   Files :         5         0         5         0         0         0
+   Bytes :    87.1 k         0    87.1 k         0         0         0
+   Times :   0:00:00   0:00:00                       0:00:00   0:00:00
+   Ended : 14 March 2026 08:19 PM
+
+
+-------------------------------------------------------------------------------
+   ROBOCOPY     ::     Robust File Copy for Windows                              
+-------------------------------------------------------------------------------
+
+  Started : 14 March 2026 08:19 PM
+   Source : \\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\cron\
+     Dest : \\acevs125.acedesigners.co.in\htdocs\projeX-PMG\cron\
+
+    Files : *.*
+	    
+Exc Files : *.env
+	    *.json
+	    *.log
+	    
+ Exc Dirs : .git
+	    .vscode
+	    node_modules
+	    cache
+	    
+  Options : *.* /V /S /E /DCOPY:DA /COPY:DAT /XO /R:2 /W:2 
+
+------------------------------------------------------------------------------
+
+	                  11	\\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\cron\
+	         named		    1703	daily_email_log_2025-12-25.json
+	         named		    1703	daily_email_log_2025-12-26.json
+	         named		    1703	daily_email_log_2025-12-27.json
+	          same		    2234	cron.php
+	          same		    5264	cron_backup.php
+	          same		    2030	cron_cleanup.php
+	          same		   34240	cron_daily.php
+	          same		   10574	cron_unreplied_comments.php
+	          same		     773	log_backup.txt
+	          same		   45094	log_cleanup.txt
+	          same		     232	log_daily_digest.txt
+
+------------------------------------------------------------------------------
+
+               Total    Copied   Skipped  Mismatch    FAILED    Extras
+    Dirs :         1         0         1         0         0         0
+   Files :        11         0        11         0         0         0
+   Bytes :   103.0 k         0   103.0 k         0         0         0
+   Times :   0:00:00   0:00:00                       0:00:00   0:00:00
+   Ended : 14 March 2026 08:19 PM
+
+
+>>> UPDATING TARGET: \\acevs125.acedesigners.co.in\htdocs\jetAdminReport
+
+-------------------------------------------------------------------------------
+   ROBOCOPY     ::     Robust File Copy for Windows                              
+-------------------------------------------------------------------------------
+
+  Started : 14 March 2026 08:19 PM
+   Source : \\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\
+     Dest : \\acevs125.acedesigners.co.in\htdocs\jetAdminReport\
+
+    Files : *.*
+	    
+Exc Files : *.env
+	    *.json
+	    *.log
+	    
+ Exc Dirs : .git
+	    .vscode
+	    node_modules
+	    cache
+	    
+  Options : *.* /V /DCOPY:DA /COPY:DAT /XO /LEV:1 /R:2 /W:2 
+
+------------------------------------------------------------------------------
+
+	                 203	\\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\
+	  *EXTRA File 		     327	check_schema.php
+	  *EXTRA File 		    1395	db_diagnostic.php
+	  *EXTRA File 		     237	dns_result.txt
+	  *EXTRA File 		  416946	light_gantt_app_original.php
+	  *EXTRA File 		     646	temp_migrate_audit.php
+	  *EXTRA File 		     301	temp_migrate_qg.php
+	  *EXTRA File 		   13312	Thumbs.db
+	         named		     235	.env
+	         named		    3700	options.json
+	         named		   36160	package-lock.json
+	         named		      52	package.json
+	         named		     640	settings.json
+	         named		   18148	sync_config.json
+	         older		   75685	log.txt
+	         older		     175	script_log.txt
+	      modified		     255	.gitignore
+	      modified		    3337	add_issue.php
+	      modified		    6508	add_mom.php
+	      modified		    3364	add_todo.php
+	      modified		   88433	admin.php
+	      modified		   18324	ajax_member_dashboard.php
+	      modified		     545	api_app_status.php
+	      modified		    4928	api_backup_handler.php
+	      modified		    9084	api_budget_handler.php
+	      modified		   16361	api_comments_handler.php
+	      modified		    3937	api_export_csv.php
+	      modified		    9555	api_fmea_handler.php
+	      modified		   12822	api_gamification.php
+	      modified		     809	api_options_handler.php
+	      modified		    4697	api_productivity_metrics.php
+	      modified		    3424	api_project_handler.php
+	      modified		    6254	api_project_insight_json.php
+	      modified		   21355	api_quality_gates.php
+	      modified		    2955	api_saved_urls.php
+	      modified		   13585	api_technology_gates.php
+	      modified		     708	api_view_logs.php
+	      modified		   21148	ccpm_help.html
+	      modified		     311	check_risk.php
+	      modified		   20602	comments_modal.php
+	      modified		    1796	create_comment_tables.php
+	      modified		   59165	cxo_project_slides.php
+	      modified		   16762	cxo_selection.php
+	      modified		  309623	dashboard.php
+	      modified		    4797	db.php
+	      modified		     184	debug_schema_temp.php
+	      modified		     633	debug_users.php
+	      modified		    1450	delete_mom.php
+	      modified		   16843	email_notifications.php
+	      modified		  489122	enterprise_resource.php
+	      modified		    3171	error.php
+	      modified		     970	execute_phase1_db.php
+	      modified		   80516	fmea.php
+	      modified		   43656	gantt_api.php
+	      modified		    6000	Gemini.md
+	      modified		    4794	get_calendar_entries.php
+	      modified		    1666	get_followup_todos.php
+	      modified		     830	get_mom.php
+	      modified		    1327	get_mom_by_id.php
+	      modified		    1916	get_project_wise_effort.php
+	      modified		    5422	get_resource_histogram_data.php
+	      modified		    3067	get_todos_for_project.php
+	      modified		    4119	get_user_todos.php
+	      modified		   10249	goal_statistics.php
+	      modified		   15659	identity_migration_manager.php
+	      modified		  416376	light_gantt_app.php
+	      modified		    9682	login.php
+	      modified		   16753	momGen.php
+	      modified		  185931	my-page.php
+	      modified		  107321	pmo-dashboard.php
+	      modified		   29700	pmo-user-insights.php
+	      modified		   66903	program_gantt_app.php
+	      modified		   13816	program_manager.php
+	      modified		    9912	projectlibre_api.php
+	      modified		   24958	project_overview.php
+	      modified		   65454	project_status_report.php
+	      modified		   73735	quality_check.php
+	      modified		    2738	README.md
+	      modified		    7607	register.php
+	      modified		   12714	resource_histogram.php
+	      modified		    4648	save_goal_appraisal.php
+	      modified		    1772	save_mgr_goal_review.php
+	      modified		     760	scan_db_usage.php
+	      modified		    1091	search_users.php
+	      modified		    2507	send_followup_email.php
+	      modified		   11228	send_mom_email.php
+	      modified		   35523	team_management.php
+	      modified		   57564	technology_check.php
+	      modified		    1290	test_fmea.php
+	      modified		   14309	time_tracker.css
+	      modified		   48472	time_tracker.js
+	      modified		   17132	time_tracker.php
+	      modified		    4368	update_calendar_entry.php
+	      modified		    5722	update_combined_status.php
+	      modified		    6637	update_issue.php
+	      modified		    7547	update_mom.php
+	      modified		    4960	update_profile.php
+	      modified		     749	update_schema_fmea.php
+	      modified		    4328	update_todo_status.php
+	          same		     117	.htaccess
+	          same		      57	2026-02-27 12-33-13.txt
+	          same		    1404	add_idea.php
+	          same		     551	add_last_activity_column.php
+	          same		    3620	add_project.php
+	          same		    1300	add_project_update.php
+	          same		    1646	add_risk.php
+	          same		    4306	api_checklist_handler.php
+	          same		    7180	api_daily_check.php
+	          same		   17023	api_dashboard_stats.php
+	          same		    1332	api_goals.php
+	          same		    1958	api_log_performance.php
+	          same		   24118	api_project_status.php
+	          same		    3599	api_roadmap.php
+	          same		   10324	api_send_reminder.php
+	          same		    1367	api_settings_handler.php
+	          same		    1714	api_update_ccpm.php
+	          same		    4106	api_user_handler.php
+	          same		    6802	change-password.php
+	          same		     415	check_fk.php
+	          same		     579	check_logout.php
+	          same		     198	check_npd.php
+	          same		     961	check_tables.php
+	          same		      56	cron.php
+	          same		    4916	cron_weekly_summary.php
+	          same		     249	debug_idf.php
+	          same		    4700	debug_perf.php
+	          same		     598	debug_schema.php
+	          same		     302	debug_tables.php
+	          same		    1345	debug_tasks.php
+	          same		     634	debug_todo.php
+	          same		    1742	delete_calendar_entry.php
+	          same		    6951	favicon.ico
+	          same		  238672	favicon.png
+	          same		    6330	forgot-password.php
+	          same		   33733	gantt_styel.css
+	          same		    1790	get_issues.php
+	          same		    5099	get_milestones.php
+	          same		     354	get_projects.php
+	          same		    1029	get_project_updates.php
+	          same		    1502	get_raw_saw_data.php
+	          same		    4186	get_report_data.php
+	          same		     708	get_risks.php
+	          same		    4164	get_sankey_data.php
+	          same		    2115	get_timeline_data.php
+	          same		    2638	get_time_analysis.php
+	          same		    1639	get_time_entries.php
+	          same		    2173	get_time_entry_dashboard_data.php
+	          same		    3374	get_time_trend.php
+	          same		    1179	get_todos.php
+	          same		    1238	get_todos_by_proj_id.php
+	          same		    7165	get_user_insights_data.php
+	          same		    5778	get_user_work_breakdown.php
+	          same		    5923	get_workload_forecast.php
+	          same		    7028	git_diff.txt
+	          same		   32658	goal_tree_r1.php
+	          same		   25878	gui_sync.py
+	          same		    2039	index.php
+	          same		     807	inspect_db.php
+	          same		  110520	interactive_roadmap.php
+	          same		  416946	light_gantt_app_.php
+	          same		  416946	light_gantt_app_v0.php
+	          same		    4316	lock_mom.php
+	          same		     290	logout.php
+	          same		    1662	log_update_mom.txt
+	          same		   24772	magic_quadrant.php
+	          same		  503025	master_gantt_app.php
+	          same		   87059	my-page-2.php
+	          same		    3811	performance_monitor.js
+	          same		   12841	performance_report.php
+	          same		   21727	pmo-insights.php
+	          same		   12594	pmo-user-work-breakdown.php
+	          same		    4909	print_gate.php
+	          same		    8457	PROGRAM_MANAGEMENT_FEATURE.md
+	          same		   59098	project-overview.jpg
+	          same		    5252	project_analysis.md
+	          same		   13809	qg_gate_r1.php
+	          same		   27963	quality_gate_summary_wireframe.html
+	          same		   37996	raw_saw_app.html
+	          same		   48827	raw_saw_assessment.php
+	          same		    5152	resource_data.php
+	          same		   27578	resource_management.php
+	          same		    3704	save_raw_saw_data.php
+	          same		    4415	save_time_entry.php
+	          same		   30902	schema.sql
+	          same		    7121	send_reminder_email.php
+	          same		    7617	send_user_insight_email.php
+	          same		     917	send_welcome_email.php
+	          same		     858	setup_performance_db.php
+	          same		    2589	setup_program_mgmt.php
+	          same		    8460	setup_trl_db.php
+	          same		    2376	sync_me.bat
+	          same		    8847	time_entry_readme.md
+	          same		    3696	todo.md
+	          same		     991	update_activity.php
+	          same		    1408	update_goal_status.php
+	          same		    1394	update_idf_status.php
+	          same		    4384	update_milestone.php
+	          same		    4330	update_project.php
+	          same		    3581	update_project_todo.php
+	          same		    1757	update_project_update.php
+	          same		    2782	update_resource_task.php
+	          same		    4042	update_risk.php
+	          same		     399	update_schema.php
+	          same		     345	update_schema_lock_mom.php
+	          same		    1390	update_schema_sdr.php
+	          same		     622	update_schema_task_comments.php
+	          same		    2201	update_todo_date.php
+	          same		    1417	upload.php
+	          same		    1118	utils.php
+	          same		    6045	verify_gates.php
+	          same		     521	verify_trl.php
+
+------------------------------------------------------------------------------
+
+               Total    Copied   Skipped  Mismatch    FAILED    Extras
+    Dirs :         1         0         1         0         0         0
+   Files :       203         0       203         0         0         7
+   Bytes :    5.01 m         0    5.01 m         0         0   423.0 k
+   Times :   0:00:00   0:00:00                       0:00:00   0:00:00
+   Ended : 14 March 2026 08:19 PM
+
+
+-------------------------------------------------------------------------------
+   ROBOCOPY     ::     Robust File Copy for Windows                              
+-------------------------------------------------------------------------------
+
+  Started : 14 March 2026 08:19 PM
+   Source : \\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\partials\
+     Dest : \\acevs125.acedesigners.co.in\htdocs\jetAdminReport\partials\
+
+    Files : *.*
+	    
+Exc Files : *.env
+	    *.json
+	    *.log
+	    
+ Exc Dirs : .git
+	    .vscode
+	    node_modules
+	    cache
+	    
+  Options : *.* /V /S /E /DCOPY:DA /COPY:DAT /XO /R:2 /W:2 
+
+------------------------------------------------------------------------------
+
+	                   5	\\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\partials\
+	      modified		   20944	admin_performance_tab.php
+	      modified		   25192	dashboard_projects_grid.php
+	      modified		   14961	dashboard_projects_list.php
+	      modified		   13608	user_profile_modal.php
+	          same		   14585	header_nav.php
+
+------------------------------------------------------------------------------
+
+               Total    Copied   Skipped  Mismatch    FAILED    Extras
+    Dirs :         1         0         1         0         0         0
+   Files :         5         0         5         0         0         0
+   Bytes :    87.1 k         0    87.1 k         0         0         0
+   Times :   0:00:00   0:00:00                       0:00:00   0:00:00
+   Ended : 14 March 2026 08:19 PM
+
+
+-------------------------------------------------------------------------------
+   ROBOCOPY     ::     Robust File Copy for Windows                              
+-------------------------------------------------------------------------------
+
+  Started : 14 March 2026 08:19 PM
+   Source : \\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\cron\
+     Dest : \\acevs125.acedesigners.co.in\htdocs\jetAdminReport\cron\
+
+    Files : *.*
+	    
+Exc Files : *.env
+	    *.json
+	    *.log
+	    
+ Exc Dirs : .git
+	    .vscode
+	    node_modules
+	    cache
+	    
+  Options : *.* /V /S /E /DCOPY:DA /COPY:DAT /XO /R:2 /W:2 
+
+------------------------------------------------------------------------------
+
+	                  11	\\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\cron\
+	   *named file		    1703	daily_email_log_2025-12-28.json
+	   *named file		    1703	daily_email_log_2025-12-29.json
+	   *named file		    1703	daily_email_log_2025-12-30.json
+	   *named file		    1703	daily_email_log_2025-12-31.json
+	   *named file		    1703	daily_email_log_2026-01-02.json
+	   *named file		    1703	daily_email_log_2026-01-03.json
+	   *named file		    1703	daily_email_log_2026-01-04.json
+	   *named file		    1703	daily_email_log_2026-01-05.json
+	   *named file		    1703	daily_email_log_2026-01-06.json
+	   *named file		    1703	daily_email_log_2026-01-07.json
+	   *named file		    1703	daily_email_log_2026-01-08.json
+	   *named file		    1703	daily_email_log_2026-01-09.json
+	   *named file		    1703	daily_email_log_2026-01-10.json
+	   *named file		    1703	daily_email_log_2026-01-13.json
+	   *named file		    1703	daily_email_log_2026-01-14.json
+	   *named file		    1703	daily_email_log_2026-01-15.json
+	   *named file		    1703	daily_email_log_2026-01-16.json
+	   *named file		    1703	daily_email_log_2026-01-17.json
+	   *named file		    1703	daily_email_log_2026-01-18.json
+	   *named file		    1703	daily_email_log_2026-01-19.json
+	   *named file		    1703	daily_email_log_2026-01-20.json
+	   *named file		    1703	daily_email_log_2026-01-21.json
+	   *named file		    1703	daily_email_log_2026-01-22.json
+	   *named file		    1703	daily_email_log_2026-01-23.json
+	   *named file		    1703	daily_email_log_2026-01-24.json
+	   *named file		    1703	daily_email_log_2026-01-25.json
+	   *named file		    1703	daily_email_log_2026-01-26.json
+	   *named file		    1703	daily_email_log_2026-01-27.json
+	   *named file		    1703	daily_email_log_2026-01-29.json
+	   *named file		    1703	daily_email_log_2026-01-30.json
+	   *named file		    1703	daily_email_log_2026-01-31.json
+	   *named file		    1703	daily_email_log_2026-02-01.json
+	   *named file		    1703	daily_email_log_2026-02-02.json
+	   *named file		    1703	daily_email_log_2026-02-06.json
+	   *named file		    1703	daily_email_log_2026-02-07.json
+	   *named file		    1703	daily_email_log_2026-02-08.json
+	   *named file		    1703	daily_email_log_2026-02-12.json
+	   *named file		    1703	daily_email_log_2026-02-13.json
+	   *named file		    1703	daily_email_log_2026-02-15.json
+	   *named file		    1703	daily_email_log_2026-02-16.json
+	   *named file		    1703	daily_email_log_2026-02-17.json
+	   *named file		    1703	daily_email_log_2026-02-18.json
+	   *named file		    1703	daily_email_log_2026-02-19.json
+	   *named file		    1703	daily_email_log_2026-02-20.json
+	   *named file		    1703	daily_email_log_2026-02-21.json
+	   *named file		    1703	daily_email_log_2026-02-22.json
+	   *named file		    1703	daily_email_log_2026-02-23.json
+	   *named file		    1703	daily_email_log_2026-02-24.json
+	   *named file		    1703	daily_email_log_2026-02-28.json
+	   *named file		    1703	daily_email_log_2026-03-01.json
+	   *named file		    1703	daily_email_log_2026-03-02.json
+	   *named file		    1703	daily_email_log_2026-03-03.json
+	   *named file		    1703	daily_email_log_2026-03-04.json
+	   *named file		    1703	daily_email_log_2026-03-05.json
+	   *named file		    1703	daily_email_log_2026-03-06.json
+	   *named file		    1703	daily_email_log_2026-03-07.json
+	   *named file		    1703	daily_email_log_2026-03-08.json
+	   *named file		    1703	daily_email_log_2026-03-09.json
+	   *named file		    1703	daily_email_log_2026-03-10.json
+	   *named file		    1703	daily_email_log_2026-03-11.json
+	   *named file		    1702	daily_email_log_2026-03-12.json
+	         named		    1703	daily_email_log_2025-12-25.json
+	         named		    1703	daily_email_log_2025-12-26.json
+	         named		    1703	daily_email_log_2025-12-27.json
+	         older		     773	log_backup.txt
+	         older		   45094	log_cleanup.txt
+	         older		     232	log_daily_digest.txt
+	      modified		    2234	cron.php
+	      modified		    5264	cron_backup.php
+	      modified		   10574	cron_unreplied_comments.php
+	          same		    2030	cron_cleanup.php
+	          same		   34240	cron_daily.php
+
+------------------------------------------------------------------------------
+
+               Total    Copied   Skipped  Mismatch    FAILED    Extras
+    Dirs :         1         0         1         0         0         0
+   Files :        11         0        11         0         0        61
+   Bytes :   103.0 k         0   103.0 k         0         0   101.4 k
+   Times :   0:00:00   0:00:00                       0:00:00   0:00:00
+   Ended : 14 March 2026 08:19 PM
+
+
+
+============================================================
+Deployment Finished: 14/3/2026, 8:19:22 pm
