@@ -18,7 +18,11 @@ export async function GET(
     `, [sessionId]);
     
     // To match frontend expectations where 'project' is an object
-    const mappedFinals = finals.map((fp: any) => ({
+    const mappedFinals = finals.map((fp: { 
+      projectName: string; 
+      projectDescription: string;
+      [key: string]: any 
+    }) => ({
       ...fp,
       project: {
         name: fp.projectName,
@@ -27,7 +31,7 @@ export async function GET(
     }));
 
     return NextResponse.json(mappedFinals);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("GET /api/final error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
@@ -62,7 +66,7 @@ export async function PUT(
     }
 
     return NextResponse.json({ success: true, count: placements.length });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("PUT /api/final error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }

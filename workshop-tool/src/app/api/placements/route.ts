@@ -28,7 +28,7 @@ export async function GET(req: Request) {
 
     const placements = await query(sql, params);
     return NextResponse.json(placements);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("GET /api/placements error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
@@ -58,7 +58,7 @@ export async function PUT(req: Request) {
     }
 
     return NextResponse.json({ success: true, count: placements.length });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("PUT /api/placements error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }

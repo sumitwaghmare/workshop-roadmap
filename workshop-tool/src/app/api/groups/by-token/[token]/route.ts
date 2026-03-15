@@ -23,7 +23,7 @@ export async function GET(
 
     const group = rows[0];
     return NextResponse.json(group);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("GET /api/groups/by-token error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }

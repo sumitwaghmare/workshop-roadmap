@@ -1,7 +1,6 @@
 export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
-import { isAdmin } from "@/lib/auth";
 import { v4 as uuidv4 } from "uuid";
 
 export async function GET(req: Request) {
@@ -18,7 +17,7 @@ export async function GET(req: Request) {
       [sessionId]
     );
     return NextResponse.json(projects);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("GET /api/projects error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
@@ -36,7 +35,7 @@ export async function POST(req: Request) {
 
     const [project] = await query("SELECT * FROM Project WHERE id = ?", [id]);
     return NextResponse.json(project, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("POST /api/projects error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }

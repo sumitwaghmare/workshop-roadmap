@@ -15,7 +15,14 @@ export async function GET() {
     `);
     
     // Map to match the expected structure
-    const mappedSessions = sessions.map((s: any) => ({
+    const mappedSessions = sessions.map((s: { 
+      id: string; 
+      name: string; 
+      active: number | boolean; 
+      createdAt: Date; 
+      projectCount: number; 
+      groupCount: number 
+    }) => ({
       ...s,
       _count: {
         projects: s.projectCount,
@@ -24,7 +31,7 @@ export async function GET() {
     }));
 
     return NextResponse.json(mappedSessions);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("GET /api/sessions error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
@@ -45,7 +52,7 @@ export async function POST(req: Request) {
     
     const [session] = await query("SELECT * FROM Session WHERE id = ?", [id]);
     return NextResponse.json(session, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("POST /api/sessions error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }

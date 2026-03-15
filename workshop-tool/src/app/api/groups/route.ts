@@ -22,7 +22,7 @@ export async function GET(req: Request) {
       [sessionId]
     );
     return NextResponse.json(groups);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("GET /api/groups error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
 
     const [group] = await query("SELECT * FROM \`Group\` WHERE id = ?", [id]);
     return NextResponse.json(group, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("POST /api/groups error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }

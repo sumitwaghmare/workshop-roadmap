@@ -22,7 +22,7 @@ export async function PATCH(
 
     const [project] = await query("SELECT * FROM Project WHERE id = ?", [id]);
     return NextResponse.json(project);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("PATCH /api/projects/[id] error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
@@ -40,7 +40,7 @@ export async function DELETE(
     const { id } = await params;
     await query("DELETE FROM Project WHERE id = ?", [id]);
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("DELETE /api/projects/[id] error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }

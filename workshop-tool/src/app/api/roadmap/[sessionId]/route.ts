@@ -32,15 +32,15 @@ export async function GET(
     `, [sessionId]);
 
     // 4. Compute majority for each project
-    const roadmap = projects.map((project: any) => {
+    const roadmap = projects.map((project: { id: string; name: string }) => {
       const projectPlacements = placements.filter(
-        (p: any) => p.projectId === project.id
+        (p: { projectId: string }) => p.projectId === project.id
       );
 
       // Group placements by (horizon, status)
       const counts: Record<string, { horizon: number; status: string; groups: string[] }> = {};
       
-      projectPlacements.forEach((p: any) => {
+      projectPlacements.forEach((p: { horizon: number | null; status: string | null; groupName: string }) => {
         if (p.horizon === null || p.status === null) return;
         const key = `${p.horizon}-${p.status}`;
         if (!counts[key]) {
@@ -67,7 +67,7 @@ export async function GET(
     });
 
     return NextResponse.json(roadmap);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("GET /api/roadmap error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }

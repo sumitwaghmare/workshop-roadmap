@@ -15,7 +15,7 @@ export async function DELETE(
     const { id } = await params;
     await query("DELETE FROM \`Group\` WHERE id = ?", [id]);
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("DELETE /api/groups/[id] error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }

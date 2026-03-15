@@ -19,7 +19,7 @@ export async function PATCH(
     
     const [session] = await query("SELECT * FROM Session WHERE id = ?", [id]);
     return NextResponse.json(session);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("PATCH /api/sessions/[id] error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
@@ -37,7 +37,7 @@ export async function DELETE(
     const { id } = await params;
     await query("DELETE FROM Session WHERE id = ?", [id]);
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("DELETE /api/sessions/[id] error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
