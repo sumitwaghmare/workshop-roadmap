@@ -36,6 +36,7 @@ interface RoadmapGridProps {
   showGroupBadges?: boolean;
   title?: string;
   compact?: boolean;
+  fitView?: boolean;
   yAxisEnabled?: boolean;
   onCardClick?: (project: ProjectItem) => void;
 }
@@ -183,6 +184,7 @@ export default function RoadmapGrid({
   showGroupBadges = false,
   title,
   compact = false,
+  fitView = false,
   yAxisEnabled = true,
   onCardClick,
 }: RoadmapGridProps) {
@@ -216,6 +218,28 @@ export default function RoadmapGrid({
 
   const activeStatuses = yAxisEnabled ? STATUSES : ["ANY_STATUS"];
 
+  // Determine which cells actually contain projects (used for "fit view")
+  const occupiedCells = new Set<string>();
+  for (const p of projects) {
+    if (p.horizon != null) {
+      const s = yAxisEnabled && p.status ? p.status : "ANY_STATUS";
+      occupiedCells.add(`${s}|${p.horizon}`);
+    }
+  }
+  const hasAnyProjects = occupiedCells.size > 0;
+
+  const visibleHorizons = fitView && hasAnyProjects
+    ? HORIZONS.filter((h) =>
+        activeStatuses.some((s) => occupiedCells.has(`${s}|${h.index}`)),
+      )
+    : HORIZONS;
+
+  const visibleStatuses = fitView && hasAnyProjects
+    ? activeStatuses.filter((s) =>
+        visibleHorizons.some((h) => occupiedCells.has(`${s}|${h.index}`)),
+      )
+    : activeStatuses;
+
   // Build grid data: map (status, horizon) -> projects
   const gridData = new Map<string, ProjectItem[]>();
   for (const s of activeStatuses) {
@@ -231,6 +255,11 @@ export default function RoadmapGrid({
       gridData.get(key)?.push(p);
     }
   }
+
+  const horizonCount = visibleHorizons.length;
+  const rowLabelWidth = compact ? 100 : 140;
+  const minWidth = `${rowLabelWidth + horizonCount * (compact ? 220 : 250)}px`;
+  const gridTemplateColumns = `${rowLabelWidth}px repeat(${horizonCount}, minmax(0, 1fr))`;
 
   return (
     <DndContext
@@ -263,19 +292,19 @@ export default function RoadmapGrid({
           <div
             className="grid gap-3"
             style={{
-              gridTemplateColumns: compact ? "100px repeat(3, 1fr)" : "140px repeat(3, 1fr)",
-              minWidth: compact ? "700px" : "900px",
+              gridTemplateColumns,
+              minWidth,
             }}
           >
             {/* Header row */}
             <div /> {/* empty corner */}
-            {HORIZONS.map((h, i) => (
+            {visibleHorizons.map((h) => (
               <div
                 key={h.index}
                 className={`rounded-t-xl border-b-4 bg-muted/50 backdrop-blur-sm ${compact ? 'px-2 py-1.5' : 'px-4 py-3'} text-center font-bold uppercase tracking-wider glass`}
                 style={{
-                  borderColor: HORIZON_COLORS[i].border,
-                  color: HORIZON_COLORS[i].text,
+                  borderColor: HORIZON_COLORS[h.index].border,
+                  color: HORIZON_COLORS[h.index].text,
                 }}
               >
                 {h.name}
@@ -286,7 +315,7 @@ export default function RoadmapGrid({
             ))}
 
             {/* Grid rows */}
-            {activeStatuses.map((status) => (
+            {visibleStatuses.map((status) => (
               <React.Fragment key={status}>
                 {/* Row label */}
                 <div
@@ -313,7 +342,7 @@ export default function RoadmapGrid({
                 </div>
 
                 {/* Cells */}
-                {HORIZONS.map((h) => {
+                {visibleHorizons.map((h) => {
                   const cellId = `${status}|${h.index}`;
                   const cellProjects = gridData.get(cellId) || [];
                   return (

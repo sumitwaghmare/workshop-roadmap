@@ -125,7 +125,9 @@ export default function AdminPage() {
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [compactRoadmap, setCompactRoadmap] = useState(false);
+  const [fitView, setFitView] = useState(false);
   const [yAxisEnabled, setYAxisEnabled] = useState(true);
+  const [activeTab, setActiveTab] = useState<"projects" | "groups" | "table" | "roadmap">("projects");
 
   // Roadmap Item Details (locked session editing)
   const [selectedRoadmapItem, setSelectedRoadmapItem] = useState<RoadmapResult | null>(null);
@@ -593,7 +595,7 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen p-4 md:p-6">
       {/* Header */}
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-border/50 pb-4">
+      <div className={`${fitView && activeTab === "roadmap" ? "hidden" : "mb-6"} flex flex-wrap items-center justify-between gap-4 border-b border-border/50 pb-4`}>
         <div>
           <h1 className="text-4xl font-extrabold text-blue-500 tracking-tight">Workshop Roadmap</h1>
           <p className="text-sm text-slate-500 dark:text-slate-300 font-bold">Admin Dashboard</p>
@@ -697,8 +699,8 @@ export default function AdminPage() {
       )}
 
       {activeSession && (
-        <Tabs defaultValue="projects" className="flex flex-col lg:flex-row gap-8 relative">
-          <TabsList className={`flex lg:flex-col h-auto bg-muted/50 p-1.5 gap-2 border border-border/50 rounded-xl transition-all duration-300 ease-in-out shrink-0 overflow-x-auto lg:overflow-visible ${sidebarCollapsed ? 'lg:w-16' : 'lg:w-64'}`}>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col lg:flex-row gap-8 relative">
+          <TabsList className={`flex lg:flex-col h-auto bg-muted/50 p-1.5 gap-2 border border-border/50 rounded-xl transition-all duration-300 ease-in-out shrink-0 overflow-x-auto lg:overflow-visible ${sidebarCollapsed ? 'lg:w-16' : 'lg:w-64'} ${fitView && activeTab === "roadmap" ? 'hidden' : ''}`}>
             <div className="hidden lg:flex justify-end mb-2 px-2 pt-1">
               <Button 
                 variant="ghost" 
@@ -1086,13 +1088,15 @@ export default function AdminPage() {
                   <label className="text-muted-foreground text-sm cursor-pointer whitespace-nowrap">Fit View:</label>
                   <input
                     type="checkbox"
-                    checked={compactRoadmap}
+                    checked={fitView}
                     onChange={(e) => {
-                      setCompactRoadmap(e.target.checked);
-                      setSidebarCollapsed(e.target.checked);
+                      const checked = e.target.checked;
+                      setFitView(checked);
+                      setCompactRoadmap(checked);
+                      setSidebarCollapsed(checked);
                     }}
                     className="rounded cursor-pointer"
-                    title="Collapse sidebar and use compact grid"
+                    title="Collapse sidebar, use compact grid, and show only filled cells"
                   />
                 </div>
                 <div className="flex items-center gap-2 border-l border-border pl-3 ml-1">
@@ -1147,6 +1151,7 @@ export default function AdminPage() {
               readOnly={activeSession.active}
               showGroupBadges={true}
               compact={compactRoadmap}
+              fitView={fitView}
               yAxisEnabled={yAxisEnabled}
             />
           </TabsContent>
