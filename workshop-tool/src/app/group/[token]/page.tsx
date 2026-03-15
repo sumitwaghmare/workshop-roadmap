@@ -73,7 +73,7 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
 
   // Auto-refresh projects (to see new projects from other groups/admin)
   useEffect(() => {
-    if (!data?.session.active) return;
+    if (!data?.session?.active) return;
     const interval = setInterval(async () => {
       try {
         const res = await fetch(`/api/groups/by-token/${token}`);
@@ -82,16 +82,16 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
           setData((prev) => prev ? { ...prev, projects: d.projects, session: d.session } : d);
         }
       } catch { /* ignore */ }
-    }, 10000);
+    }, 5000);
     return () => clearInterval(interval);
-  }, [data?.session.active, token]);
+  }, [data?.session?.active, token]);
 
   const handleDragEnd = async (
     projectId: string,
     status: string | null,
     horizon: number | null
   ) => {
-    if (!data?.session.active) {
+    if (!data?.session?.active) {
       toast.error("Session is no longer active — links have been killed");
       return;
     }
@@ -109,10 +109,12 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          projectId,
-          groupId: data.group.id,
-          status,
-          horizon,
+          placements: [{
+            projectId,
+            groupId: data.group.id,
+            status,
+            horizon,
+          }]
         }),
       });
       if (!res.ok) {
@@ -130,10 +132,10 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          sessionId: data.session.id,
+          sessionId: data.session?.id,
           name: newProjectName,
           description: newProjectDesc,
-          createdBy: data.group.name,
+          createdBy: data.group?.name,
         }),
       });
       if (res.ok) {
@@ -175,7 +177,15 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
     })
     .map((p) => {
       const placement = localPlacements.get(p.id)!;
-      return { ...p, status: placement.status, horizon: placement.horizon };
+      return { 
+        id: p.id,
+        name: p.name,
+        description: p.description,
+        status: placement.status, 
+        horizon: placement.horizon,
+        agreedGroups: [data.group.name], // For group view, they only see their own placement as "agreed"
+        isPlaced: true
+      };
     });
 
   const inboxProjects = data.projects
@@ -187,6 +197,7 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
       id: p.id,
       name: p.name,
       description: p.description,
+      isPlaced: false
     }));
 
   return (

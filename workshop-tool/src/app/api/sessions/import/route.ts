@@ -36,7 +36,7 @@ export async function POST(req: Request) {
 
     // 2. Iterate and upsert projects/placements
     for (const item of items) {
-      const { title, description, horizon, status } = item;
+      const { title, description, horizon, status, icon } = item;
       if (!title) continue;
 
       // Check if project exists by name in this session
@@ -49,15 +49,15 @@ export async function POST(req: Request) {
       if (existingProjects.length > 0) {
         projectId = existingProjects[0].id;
         await query(
-          "UPDATE Project SET description = ? WHERE id = ?",
-          [description || null, projectId]
+          "UPDATE Project SET description = ?, icon = ? WHERE id = ?",
+          [description || null, icon || null, projectId]
         );
         summary.projectsUpdated++;
       } else {
         projectId = uuidv4();
         await query(
-          "INSERT INTO Project (id, sessionId, name, description) VALUES (?, ?, ?, ?)",
-          [projectId, sessionId, title, description || null]
+          "INSERT INTO Project (id, sessionId, name, description, icon) VALUES (?, ?, ?, ?, ?)",
+          [projectId, sessionId, title, description || null, icon || null]
         );
         summary.projectsAdded++;
       }

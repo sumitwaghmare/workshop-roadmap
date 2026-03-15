@@ -10,20 +10,27 @@ export async function GET(
   try {
     const { sessionId } = await params;
 
-    // 1. Get total group count for this session
+    // 1. Get session info
+    const sessionRows = await query<{ active: boolean }>(
+      "SELECT active FROM Session WHERE id = ?",
+      [sessionId]
+    );
+    const sessionActive = sessionRows[0]?.active ?? false;
+
+    // 2. Get total group count for this session
     const groupRows = await query<{ total: number }>(
-      "SELECT COUNT(*) as total FROM \`Group\` WHERE sessionId = ?",
+      "SELECT COUNT(*) as total FROM `Group` WHERE sessionId = ?",
       [sessionId]
     );
     const totalGroups = groupRows[0]?.total || 0;
 
-    // 2. Get all projects in this session
-    const projects = await query<{ id: string; name: string }>(
-      "SELECT * FROM Project WHERE sessionId = ?",
+    // 3. Get all projects in this session
+    const projects = await query<{ id: string; name: string; description: string | null }>(
+      "SELECT id, name, description FROM Project WHERE sessionId = ?",
       [sessionId]
     );
 
-    // 3. Get all placements for this session with group names
+    // 4. Get all placements for this session with group names
     const placements = await query<{ 
       projectId: string; 
       groupName: string; 
@@ -37,16 +44,24 @@ export async function GET(
       WHERE pr.sessionId = ?
     `, [sessionId]);
 
-    // 4. Compute majority for each project
-    const roadmap = projects.map((project: { id: string; name: string }) => {
+    // 5. Get final placements
+    const finalPlacements = await query<{ projectId: string; horizon: number | null; status: string | null }>(
+      "SELECT projectId, horizon, status FROM FinalPlacement WHERE sessionId = ?",
+      [sessionId]
+    );
+
+    // 6. Compute roadmap for each project
+    const roadmap = projects.map((project) => {
       const projectPlacements = placements.filter(
-        (p: { projectId: string }) => p.projectId === project.id
+        (p) => p.projectId === project.id
       );
 
-      // Group placements by (horizon, status)
+      const final = finalPlacements.find((f) => f.projectId === project.id);
+
+      // Group placements by (horizon, status) for "bubble" info
       const counts: Record<string, { horizon: number; status: string; groups: string[] }> = {};
       
-      projectPlacements.forEach((p: { horizon: number | null; status: string | null; groupName: string }) => {
+      projectPlacements.forEach((p) => {
         if (p.horizon === null || p.status === null) return;
         const key = `${p.horizon}-${p.status}`;
         if (!counts[key]) {
@@ -55,20 +70,49 @@ export async function GET(
         counts[key].groups.push(p.groupName);
       });
 
-      // Find if any cell has > 50% agreement
-      let majorityCell = null;
+      // Find majority cell (>= 50%)
+      let majorityCell: { horizon: number; status: string; groups: string[] } | null = null;
       for (const key in counts) {
-        if (counts[key].groups.length > totalGroups / 2) {
+        if (counts[key].groups.length >= totalGroups / 2) {
           majorityCell = counts[key];
           break;
         }
       }
 
+      // DETERMINISTIC LOGIC:
+      // If session is ACTIVE: Only use majority consensus (Consolidated Roadmap).
+      // If session is LOCKED: Use manual override (Final Roadmap), fallback to majority.
+      let horizon = null;
+      let status = null;
+      const hasMajority = !!majorityCell;
+
+      if (sessionActive) {
+        // Active session: consolidated view from live group votes
+        horizon = majorityCell ? majorityCell.horizon : null;
+        status = majorityCell ? majorityCell.status : null;
+      } else {
+        // Locked session: respect manual admin overrides
+        horizon = final ? final.horizon : (majorityCell ? majorityCell.horizon : null);
+        status = final ? final.status : (majorityCell ? majorityCell.status : null);
+      }
+      
+      // Which groups recommended THIS specific cell?
+      let agreedGroups = (horizon !== null && status !== null) 
+        ? (counts[`${horizon}-${status}`]?.groups || []) 
+        : [];
+
+      // If project is in Inbox (no horizon/status), show all groups that voted for it
+      if (horizon === null && status === null) {
+        agreedGroups = projectPlacements.map(p => p.groupName);
+      }
+
       return {
         ...project,
-        horizon: majorityCell ? majorityCell.horizon : null,
-        status: majorityCell ? majorityCell.status : null,
-        agreedGroups: majorityCell ? majorityCell.groups : [],
+        horizon,
+        status,
+        agreedGroups,
+        isFinal: !!final && !sessionActive,
+        hasMajority
       };
     });
 

@@ -14,7 +14,6 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { STATUSES, HORIZONS, STATUS_COLORS, HORIZON_COLORS, StatusType } from "@/lib/constants";
-import { Badge } from "@/components/ui/badge";
 
 // --- Types ---
 export interface ProjectItem {
@@ -24,8 +23,7 @@ export interface ProjectItem {
   icon?: string | null;
   horizon?: number | null;
   status?: string | null;
-  groups?: string[];
-  groupNames?: string[];
+  agreedGroups?: string[];
   isPlaced?: boolean;
 }
 
@@ -69,19 +67,25 @@ function DraggableCard({
       title={project.description || ""}
     >
       <div className="flex items-center gap-2">
+        {project.icon && <span className="text-blue-400">{project.icon}</span>}
         <span className="truncate font-medium">{project.name}</span>
       </div>
-      {showGroupBadges && project.groupNames && project.groupNames.length > 0 && (
-        <div className="mt-1.5 flex flex-wrap gap-1">
-          {project.groupNames.map((gn, i) => (
-            <Badge
-              key={i}
-              variant="outline"
-              className="border-primary/30 bg-primary/10 px-1.5 py-0 text-[10px] text-primary"
-            >
-              {gn}
-            </Badge>
-          ))}
+      {showGroupBadges && project.agreedGroups && project.agreedGroups.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {project.agreedGroups.map((gn, i) => {
+            // Extract number from "Group 1" or use initial
+            const match = gn.match(/\d+/);
+            const label = match ? `G${match[0]}` : gn.charAt(0).toUpperCase();
+            return (
+              <div
+                key={i}
+                title={gn}
+                className="flex size-5 items-center justify-center rounded-full bg-blue-500/20 text-[9px] font-bold text-blue-400 border border-blue-500/30 cursor-help"
+              >
+                {label}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

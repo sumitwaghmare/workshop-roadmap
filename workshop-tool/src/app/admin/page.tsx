@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Table,
@@ -21,6 +21,14 @@ import {
 } from "@/components/ui/table";
 import RoadmapGrid from "@/components/roadmap-grid";
 import { STATUS_COLORS, type StatusType } from "@/lib/constants";
+import { 
+  ClipboardCopy,
+  Copy,
+  Lock,
+  Plus,
+  Trash2, 
+  Unlock
+} from "lucide-react";
 
 // --- Types ---
 interface Session {
@@ -54,13 +62,14 @@ interface Placement {
 }
 
 interface RoadmapResult {
-  projectId: string;
+  id: string;
+  name: string;
+  description?: string | null;
   horizon: number | null;
   status: string | null;
-  groups: string[];
-  groupNames: string[];
-  isPlaced: boolean;
-  project: Project;
+  agreedGroups: string[];
+  isFinal: boolean;
+  hasMajority: boolean;
 }
 
 export default function AdminPage() {
@@ -83,6 +92,8 @@ export default function AdminPage() {
   // Groups
   const [groups, setGroups] = useState<Group[]>([]);
   const [newGroupName, setNewGroupName] = useState("");
+  const [bulkGroupsText, setBulkGroupsText] = useState("");
+  const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
 
   // Table view
   const [placements, setPlacements] = useState<Placement[]>([]);
@@ -120,7 +131,7 @@ export default function AdminPage() {
   const loadRoadmap = useCallback(async (sessionId: string) => {
     const res = await fetch(`/api/roadmap/${sessionId}`);
     const data = await res.json();
-    setRoadmapData(data.results || []);
+    setRoadmapData(data || []);
   }, []);
 
   // Check auth
@@ -154,7 +165,7 @@ export default function AdminPage() {
     const interval = setInterval(() => {
       loadPlacements(activeSession.id);
       loadRoadmap(activeSession.id);
-    }, refreshInterval * 1000);
+    }, 5000); // 5 seconds for real-time visibility
     return () => clearInterval(interval);
   }, [autoRefresh, refreshInterval, activeSession, loadPlacements, loadRoadmap]);
 
@@ -239,11 +250,54 @@ export default function AdminPage() {
     loadGroups(activeSession.id);
   };
 
-  const deleteGroup = async (id: string) => {
-    if (!confirm("Delete this group? All their placements will be lost.")) return;
-    await fetch(`/api/groups/${id}`, { method: "DELETE" });
-    toast.success("Group deleted");
-    if (activeSession) loadGroups(activeSession.id);
+  const handleBulkCreateGroups = async () => {
+    if (!bulkGroupsText.trim() || !activeSession) return;
+    const names = bulkGroupsText.split("\n").map(n => n.trim()).filter(n => n.length > 0);
+    
+    for (const name of names) {
+      await fetch("/api/groups", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId: activeSession.id, name }),
+      });
+    }
+    
+    setBulkGroupsText("");
+    setIsBulkDialogOpen(false);
+    toast.success(`${names.length} groups created`);
+    loadGroups(activeSession.id);
+  };
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } else {
+        // Fallback for non-secure contexts
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        textArea.style.top = "0";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        const successful = document.execCommand("copy");
+        document.body.removeChild(textArea);
+        return successful;
+      }
+    } catch (err) {
+      console.error("Clipboard copy failed", err);
+      return false;
+    }
+  };
+
+  const copyAllLinks = async () => {
+    const links = groups.map(g => `${g.name}: ${window.location.origin}/group/${g.token}`).join("\n");
+    const ok = await copyToClipboard(links);
+    if (ok) toast.success("All links copied to clipboard");
+    else toast.error("Failed to copy links. Please copy manually.");
   };
 
   const getGroupLink = (token: string) => {
@@ -251,9 +305,17 @@ export default function AdminPage() {
     return `${base}/group/${token}`;
   };
 
-  const copyLink = (token: string) => {
-    navigator.clipboard.writeText(getGroupLink(token));
-    toast.success("Link copied to clipboard");
+  const copyLink = async (token: string) => {
+    const ok = await copyToClipboard(getGroupLink(token));
+    if (ok) toast.success("Link copied to clipboard");
+    else toast.error("Failed to copy link. Please copy manually.");
+  };
+
+  const deleteGroup = async (id: string) => {
+    if (!confirm("Delete this group? All their placements will be lost.")) return;
+    await fetch(`/api/groups/${id}`, { method: "DELETE" });
+    toast.success("Group deleted");
+    if (activeSession) loadGroups(activeSession.id);
   };
 
   // Final roadmap save
@@ -263,18 +325,18 @@ export default function AdminPage() {
     horizon: number | null
   ) => {
     setRoadmapData((prev) =>
-      prev.map((r) =>
-        r.projectId === projectId
-          ? { ...r, status, horizon, isPlaced: status !== null && horizon !== null }
+      (prev as RoadmapResult[]).map((r) =>
+        r.id === projectId
+          ? { ...r, status, horizon }
           : r
       )
     );
 
     if (activeSession && !activeSession.active) {
-      const allPlacements = roadmapData.map((r) =>
-        r.projectId === projectId
+      const allPlacements = (roadmapData as RoadmapResult[]).map((r) =>
+        r.id === projectId
           ? { projectId, status, horizon }
-          : { projectId: r.projectId, status: r.status, horizon: r.horizon }
+          : { projectId: r.id, status: r.status, horizon: r.horizon }
       );
       await fetch(`/api/final/${activeSession.id}`, {
         method: "PUT",
@@ -347,7 +409,10 @@ export default function AdminPage() {
               }),
             });
 
-            if (!res.ok) throw new Error(`Batch ${i + 1} failed`);
+            if (!res.ok) {
+              const errData = await res.json();
+              throw new Error(errData.error || `Batch ${i + 1} failed`);
+            }
             
             const result = await res.json();
             currentSessionId = result.sessionId;
@@ -366,16 +431,31 @@ export default function AdminPage() {
           toast.success(
             `Import complete: Added ${summary.added}, Updated ${summary.updated} projects, Sync'd ${summary.placements} placements.`
           );
-        } catch {
-          toast.error("Invalid JSON format or import error");
+        } catch (err) {
+          const message = err instanceof Error ? err.message : "Invalid JSON format or import error";
+          toast.error(message);
         }
       };
       reader.readAsText(file);
     } catch {
       toast.error("Failed to read file");
     } finally {
-      // Clear input so same file can be imported again
       e.target.value = "";
+    }
+  };
+
+  const handleDeleteSession = async () => {
+    if (!activeSession) return;
+    if (!confirm(`Are you sure you want to delete the entire session "${activeSession.name}" and all associated data? This cannot be undone.`)) return;
+
+    try {
+      const res = await fetch(`/api/sessions/${activeSession.id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Delete failed");
+      toast.success("Session deleted successfully");
+      setActiveSession(null);
+      await loadSessions();
+    } catch {
+      toast.error("Failed to delete session");
     }
   };
 
@@ -410,20 +490,34 @@ export default function AdminPage() {
           <p className="text-sm text-slate-300 font-bold">Admin Dashboard</p>
         </div>
         <div className="flex items-center gap-3">
-          <select
-            className="rounded-md border border-white/20 bg-slate-900 px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 outline-none cursor-pointer"
-            value={activeSession?.id || ""}
-            onChange={(e) => {
-              const s = sessions.find((s) => s.id === e.target.value);
-              if (s) setActiveSession(s);
-            }}
-          >
-            {sessions.map((s) => (
-              <option key={s.id} value={s.id} className="bg-slate-900">
-                {s.name} {s.active ? "🟢" : "🔴"}
-              </option>
-            ))}
-          </select>
+          <div className="flex items-center gap-2">
+            <select
+              className="rounded-md border border-white/20 bg-slate-900 px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 outline-none cursor-pointer"
+              value={activeSession?.id || ""}
+              onChange={(e) => {
+                const s = sessions.find((s) => s.id === e.target.value);
+                setActiveSession(s || null);
+              }}
+            >
+              <option value="">Select Session...</option>
+              {sessions.map((s) => (
+                <option key={s.id} value={s.id} className="bg-slate-900">
+                  {s.name} {s.active ? "🟢" : "🔴"}
+                </option>
+              ))}
+            </select>
+            {activeSession && (
+              <Button 
+                variant="destructive" 
+                size="icon-sm" 
+                onClick={handleDeleteSession}
+                className="bg-red-900/40 border-red-900/60 hover:bg-red-800 text-red-200"
+                title="Delete Session"
+              >
+                <Trash2 className="size-4" />
+              </Button>
+            )}
+          </div>
           <div className="flex items-center gap-2">
             <label className="cursor-pointer">
               <input
@@ -462,13 +556,47 @@ export default function AdminPage() {
       )}
 
       {activeSession && (
-        <Tabs defaultValue="projects" className="space-y-6">
-          <TabsList className="bg-slate-800 p-1 h-auto gap-1 border border-slate-700">
-            <TabsTrigger value="projects" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-300 rounded-sm px-6 py-2 transition-all font-bold">Projects</TabsTrigger>
-            <TabsTrigger value="groups" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-300 rounded-sm px-6 py-2 transition-all font-bold">Groups</TabsTrigger>
-            <TabsTrigger value="table" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-300 rounded-sm px-6 py-2 transition-all font-bold">Table View</TabsTrigger>
-            <TabsTrigger value="roadmap" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-300 rounded-sm px-6 py-2 transition-all font-bold">Roadmap View</TabsTrigger>
+        <Tabs defaultValue="projects" className="flex flex-col lg:flex-row gap-8">
+          <TabsList className="flex lg:flex-col h-auto bg-slate-900/50 p-1.5 gap-2 border border-slate-700/50 rounded-xl lg:w-64 shrink-0 overflow-x-auto lg:overflow-visible">
+            <TabsTrigger 
+              value="projects" 
+              className="w-full justify-start gap-3 data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400 hover:text-slate-200 rounded-lg px-4 py-3 transition-all font-bold group"
+            >
+              <div className="h-2 w-2 rounded-full bg-slate-600 group-data-[state=active]:bg-white"></div>
+              Projects
+            </TabsTrigger>
+            <TabsTrigger 
+              value="groups" 
+              className="w-full justify-start gap-3 data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-300 hover:text-white rounded-lg px-4 py-3 transition-all font-bold group border border-transparent data-[state=active]:border-blue-400/50 shadow-lg"
+            >
+              <div className="h-2 w-2 rounded-full bg-slate-600 group-data-[state=active]:bg-white"></div>
+              Groups & Links
+            </TabsTrigger>
+            <TabsTrigger 
+              value="table" 
+              className="w-full justify-start gap-3 data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400 hover:text-slate-200 rounded-lg px-4 py-3 transition-all font-bold group"
+            >
+              <div className="h-2 w-2 rounded-full bg-slate-600 group-data-[state=active]:bg-white"></div>
+              Table View
+            </TabsTrigger>
+            <TabsTrigger 
+              value="roadmap" 
+              className="w-full justify-start gap-3 data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400 hover:text-slate-200 rounded-lg px-4 py-3 transition-all font-bold group"
+            >
+              <div className="h-2 w-2 rounded-full bg-slate-600 group-data-[state=active]:bg-white"></div>
+              Roadmap View
+            </TabsTrigger>
+            <div className="mt-auto hidden lg:block p-4">
+              <div className="rounded-lg bg-blue-500/10 border border-blue-500/20 p-3">
+                <p className="text-[10px] text-blue-400 uppercase tracking-widest font-bold mb-1">Session Data</p>
+                <p className="text-xs text-slate-300">{projects.length} Projects</p>
+                <p className="text-xs text-slate-300">{groups.length} Groups</p>
+              </div>
+            </div>
           </TabsList>
+
+          <div className="flex-1 min-w-0">
+            {/* Tab content follows... */}
 
           {/* === PROJECTS TAB === */}
           <TabsContent value="projects" className="space-y-4">
@@ -537,67 +665,137 @@ export default function AdminPage() {
           </TabsContent>
 
           {/* === GROUPS TAB === */}
-          <TabsContent value="groups" className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-semibold">Groups</h2>
-                <p className="text-sm text-muted-foreground">
-                  Create groups and share unique links with group leaders
-                </p>
-              </div>
-              <Button
-                variant={activeSession.active ? "destructive" : "default"}
-                onClick={toggleSessionActive}
-              >
-                {activeSession.active ? "🔒 Kill All Links" : "🔓 Activate Links"}
-              </Button>
-            </div>
+          <TabsContent value="groups" className="space-y-6">
+            <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+              <div className="flex items-center gap-3">
+                <Input
+                  placeholder="Group name (e.g., BU TCD)"
+                  value={newGroupName}
+                  onChange={(e) => setNewGroupName(e.target.value)}
+                  className="max-w-sm"
+                  onKeyDown={(e) => e.key === "Enter" && createGroup()}
+                />
+                <Button onClick={createGroup}>
+                  <Plus className="mr-2 h-4 w-4" /> Add Group
+                </Button>
 
-            <div className="flex items-center gap-3">
-              <Input
-                placeholder="Group name (e.g., BU TCD)"
-                value={newGroupName}
-                onChange={(e) => setNewGroupName(e.target.value)}
-                className="max-w-sm"
-                onKeyDown={(e) => e.key === "Enter" && createGroup()}
-              />
-              <Button onClick={createGroup}>+ Add Group</Button>
-            </div>
-
-            <div className="grid gap-3">
-              {groups.map((g) => (
-                <Card key={g.id} className="glass-card overflow-hidden">
-                  <CardContent className="flex items-center justify-between p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="font-medium">{g.name}</div>
-                      <Badge variant="outline" className="font-mono text-xs">
-                        {g._count?.placements || 0} placements
-                      </Badge>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <code className="max-w-[300px] truncate rounded bg-background/50 px-2 py-1 text-xs text-muted-foreground">
-                        {getGroupLink(g.token)}
-                      </code>
-                      <Button variant="outline" size="sm" onClick={() => copyLink(g.token)}>
-                        Copy
+                <Dialog open={isBulkDialogOpen} onOpenChange={setIsBulkDialogOpen}>
+                  <DialogTrigger 
+                    render={
+                      <Button variant="outline">
+                        <Plus className="mr-2 h-4 w-4" /> Bulk Add
                       </Button>
+                    }
+                  />
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Bulk Create Groups</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <p className="text-sm text-muted-foreground">
+                        Enter group names, one per line.
+                      </p>
+                      <Textarea
+                        placeholder="Group 1: Marketing&#10;Group 2: Sales&#10;Group 3: Product"
+                        value={bulkGroupsText}
+                        onChange={(e) => setBulkGroupsText(e.target.value)}
+                        rows={8}
+                      />
+                      <Button className="w-full" onClick={handleBulkCreateGroups}>
+                        Generate {bulkGroupsText.split("\n").filter(n => n.trim()).length} Groups
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <Button variant="outline" onClick={copyAllLinks}>
+                  <ClipboardCopy className="mr-2 h-4 w-4" /> Copy All Links
+                </Button>
+                <Button
+                  variant={activeSession.active ? "destructive" : "default"}
+                  onClick={toggleSessionActive}
+                  className="min-w-[180px]"
+                >
+                  {activeSession.active ? (
+                    <><Lock className="mr-2 h-4 w-4" /> Finalize Session</>
+                  ) : (
+                    <><Unlock className="mr-2 h-4 w-4" /> Resume Session</>
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {groups.map((g) => (
+                <Card key={g.id} className="overflow-hidden border-slate-700 bg-slate-800/50 hover:bg-slate-800 transition-all duration-200 shadow-lg group">
+                  <div className="p-5">
+                    <div className="mb-4 flex items-center justify-between">
+                      <h4 className="font-bold text-slate-100 text-lg group-hover:text-blue-400 transition-colors">{g.name}</h4>
                       <Button
                         variant="ghost"
-                        size="sm"
-                        className="text-destructive"
+                        size="icon"
+                        className="h-9 w-9 text-slate-500 hover:text-red-400 hover:bg-red-400/10 rounded-full transition-all"
                         onClick={() => deleteGroup(g.id)}
                       >
-                        Delete
+                        <Trash2 className="h-5 w-5" />
                       </Button>
                     </div>
-                  </CardContent>
+                    
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 rounded-lg bg-slate-900/80 p-3 border border-slate-700/50 group-hover:border-blue-500/30 transition-colors">
+                        <code className="flex-1 truncate text-xs text-blue-400 font-mono">
+                          {getGroupLink(g.token)}
+                        </code>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-slate-400 hover:text-blue-400 hover:bg-blue-400/10"
+                          onClick={() => {
+                            copyLink(g.token);
+                          }}
+                          title="Copy Link"
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                      </div>
+
+                      <div className="flex items-center justify-between border-t border-slate-700/50 pt-4 mt-2">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Status</span>
+                          <span className={`text-xs font-bold flex items-center gap-1.5 ${activeSession.active ? "text-green-500" : "text-amber-500"}`}>
+                            <span className={`h-2 w-2 rounded-full ${activeSession.active ? "bg-green-500 animate-pulse" : "bg-amber-500"}`}></span>
+                            {activeSession.active ? "Active" : "Locked"}
+                          </span>
+                        </div>
+                        <div className="flex flex-col items-end">
+                          <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Placements</span>
+                          <span className="text-xs font-bold text-slate-200">
+                            {g._count?.placements || 0} Projects
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </Card>
               ))}
+              {groups.length === 0 && (
+                <div className="col-span-full rounded-xl border border-dashed border-slate-700 p-12 text-center">
+                  <div className="mx-auto w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center mb-4">
+                    <Plus className="text-slate-500" />
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-300">No groups yet</h3>
+                  <p className="text-sm text-slate-500 mt-1 max-w-xs mx-auto">
+                    Create groups to generate unique session links for your workshop participants.
+                  </p>
+                </div>
+              )}
             </div>
 
             {!activeSession.active && (
-              <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
-                ⚠️ Links are currently killed. Group leaders cannot make changes.
+              <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
+                ⚠️ Session is currently Locked. Group leaders can no longer make changes.
                 You can now finalize the roadmap in the Roadmap View tab.
               </div>
             )}
@@ -706,24 +904,24 @@ export default function AdminPage() {
             </div>
 
             <RoadmapGrid
-              projects={roadmapData
-                .filter((r) => r.isPlaced)
+              projects={(roadmapData as RoadmapResult[])
+                .filter((r) => r.horizon !== null && r.status !== null)
                 .map((r) => ({
-                  id: r.projectId,
-                  name: r.project?.name || "",
-                  description: r.project?.description,
+                  id: r.id,
+                  name: r.name,
+                  description: r.description,
                   status: r.status,
                   horizon: r.horizon,
-                  groupNames: r.groupNames,
+                  agreedGroups: r.agreedGroups,
                   isPlaced: true,
                 }))}
-              inboxProjects={roadmapData
-                .filter((r) => !r.isPlaced)
+              inboxProjects={(roadmapData as RoadmapResult[])
+                .filter((r) => r.horizon === null || r.status === null)
                 .map((r) => ({
-                  id: r.projectId,
-                  name: r.project?.name || "",
-                  description: r.project?.description,
-                  groupNames: r.groupNames,
+                  id: r.id,
+                  name: r.name,
+                  description: r.description,
+                  agreedGroups: r.agreedGroups,
                   isPlaced: false,
                 }))}
               onDragEnd={handleFinalDragEnd}
@@ -731,6 +929,7 @@ export default function AdminPage() {
               showGroupBadges={true}
             />
           </TabsContent>
+          </div>
         </Tabs>
       )}
 
