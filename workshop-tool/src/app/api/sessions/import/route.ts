@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 import { NextResponse } from "next/server";
-import { query } from "@/lib/db";
+import { query, ensureProjectFields } from "@/lib/db";
 import { isAdmin } from "@/lib/auth";
 import { v4 as uuidv4 } from "uuid";
 
@@ -11,6 +11,7 @@ export async function POST(req: Request) {
   }
 
   try {
+    await ensureProjectFields();
     const { items, sessionName, sessionId: existingSessionId } = await req.json();
 
     if (!Array.isArray(items)) {
@@ -36,7 +37,7 @@ export async function POST(req: Request) {
 
     // 2. Iterate and upsert projects/placements
     for (const item of items) {
-      const { title, description, horizon, status, icon } = item;
+      const { title, description, horizon, status, icon, priority, bu, owner, timeline } = item;
       if (!title) continue;
 
       // Check if project exists by name in this session
@@ -49,15 +50,25 @@ export async function POST(req: Request) {
       if (existingProjects.length > 0) {
         projectId = existingProjects[0].id;
         await query(
-          "UPDATE Project SET description = ?, icon = ? WHERE id = ?",
-          [description || null, icon || null, projectId]
+          "UPDATE Project SET description = ?, icon = ?, priority = ?, bu = ?, owner = ?, timeline = ? WHERE id = ?",
+          [description || null, icon || null, priority || null, bu || null, owner || null, timeline || null, projectId]
         );
         summary.projectsUpdated++;
       } else {
         projectId = uuidv4();
         await query(
-          "INSERT INTO Project (id, sessionId, name, description, icon) VALUES (?, ?, ?, ?, ?)",
-          [projectId, sessionId, title, description || null, icon || null]
+          "INSERT INTO Project (id, sessionId, name, description, icon, priority, bu, owner, timeline) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          [
+            projectId,
+            sessionId,
+            title,
+            description || null,
+            icon || null,
+            priority || null,
+            bu || null,
+            owner || null,
+            timeline || null,
+          ]
         );
         summary.projectsAdded++;
       }

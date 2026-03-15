@@ -20,7 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import RoadmapGrid from "@/components/roadmap-grid";
-import { STATUS_COLORS, type StatusType } from "@/lib/constants";
+import { STATUSES, STATUS_COLORS, type StatusType } from "@/lib/constants";
 import { 
   ClipboardCopy,
   Copy,
@@ -34,6 +34,12 @@ import {
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
+const PRIORITY_OPTIONS = [
+  { value: "to-plan", label: "To Plan" },
+  { value: "in-discussion", label: "In Discussion" },
+  { value: "in-progress", label: "In Progress" },
+];
+
 // --- Types ---
 interface Session {
   id: string;
@@ -46,6 +52,11 @@ interface Project {
   id: string;
   name: string;
   description?: string | null;
+  icon?: string | null;
+  priority?: string | null;
+  bu?: string | null;
+  owner?: string | null;
+  timeline?: string | null;
   sessionId: string;
 }
 
@@ -69,6 +80,11 @@ interface RoadmapResult {
   id: string;
   name: string;
   description?: string | null;
+  icon?: string | null;
+  priority?: string | null;
+  bu?: string | null;
+  owner?: string | null;
+  timeline?: string | null;
   horizon: number | null;
   status: string | null;
   agreedGroups: string[];
@@ -110,6 +126,18 @@ export default function AdminPage() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [compactRoadmap, setCompactRoadmap] = useState(false);
   const [yAxisEnabled, setYAxisEnabled] = useState(true);
+
+  // Roadmap Item Details (locked session editing)
+  const [selectedRoadmapItem, setSelectedRoadmapItem] = useState<RoadmapResult | null>(null);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [detailName, setDetailName] = useState("");
+  const [detailIcon, setDetailIcon] = useState<string | null>(null);
+  const [detailDescription, setDetailDescription] = useState<string | null>(null);
+  const [detailStatus, setDetailStatus] = useState<string | null>(null);
+  const [detailPriority, setDetailPriority] = useState<string | null>(null);
+  const [detailBu, setDetailBu] = useState<string | null>(null);
+  const [detailOwner, setDetailOwner] = useState<string | null>(null);
+  const [detailTimeline, setDetailTimeline] = useState<string | null>(null);
 
   // --- Data loaders (declared before useEffects) ---
   const loadSessions = useCallback(async () => {
@@ -354,6 +382,77 @@ export default function AdminPage() {
       });
       toast.success("Position saved");
     }
+  };
+
+  const openRoadmapItemDetails = (item: RoadmapResult) => {
+    setSelectedRoadmapItem(item);
+    setDetailName(item.name);
+    setDetailIcon(item.icon ?? "");
+    setDetailDescription(item.description ?? "");
+    setDetailStatus(item.status ?? "");
+    setDetailPriority(item.priority ?? "");
+    setDetailBu(item.bu ?? "");
+    setDetailOwner(item.owner ?? "");
+    setDetailTimeline(item.timeline ?? "");
+    setDetailsDialogOpen(true);
+  };
+
+  const saveRoadmapItemDetails = async () => {
+    if (!activeSession || !selectedRoadmapItem) return;
+
+    const updated = {
+      name: detailName.trim(),
+      description: detailDescription?.trim() || null,
+      icon: detailIcon?.trim() || null,
+      priority: detailPriority?.trim() || null,
+      bu: detailBu?.trim() || null,
+      owner: detailOwner?.trim() || null,
+      timeline: detailTimeline?.trim() || null,
+    };
+
+    // Update project metadata
+    await fetch(`/api/projects/${selectedRoadmapItem.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updated),
+    });
+
+    // Update final placement status (if session is locked)
+    if (!activeSession.active) {
+      const horizon = selectedRoadmapItem.horizon;
+      const status = detailStatus || null;
+      await fetch(`/api/final/${activeSession.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          placements: [{ projectId: selectedRoadmapItem.id, horizon, status }],
+        }),
+      });
+
+      setRoadmapData((prev) =>
+        (prev as RoadmapResult[]).map((r) =>
+          r.id === selectedRoadmapItem.id
+            ? { ...r, status, horizon, ...updated }
+            : r
+        )
+      );
+    } else {
+      setRoadmapData((prev) =>
+        (prev as RoadmapResult[]).map((r) =>
+          r.id === selectedRoadmapItem.id ? { ...r, ...updated } : r
+        )
+      );
+    }
+
+    // Also update Projects list if present
+    setProjects((prev) =>
+      prev.map((p) =>
+        p.id === selectedRoadmapItem.id ? { ...p, ...updated, name: detailName.trim(), description: detailDescription?.trim() || null } : p
+      )
+    );
+
+    toast.success("Item details saved");
+    setDetailsDialogOpen(false);
   };
 
   const handleLogout = async () => {
@@ -1019,6 +1118,11 @@ export default function AdminPage() {
                   id: r.id,
                   name: r.name,
                   description: r.description,
+                  icon: r.icon,
+                  priority: r.priority,
+                  bu: r.bu,
+                  owner: r.owner,
+                  timeline: r.timeline,
                   status: r.status,
                   horizon: r.horizon,
                   agreedGroups: r.agreedGroups,
@@ -1030,10 +1134,16 @@ export default function AdminPage() {
                   id: r.id,
                   name: r.name,
                   description: r.description,
+                  icon: r.icon,
+                  priority: r.priority,
+                  bu: r.bu,
+                  owner: r.owner,
+                  timeline: r.timeline,
                   agreedGroups: r.agreedGroups,
                   isPlaced: false,
                 }))}
               onDragEnd={handleFinalDragEnd}
+              onCardClick={activeSession && !activeSession.active ? openRoadmapItemDetails : undefined}
               readOnly={activeSession.active}
               showGroupBadges={true}
               compact={compactRoadmap}
@@ -1075,6 +1185,105 @@ export default function AdminPage() {
             </Button>
             <Button onClick={saveProject}>
               {editProject ? "Update" : "Add"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
+        <DialogContent className="glass border-border shadow-2xl backdrop-blur-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit Item Details</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Title</Label>
+              <Input
+                value={detailName}
+                onChange={(e) => setDetailName(e.target.value)}
+                placeholder="Project title"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Icon (Font Awesome class)</Label>
+              <Input
+                value={detailIcon || ""}
+                onChange={(e) => setDetailIcon(e.target.value)}
+                placeholder="e.g., fa-solid fa-rocket"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Textarea
+                value={detailDescription || ""}
+                onChange={(e) => setDetailDescription(e.target.value)}
+                placeholder="Project description"
+                rows={3}
+              />
+            </div>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <select
+                  value={detailStatus || ""}
+                  onChange={(e) => setDetailStatus(e.target.value)}
+                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 outline-none"
+                >
+                  <option value="">(none)</option>
+                  {STATUSES.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Priority / Stage</Label>
+                <select
+                  value={detailPriority || ""}
+                  onChange={(e) => setDetailPriority(e.target.value)}
+                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 outline-none"
+                >
+                  <option value="">(none)</option>
+                  {PRIORITY_OPTIONS.map((p) => (
+                    <option key={p.value} value={p.value}>
+                      {p.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>BU</Label>
+                <Input
+                  value={detailBu || ""}
+                  onChange={(e) => setDetailBu(e.target.value)}
+                  placeholder="e.g., ADL"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Owner</Label>
+                <Input
+                  value={detailOwner || ""}
+                  onChange={(e) => setDetailOwner(e.target.value)}
+                  placeholder="Owner name"
+                />
+              </div>
+              <div className="space-y-2 md:col-span-2">
+                <Label>Timeline</Label>
+                <Input
+                  value={detailTimeline || ""}
+                  onChange={(e) => setDetailTimeline(e.target.value)}
+                  placeholder="e.g., Q1-Q2 2026"
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDetailsDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={saveRoadmapItemDetails} disabled={!selectedRoadmapItem}>
+              Save
             </Button>
           </DialogFooter>
         </DialogContent>

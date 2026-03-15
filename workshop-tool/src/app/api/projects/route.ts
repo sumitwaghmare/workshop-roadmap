@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 import { NextResponse } from "next/server";
-import { query } from "@/lib/db";
+import { query, ensureProjectFields } from "@/lib/db";
 import { v4 as uuidv4 } from "uuid";
 
 export async function GET(req: Request) {
@@ -14,7 +14,7 @@ export async function GET(req: Request) {
 
   try {
     const projects = await query<Record<string, unknown>>(
-      "SELECT * FROM Project WHERE sessionId = ? ORDER BY createdAt ASC",
+      "SELECT id, sessionId, name, description, icon, priority, bu, owner, timeline, createdBy, createdAt FROM Project WHERE sessionId = ? ORDER BY createdAt ASC",
       [sessionId]
     );
     return NextResponse.json(projects);
@@ -26,12 +26,25 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const { sessionId, name, description, createdBy } = await req.json();
+    await ensureProjectFields();
+    const { sessionId, name, description, icon, priority, bu, owner, timeline, createdBy } = await req.json();
     const id = uuidv4();
     
     await query(
-      "INSERT INTO Project (id, sessionId, name, description, createdBy, createdAt) VALUES (?, ?, ?, ?, ?, ?)",
-      [id, sessionId, name, description, createdBy || "admin", new Date()]
+      "INSERT INTO Project (id, sessionId, name, description, icon, priority, bu, owner, timeline, createdBy, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [
+        id,
+        sessionId,
+        name,
+        description,
+        icon || null,
+        priority || null,
+        bu || null,
+        owner || null,
+        timeline || null,
+        createdBy || "admin",
+        new Date(),
+      ]
     );
 
     const [project] = await query<Record<string, unknown>>("SELECT * FROM Project WHERE id = ?", [id]);

@@ -31,9 +31,14 @@ export async function GET(
     const sessionId = first.sessionId;
     const groupId = first.groupId;
 
-    // 2. Fetch all projects for this session
-    const projects = await query<{ id: string; name: string; description: string | null }>(
-      "SELECT id, name, description FROM Project WHERE sessionId = ?",
+    // 2. Fetch all projects for this session (including optional icon metadata)
+    const projects = await query<{
+      id: string;
+      name: string;
+      description: string | null;
+      icon: string | null;
+    }>(
+      "SELECT id, name, description, icon FROM Project WHERE sessionId = ?",
       [sessionId]
     );
 

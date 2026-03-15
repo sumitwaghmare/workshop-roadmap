@@ -13,6 +13,7 @@ interface Project {
   id: string;
   name: string;
   description?: string | null;
+  icon?: string | null;
 }
 
 interface Placement {
@@ -177,14 +178,15 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
     })
     .map((p) => {
       const placement = localPlacements.get(p.id)!;
-      return { 
+      return {
         id: p.id,
         name: p.name,
         description: p.description,
-        status: placement.status, 
+        icon: p.icon ?? null,
+        status: placement.status,
         horizon: placement.horizon,
         agreedGroups: [data.group.name], // For group view, they only see their own placement as "agreed"
-        isPlaced: true
+        isPlaced: true,
       };
     });
 
@@ -197,7 +199,8 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
       id: p.id,
       name: p.name,
       description: p.description,
-      isPlaced: false
+      icon: p.icon ?? null,
+      isPlaced: false,
     }));
 
   return (

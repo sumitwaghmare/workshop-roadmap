@@ -1,13 +1,15 @@
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 import { NextResponse } from "next/server";
-import { query } from "@/lib/db";
+import { query, ensureProjectFields } from "@/lib/db";
 
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ sessionId: string }> }
 ) {
   try {
+    await ensureProjectFields();
+
     const { sessionId } = await params;
     
     // Parse query params
@@ -29,8 +31,17 @@ export async function GET(
     const totalGroups = groupRows[0]?.total || 0;
 
     // 3. Get all projects in this session
-    const projects = await query<{ id: string; name: string; description: string | null }>(
-      "SELECT id, name, description FROM Project WHERE sessionId = ?",
+    const projects = await query<{
+      id: string;
+      name: string;
+      description: string | null;
+      icon?: string | null;
+      priority?: string | null;
+      bu?: string | null;
+      owner?: string | null;
+      timeline?: string | null;
+    }>(
+      "SELECT id, name, description, icon, priority, bu, owner, timeline FROM Project WHERE sessionId = ?",
       [sessionId]
     );
 

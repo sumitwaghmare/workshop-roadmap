@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 import { NextResponse } from "next/server";
-import { query } from "@/lib/db";
+import { query, ensureProjectFields } from "@/lib/db";
 import { isAdmin } from "@/lib/auth";
 
 export async function PATCH(
@@ -13,12 +13,13 @@ export async function PATCH(
   }
 
   try {
+    await ensureProjectFields();
     const { id } = await params;
-    const { name, description } = await req.json();
+    const { name, description, icon, priority, bu, owner, timeline } = await req.json();
 
     await query(
-      "UPDATE Project SET name = ?, description = ? WHERE id = ?",
-      [name, description, id]
+      "UPDATE Project SET name = ?, description = ?, icon = ?, priority = ?, bu = ?, owner = ?, timeline = ? WHERE id = ?",
+      [name, description, icon || null, priority || null, bu || null, owner || null, timeline || null, id]
     );
 
     const [project] = await query<Record<string, unknown>>("SELECT * FROM Project WHERE id = ?", [id]);

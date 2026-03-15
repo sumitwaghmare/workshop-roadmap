@@ -17,6 +17,28 @@ const pool = databaseUrl
     })
   : null;
 
+let _projectSchemaEnsured = false;
+
+export async function ensureProjectFields() {
+  if (_projectSchemaEnsured || !pool) return;
+
+  // Safely attempt to add columns used for the extended roadmap item details.
+  // These columns are optional and will be ignored if they already exist.
+  try {
+    await query("ALTER TABLE Project ADD COLUMN IF NOT EXISTS icon VARCHAR(255) NULL");
+    await query("ALTER TABLE Project ADD COLUMN IF NOT EXISTS priority VARCHAR(255) NULL");
+    await query("ALTER TABLE Project ADD COLUMN IF NOT EXISTS bu VARCHAR(255) NULL");
+    await query("ALTER TABLE Project ADD COLUMN IF NOT EXISTS owner VARCHAR(255) NULL");
+    await query("ALTER TABLE Project ADD COLUMN IF NOT EXISTS timeline VARCHAR(255) NULL");
+  } catch (error) {
+    // Some MySQL versions may not support IF NOT EXISTS for columns.
+    // Ignore failures so the app can still run if columns are managed externally.
+    console.warn("Could not ensure project schema fields:", error);
+  }
+
+  _projectSchemaEnsured = true;
+}
+
 export async function query<T = unknown>(sql: string, params?: (string | number | boolean | Date | null)[]): Promise<T[]> {
   if (!pool) {
     console.error("Database connection pool not initialized. Is DATABASE_URL set?");

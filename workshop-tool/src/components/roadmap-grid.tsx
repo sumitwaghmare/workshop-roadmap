@@ -13,6 +13,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
+import { Edit3 } from "lucide-react";
 import { STATUSES, HORIZONS, STATUS_COLORS, HORIZON_COLORS, StatusType } from "@/lib/constants";
 
 // --- Types ---
@@ -36,6 +37,7 @@ interface RoadmapGridProps {
   title?: string;
   compact?: boolean;
   yAxisEnabled?: boolean;
+  onCardClick?: (project: ProjectItem) => void;
 }
 
 // --- Draggable Project Card ---
@@ -44,11 +46,13 @@ function DraggableCard({
   showGroupBadges,
   readOnly,
   compact,
+  onCardClick,
 }: {
   project: ProjectItem;
   showGroupBadges?: boolean;
   readOnly?: boolean;
   compact?: boolean;
+  onCardClick?: (project: ProjectItem) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: project.id,
@@ -64,6 +68,11 @@ function DraggableCard({
       ref={setNodeRef}
       {...listeners}
       {...attributes}
+      onClick={() => {
+        if (!readOnly && !isDragging && onCardClick) {
+          onCardClick(project);
+        }
+      }}
       style={style}
       className={`group relative rounded-lg border border-border bg-card/50 ${compact ? 'px-2 py-1 text-xs' : 'px-3 py-2.5 text-sm'} transition-all hover:bg-card hover:border-primary/30 hover:shadow-[0_0_15px_rgba(59,130,246,0.2)] ${
         readOnly ? "cursor-default" : "cursor-grab active:cursor-grabbing"
@@ -71,9 +80,20 @@ function DraggableCard({
       title={project.description || ""}
     >
       <div className="flex items-center gap-2">
-        {project.icon && <span className="text-blue-400">{project.icon}</span>}
+        {project.icon ? (
+          <i
+            className={`${project.icon} text-blue-400 text-lg leading-none`}
+            aria-hidden="true"
+            title={project.icon}
+          />
+        ) : null}
         <span className="truncate font-medium">{project.name}</span>
       </div>
+      {onCardClick && !readOnly && (
+        <div className="absolute top-2 right-2 flex items-center justify-center rounded-full bg-background/80 p-1 text-slate-500 hover:text-slate-900 hover:bg-background">
+          <Edit3 size={14} />
+        </div>
+      )}
       {showGroupBadges && project.agreedGroups && project.agreedGroups.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1.5">
           {project.agreedGroups.map((gn, i) => {
@@ -164,6 +184,7 @@ export default function RoadmapGrid({
   title,
   compact = false,
   yAxisEnabled = true,
+  onCardClick,
 }: RoadmapGridProps) {
   const [activeId, setActiveId] = React.useState<string | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
@@ -232,6 +253,7 @@ export default function RoadmapGrid({
               showGroupBadges={showGroupBadges}
               readOnly={readOnly}
               compact={compact}
+              onCardClick={onCardClick}
             />
           ))}
         </InboxDropZone>
@@ -308,6 +330,7 @@ export default function RoadmapGrid({
                           showGroupBadges={showGroupBadges}
                           readOnly={readOnly}
                           compact={compact}
+                          onCardClick={onCardClick}
                         />
                       ))}
                     </DroppableCell>
