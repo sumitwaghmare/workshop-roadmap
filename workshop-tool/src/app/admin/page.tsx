@@ -109,6 +109,7 @@ export default function AdminPage() {
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [compactRoadmap, setCompactRoadmap] = useState(false);
+  const [yAxisEnabled, setYAxisEnabled] = useState(true);
 
   // --- Data loaders (declared before useEffects) ---
   const loadSessions = useCallback(async () => {
@@ -135,8 +136,8 @@ export default function AdminPage() {
     setPlacements(await res.json());
   }, []);
 
-  const loadRoadmap = useCallback(async (sessionId: string) => {
-    const res = await fetch(`/api/roadmap/${sessionId}`);
+  const loadRoadmap = useCallback(async (sessionId: string, currentYAxis: boolean) => {
+    const res = await fetch(`/api/roadmap/${sessionId}?yAxis=${currentYAxis}`);
     const data = await res.json();
     setRoadmapData(data || []);
   }, []);
@@ -162,19 +163,19 @@ export default function AdminPage() {
       loadProjects(activeSession.id);
       loadGroups(activeSession.id);
       loadPlacements(activeSession.id);
-      loadRoadmap(activeSession.id);
+      loadRoadmap(activeSession.id, yAxisEnabled);
     }
-  }, [activeSession, authenticated, loadProjects, loadGroups, loadPlacements, loadRoadmap]);
+  }, [activeSession, authenticated, loadProjects, loadGroups, loadPlacements, loadRoadmap, yAxisEnabled]);
 
   // Auto refresh
   useEffect(() => {
     if (!autoRefresh || !activeSession) return;
     const interval = setInterval(() => {
       loadPlacements(activeSession.id);
-      loadRoadmap(activeSession.id);
-    }, 5000); // 5 seconds for real-time visibility
+      loadRoadmap(activeSession.id, yAxisEnabled);
+    }, refreshInterval * 1000 || 5000); 
     return () => clearInterval(interval);
-  }, [autoRefresh, refreshInterval, activeSession, loadPlacements, loadRoadmap]);
+  }, [autoRefresh, refreshInterval, activeSession, loadPlacements, loadRoadmap, yAxisEnabled]);
 
   // CRUD: Sessions
   const createSession = async () => {
@@ -432,7 +433,7 @@ export default function AdminPage() {
             await loadSessions();
             if (currentSessionId) {
               await loadProjects(currentSessionId);
-              await loadRoadmap(currentSessionId);
+              await loadRoadmap(currentSessionId, yAxisEnabled);
             }
           }
 
@@ -475,7 +476,8 @@ export default function AdminPage() {
   };
 
   const formatPlacement = (p: Placement | undefined) => {
-    if (!p || !p.status || p.horizon === null) return "—";
+    if (!p || p.horizon === null) return "—";
+    if (!yAxisEnabled || !p.status) return `H${(p.horizon ?? 0) + 1}`;
     return `${p.status} / H${(p.horizon ?? 0) + 1}`;
   };
 
@@ -878,9 +880,21 @@ export default function AdminPage() {
                   See how each group has ranked every project
                 </p>
               </div>
-              <Button variant="outline" size="sm" onClick={() => activeSession && loadPlacements(activeSession.id)}>
-                Refresh
-              </Button>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 border-r border-border pr-3 mr-1">
+                  <label className="text-muted-foreground text-sm cursor-pointer whitespace-nowrap">Y-Axis:</label>
+                  <input
+                    type="checkbox"
+                    checked={yAxisEnabled}
+                    onChange={(e) => setYAxisEnabled(e.target.checked)}
+                    className="rounded cursor-pointer"
+                    title="Enable Y-axis (Status) grouping"
+                  />
+                </div>
+                <Button variant="outline" size="sm" onClick={() => activeSession && loadPlacements(activeSession.id)}>
+                  Refresh
+                </Button>
+              </div>
             </div>
 
             <div className="overflow-x-auto rounded-lg border border-border bg-card">
@@ -905,7 +919,7 @@ export default function AdminPage() {
                         const status = placement?.status as StatusType | undefined;
                         return (
                           <TableCell key={g.id} className="text-center">
-                            {status && STATUS_COLORS[status] ? (
+                            {yAxisEnabled && status && STATUS_COLORS[status] ? (
                               <Badge
                                 className="text-xs"
                                 style={{
@@ -914,6 +928,10 @@ export default function AdminPage() {
                                   borderColor: STATUS_COLORS[status].border,
                                 }}
                               >
+                                {text}
+                              </Badge>
+                            ) : status && !yAxisEnabled && (placement?.horizon !== null) ? (
+                              <Badge variant="outline" className="text-xs">
                                 {text}
                               </Badge>
                             ) : (
@@ -978,7 +996,17 @@ export default function AdminPage() {
                     title="Collapse sidebar and use compact grid"
                   />
                 </div>
-                <Button variant="outline" size="sm" onClick={() => activeSession && loadRoadmap(activeSession.id)}>
+                <div className="flex items-center gap-2 border-l border-border pl-3 ml-1">
+                  <label className="text-muted-foreground text-sm cursor-pointer whitespace-nowrap">Y-Axis:</label>
+                  <input
+                    type="checkbox"
+                    checked={yAxisEnabled}
+                    onChange={(e) => setYAxisEnabled(e.target.checked)}
+                    className="rounded cursor-pointer"
+                    title="Enable Y-axis (Status) grouping"
+                  />
+                </div>
+                <Button variant="outline" size="sm" onClick={() => activeSession && loadRoadmap(activeSession.id, yAxisEnabled)}>
                   Refresh Now
                 </Button>
               </div>
@@ -986,7 +1014,7 @@ export default function AdminPage() {
 
             <RoadmapGrid
               projects={(roadmapData as RoadmapResult[])
-                .filter((r) => r.horizon !== null && r.status !== null)
+                .filter((r) => r.horizon !== null && (!yAxisEnabled || r.status !== null))
                 .map((r) => ({
                   id: r.id,
                   name: r.name,
@@ -997,7 +1025,7 @@ export default function AdminPage() {
                   isPlaced: true,
                 }))}
               inboxProjects={(roadmapData as RoadmapResult[])
-                .filter((r) => r.horizon === null || r.status === null)
+                .filter((r) => r.horizon === null || (yAxisEnabled && r.status === null))
                 .map((r) => ({
                   id: r.id,
                   name: r.name,
@@ -1009,6 +1037,7 @@ export default function AdminPage() {
               readOnly={activeSession.active}
               showGroupBadges={true}
               compact={compactRoadmap}
+              yAxisEnabled={yAxisEnabled}
             />
           </TabsContent>
           </div>

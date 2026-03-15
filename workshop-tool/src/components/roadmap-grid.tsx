@@ -35,6 +35,7 @@ interface RoadmapGridProps {
   showGroupBadges?: boolean;
   title?: string;
   compact?: boolean;
+  yAxisEnabled?: boolean;
 }
 
 // --- Draggable Project Card ---
@@ -108,14 +109,16 @@ function DroppableCell({
   compact?: boolean;
 }) {
   const { isOver, setNodeRef } = useDroppable({ id });
-  const colors = STATUS_COLORS[status as StatusType];
+  const colors = status === "ANY_STATUS" 
+    ? { bg: "transparent", border: "var(--border)", text: "inherit" } 
+    : STATUS_COLORS[status as StatusType];
 
   return (
     <div
       ref={setNodeRef}
       className={`flex ${compact ? 'min-h-[60px] p-1.5' : 'min-h-[180px] p-3'} flex-col gap-2 rounded-xl border transition-all relative overflow-hidden`}
       style={{
-        background: isOver ? `${colors.bg.replace("0.15", "0.4")}` : colors.bg,
+        background: isOver ? (status === "ANY_STATUS" ? "var(--accent)" : `${colors.bg.replace("0.15", "0.4")}`) : colors.bg,
         borderColor: isOver ? colors.border : "var(--color-border)",
         boxShadow: isOver ? `0 0 20px -5px ${colors.border}` : "none",
       }}
@@ -160,6 +163,7 @@ export default function RoadmapGrid({
   showGroupBadges = false,
   title,
   compact = false,
+  yAxisEnabled = true,
 }: RoadmapGridProps) {
   const [activeId, setActiveId] = React.useState<string | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
@@ -181,7 +185,7 @@ export default function RoadmapGrid({
     } else {
       // droppableId format: "STATUS|HORIZON"
       const [status, horizonStr] = droppableId.split("|");
-      onDragEnd(projectId, status, parseInt(horizonStr));
+      onDragEnd(projectId, status === "ANY_STATUS" ? null : status, parseInt(horizonStr));
     }
   };
 
@@ -189,16 +193,20 @@ export default function RoadmapGrid({
     ? [...projects, ...inboxProjects].find((p) => p.id === activeId)
     : null;
 
+  const activeStatuses = yAxisEnabled ? STATUSES : ["ANY_STATUS"];
+
   // Build grid data: map (status, horizon) -> projects
   const gridData = new Map<string, ProjectItem[]>();
-  for (const s of STATUSES) {
+  for (const s of activeStatuses) {
     for (const h of HORIZONS) {
       gridData.set(`${s}|${h.index}`, []);
     }
   }
+  
   for (const p of projects) {
-    if (p.status && p.horizon != null) {
-      const key = `${p.status}|${p.horizon}`;
+    if (p.horizon != null) {
+      const s = (yAxisEnabled && p.status) ? p.status : "ANY_STATUS";
+      const key = `${s}|${p.horizon}`;
       gridData.get(key)?.push(p);
     }
   }
@@ -256,14 +264,22 @@ export default function RoadmapGrid({
             ))}
 
             {/* Grid rows */}
-            {STATUSES.map((status) => (
+            {activeStatuses.map((status) => (
               <React.Fragment key={status}>
                 {/* Row label */}
                 <div
                   className={`flex items-center justify-center rounded-xl ${compact ? 'px-1.5 py-2' : 'px-3 py-4'} text-center font-bold uppercase tracking-wider`}
-                  style={{
-                    background: STATUS_COLORS[status].bg,
-                    color: STATUS_COLORS[status].text,
+                  style={status === "ANY_STATUS" ? {
+                    background: "var(--muted)",
+                    color: "var(--muted-foreground)",
+                    writingMode: "vertical-rl",
+                    textOrientation: "mixed",
+                    transform: "rotate(180deg)",
+                    letterSpacing: compact ? "1px" : "2px",
+                    fontSize: compact ? "11px" : "14px",
+                  } : {
+                    background: STATUS_COLORS[status as StatusType].bg,
+                    color: STATUS_COLORS[status as StatusType].text,
                     writingMode: "vertical-rl",
                     textOrientation: "mixed",
                     transform: "rotate(180deg)",
@@ -271,7 +287,7 @@ export default function RoadmapGrid({
                     fontSize: compact ? "11px" : "14px",
                   }}
                 >
-                  {status}
+                  {status === "ANY_STATUS" ? "PLACED" : status}
                 </div>
 
                 {/* Cells */}

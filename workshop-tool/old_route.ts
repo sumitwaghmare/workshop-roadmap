@@ -9,10 +9,6 @@ export async function GET(
 ) {
   try {
     const { sessionId } = await params;
-    
-    // Parse query params
-    const { searchParams } = new URL(_req.url);
-    const yAxisEnabled = searchParams.get("yAxis") !== "false";
 
     // 1. Get session info
     const sessionRows = await query<{ active: boolean }>(
@@ -63,27 +59,19 @@ export async function GET(
       const final = finalPlacements.find((f) => f.projectId === project.id);
 
       // Group placements by (horizon, status) for "bubble" info
-      // Group placements by (horizon, status) for "bubble" info
-      const counts: Record<string, { horizon: number; status: string | null; groups: string[] }> = {};
+      const counts: Record<string, { horizon: number; status: string; groups: string[] }> = {};
       
       projectPlacements.forEach((p) => {
-        if (p.horizon === null) return;
-        
-        // If Y-axis is enabled, we need both horizon and status to count a vote
-        if (yAxisEnabled && p.status === null) return;
-
-        // If Y-axis is disabled, we group only by horizon, ignoring status
-        const cellStatus = yAxisEnabled ? p.status : null;
-        const key = `${p.horizon}-${cellStatus}`;
-        
+        if (p.horizon === null || p.status === null) return;
+        const key = `${p.horizon}-${p.status}`;
         if (!counts[key]) {
-          counts[key] = { horizon: p.horizon, status: cellStatus, groups: [] };
+          counts[key] = { horizon: p.horizon, status: p.status, groups: [] };
         }
         counts[key].groups.push(p.groupName);
       });
 
       // Find majority cell (>= 50%)
-      let majorityCell: { horizon: number; status: string | null; groups: string[] } | null = null;
+      let majorityCell: { horizon: number; status: string; groups: string[] } | null = null;
       for (const key in counts) {
         if (counts[key].groups.length >= totalGroups / 2) {
           majorityCell = counts[key];
@@ -94,8 +82,8 @@ export async function GET(
       // DETERMINISTIC LOGIC:
       // If session is ACTIVE: Only use majority consensus (Consolidated Roadmap).
       // If session is LOCKED: Use manual override (Final Roadmap), fallback to majority.
-      let horizon: number | null = null;
-      let status: string | null = null;
+      let horizon = null;
+      let status = null;
       const hasMajority = !!majorityCell;
 
       if (sessionActive) {
@@ -104,49 +92,19 @@ export async function GET(
         status = majorityCell ? majorityCell.status : null;
       } else {
         // Locked session: respect manual admin overrides
-        horizon = final && final.horizon !== null ? final.horizon : (majorityCell ? majorityCell.horizon : null);
-        
-        if (yAxisEnabled) {
-          status = final && final.status !== null ? final.status : (majorityCell ? majorityCell.status : null);
-        } else {
-          status = null;
-        }
+        horizon = final ? final.horizon : (majorityCell ? majorityCell.horizon : null);
+        status = final ? final.status : (majorityCell ? majorityCell.status : null);
       }
       
       // Which groups recommended THIS specific cell?
-      let agreedGroups: string[] = [];
-      
-      if (horizon !== null) {
-        if (!yAxisEnabled) {
-          // If Y-axis is disabled, we prioritize groups that placed this project in this horizon.
-          agreedGroups = projectPlacements
-            .filter(p => p.horizon === horizon)
-            .map(p => p.groupName);
-            
-          // If no one voted for this horizon (pure manual placement), fallback to all voters
-          if (agreedGroups.length === 0) {
-            agreedGroups = projectPlacements.map(p => p.groupName);
-          }
-        } else if (status !== null) {
-          // Y-axis is enabled, check the specific cell counts
-          agreedGroups = counts[`${horizon}-${status}`]?.groups || [];
-          
-          if (agreedGroups.length === 0) {
-            // Fallback for manual final placements that weren't the majority:
-            // If they didn't vote for this specific cell, at least show everyone who voted for the project
-            // so the admin doesn't lose context of who wanted it.
-            agreedGroups = projectPlacements.map(p => p.groupName);
-          }
-        }
-      }
+      let agreedGroups = (horizon !== null && status !== null) 
+        ? (counts[`${horizon}-${status}`]?.groups || []) 
+        : [];
 
-      // If project is in Inbox (no horizon, or no status when yAxis is enabled), show all groups that voted for it
-      if (horizon === null || (yAxisEnabled && status === null)) {
+      // If project is in Inbox (no horizon/status), show all groups that voted for it
+      if (horizon === null && status === null) {
         agreedGroups = projectPlacements.map(p => p.groupName);
       }
-
-      // Ensure groups are unique, especially on raw placement mapping
-      agreedGroups = [...new Set(agreedGroups)];
 
       return {
         ...project,
