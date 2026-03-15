@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
@@ -140,13 +140,13 @@ export default function AdminPage() {
 
   // Load session data when active session changes
   useEffect(() => {
-    if (activeSession) {
+    if (activeSession && authenticated) {
       loadProjects(activeSession.id);
       loadGroups(activeSession.id);
       loadPlacements(activeSession.id);
       loadRoadmap(activeSession.id);
     }
-  }, [activeSession?.id, loadProjects, loadGroups, loadPlacements, loadRoadmap]);
+  }, [activeSession, authenticated, loadProjects, loadGroups, loadPlacements, loadRoadmap]);
 
   // Auto refresh
   useEffect(() => {
@@ -317,12 +317,12 @@ export default function AdminPage() {
       {/* Header */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-border/50 pb-4">
         <div>
-          <h1 className="text-4xl font-bold text-primary">Workshop Roadmap</h1>
-          <p className="text-sm text-muted-foreground">Admin Dashboard</p>
+          <h1 className="text-4xl font-bold text-primary tracking-tight text-glow">Workshop Roadmap</h1>
+          <p className="text-sm text-muted-foreground font-medium">Admin Dashboard</p>
         </div>
         <div className="flex items-center gap-3">
           <select
-            className="rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground"
+            className="rounded-md border border-border bg-card/80 px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 outline-none"
             value={activeSession?.id || ""}
             onChange={(e) => {
               const s = sessions.find((s) => s.id === e.target.value);
@@ -330,12 +330,12 @@ export default function AdminPage() {
             }}
           >
             {sessions.map((s) => (
-              <option key={s.id} value={s.id}>
+              <option key={s.id} value={s.id} className="bg-slate-900">
                 {s.name} {s.active ? "🟢" : "🔴"}
               </option>
             ))}
           </select>
-          <Button variant="outline" size="sm" onClick={handleLogout}>
+          <Button variant="outline" size="sm" onClick={handleLogout} className="glass border-primary/20 hover:bg-primary/10 transition-all">
             Logout
           </Button>
         </div>
@@ -357,12 +357,12 @@ export default function AdminPage() {
       )}
 
       {activeSession && (
-        <Tabs defaultValue="projects" className="space-y-4">
-          <TabsList className="bg-card">
-            <TabsTrigger value="projects">Projects</TabsTrigger>
-            <TabsTrigger value="groups">Groups</TabsTrigger>
-            <TabsTrigger value="table">Table View</TabsTrigger>
-            <TabsTrigger value="roadmap">Roadmap View</TabsTrigger>
+        <Tabs defaultValue="projects" className="space-y-6">
+          <TabsList className="glass p-1 h-auto gap-1">
+            <TabsTrigger value="projects" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary rounded-md px-6 py-2 transition-all">Projects</TabsTrigger>
+            <TabsTrigger value="groups" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary rounded-md px-6 py-2 transition-all">Groups</TabsTrigger>
+            <TabsTrigger value="table" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary rounded-md px-6 py-2 transition-all">Table View</TabsTrigger>
+            <TabsTrigger value="roadmap" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary rounded-md px-6 py-2 transition-all">Roadmap View</TabsTrigger>
           </TabsList>
 
           {/* === PROJECTS TAB === */}
@@ -388,17 +388,17 @@ export default function AdminPage() {
               </div>
             </div>
 
-            <div className="grid gap-2">
+            <div className="grid gap-3">
               {projects.map((p) => (
-                <Card key={p.id} className="border-border/30 bg-card/50">
-                  <CardContent className="flex items-center justify-between p-3">
-                    <div>
-                      <div className="font-medium">{p.name}</div>
+                <Card key={p.id} className="glass-card overflow-hidden">
+                  <CardContent className="flex items-center justify-between p-4">
+                    <div className="space-y-1">
+                      <div className="font-semibold text-foreground text-lg">{p.name}</div>
                       {p.description && (
-                        <div className="text-sm text-muted-foreground">{p.description}</div>
+                        <div className="text-sm text-muted-foreground line-clamp-2 max-w-2xl">{p.description}</div>
                       )}
                     </div>
-                    <div className="flex gap-1">
+                    <div className="flex gap-2">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -459,10 +459,10 @@ export default function AdminPage() {
               <Button onClick={createGroup}>+ Add Group</Button>
             </div>
 
-            <div className="grid gap-2">
+            <div className="grid gap-3">
               {groups.map((g) => (
-                <Card key={g.id} className="border-border/30 bg-card/50">
-                  <CardContent className="flex items-center justify-between p-3">
+                <Card key={g.id} className="glass-card overflow-hidden">
+                  <CardContent className="flex items-center justify-between p-4">
                     <div className="flex items-center gap-3">
                       <div className="font-medium">{g.name}</div>
                       <Badge variant="outline" className="font-mono text-xs">
@@ -512,8 +512,8 @@ export default function AdminPage() {
               </Button>
             </div>
 
-            <div className="overflow-x-auto">
-              <Table>
+            <div className="overflow-x-auto rounded-xl border border-border/50 glass">
+              <Table className="premium-table">
                 <TableHeader>
                   <TableRow>
                     <TableHead className="min-w-[200px]">Project</TableHead>

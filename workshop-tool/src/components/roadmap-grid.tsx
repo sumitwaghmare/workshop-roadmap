@@ -63,9 +63,9 @@ function DraggableCard({
       {...listeners}
       {...attributes}
       style={style}
-      className={`group relative rounded-md border border-border/50 bg-white/5 px-3 py-2.5 text-sm transition-all hover:bg-white/10 ${
+      className={`group relative rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm transition-all hover:bg-white/10 hover:border-primary/30 hover:shadow-[0_0_15px_rgba(59,130,246,0.2)] ${
         readOnly ? "cursor-default" : "cursor-grab active:cursor-grabbing"
-      }`}
+      } ${isDragging ? "z-50 ring-2 ring-primary bg-white/20" : ""}`}
       title={project.description || ""}
     >
       <div className="flex items-center gap-2">
@@ -92,12 +92,10 @@ function DraggableCard({
 function DroppableCell({
   id,
   status,
-  horizonIndex,
   children,
 }: {
   id: string;
   status: string;
-  horizonIndex: number;
   children: React.ReactNode;
 }) {
   const { isOver, setNodeRef } = useDroppable({ id });
@@ -106,12 +104,19 @@ function DroppableCell({
   return (
     <div
       ref={setNodeRef}
-      className="flex min-h-[180px] flex-col gap-2 rounded-xl border p-3 transition-all"
+      className="flex min-h-[180px] flex-col gap-2 rounded-xl border p-3 transition-all relative overflow-hidden"
       style={{
-        background: isOver ? `${colors.bg.replace("0.15", "0.3")}` : colors.bg,
+        background: isOver ? `${colors.bg.replace("0.15", "0.4")}` : colors.bg,
         borderColor: isOver ? colors.border : "rgba(255,255,255,0.08)",
+        boxShadow: isOver ? `0 0 20px -5px ${colors.border}` : "none",
       }}
     >
+      {isOver && (
+        <div 
+          className="absolute inset-0 pointer-events-none opacity-20 animate-pulse" 
+          style={{ background: `radial-gradient(circle at center, ${colors.border}, transparent)` }}
+        />
+      )}
       {children}
     </div>
   );
@@ -123,9 +128,9 @@ function InboxDropZone({ children }: { children: React.ReactNode }) {
   return (
     <div
       ref={setNodeRef}
-      className={`min-h-[120px] rounded-xl border border-dashed p-3 transition-all ${
+      className={`min-h-[120px] rounded-xl border border-dashed p-4 transition-all glass ${
         isOver
-          ? "border-primary bg-primary/10"
+          ? "border-primary bg-primary/10 shadow-[0_0_20px_rgba(59,130,246,0.1)]"
           : "border-border/50 bg-white/[0.02]"
       }`}
     >
@@ -226,7 +231,7 @@ export default function RoadmapGrid({
             {HORIZONS.map((h, i) => (
               <div
                 key={h.index}
-                className="rounded-t-xl border-b-4 bg-card px-4 py-3 text-center font-bold uppercase tracking-wider"
+                className="rounded-t-xl border-b-4 bg-slate-900/50 backdrop-blur-sm px-4 py-3 text-center font-bold uppercase tracking-wider glass"
                 style={{
                   borderColor: HORIZON_COLORS[i].border,
                   color: HORIZON_COLORS[i].text,
@@ -267,7 +272,6 @@ export default function RoadmapGrid({
                       key={cellId}
                       id={cellId}
                       status={status}
-                      horizonIndex={h.index}
                     >
                       {cellProjects.map((p) => (
                         <DraggableCard

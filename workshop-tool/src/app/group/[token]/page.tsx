@@ -190,13 +190,13 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
     }));
 
   return (
-    <div className="min-h-screen p-4 md:p-6">
+    <div className="min-h-screen p-4 md:p-8 space-y-8">
       {/* Header */}
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-border/50 pb-4">
-        <div>
-          <h1 className="text-3xl font-bold text-primary">{data.session.name}</h1>
-          <p className="text-sm text-muted-foreground">
-            Group: <span className="font-semibold text-foreground">{data.group.name}</span>
+      <div className="flex flex-wrap items-center justify-between gap-6 border-b border-border/50 pb-6">
+        <div className="space-y-1">
+          <h1 className="text-4xl font-bold text-primary tracking-tight text-glow">{data.session.name}</h1>
+          <p className="text-sm text-muted-foreground font-medium">
+            Project Prioritization • <span className="text-foreground">{data.group.name}</span>
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -214,10 +214,17 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
 
       {/* Instructions */}
       {data.session.active && (
-        <div className="mb-4 rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm text-muted-foreground">
-          <strong className="text-foreground">How to use:</strong> Drag projects from the
-          Inbox and drop them into the appropriate cell in the grid below. Your placements
-          are saved automatically. You can also add new projects if they&apos;re not in the list.
+        <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm text-muted-foreground glass animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className="flex items-start gap-3">
+            <div className="mt-0.5 rounded-full bg-primary/20 p-1 text-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            </div>
+            <div>
+              <strong className="text-foreground">Instructions:</strong> Drag projects from the
+              Inbox and drop them into the grid. Your choices are saved instantly. 
+              You can also contribute by adding new projects to the pool.
+            </div>
+          </div>
         </div>
       )}
 
@@ -230,7 +237,7 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
 
       {/* Add Project Dialog */}
       <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
-        <DialogContent>
+        <DialogContent className="glass border-white/10 shadow-2xl backdrop-blur-2xl">
           <DialogHeader>
             <DialogTitle>Add New Project</DialogTitle>
           </DialogHeader>
