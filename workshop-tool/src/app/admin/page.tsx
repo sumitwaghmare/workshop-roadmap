@@ -145,6 +145,7 @@ export default function AdminPage() {
   const [yAxisEnabled, setYAxisEnabled] = useState(true);
   const [activeTab, setActiveTab] = useState<"projects" | "groups" | "table" | "roadmap">("projects");
   const [filteredBu, setFilteredBu] = useState<string | null>(null);
+  const [filteredPriority, setFilteredPriority] = useState<string | null>(null);
 
   // Roadmap Item Details (locked session editing)
   const [selectedRoadmapItem, setSelectedRoadmapItem] = useState<RoadmapResult | null>(null);
@@ -785,39 +786,88 @@ export default function AdminPage() {
               {sidebarCollapsed && <span className="lg:hidden">Roadmap View</span>}
             </TabsTrigger>
             {!sidebarCollapsed && (
-              <div className="mt-auto hidden lg:block p-4">
+              <div className="mt-auto hidden lg:block p-4 space-y-4">
                 <div className="rounded-lg bg-blue-500/10 border border-blue-500/20 p-3">
                   <p className="text-[10px] text-blue-500 dark:text-blue-400 uppercase tracking-widest font-bold mb-1">Session Data</p>
                   <button 
-                    onClick={() => setFilteredBu(null)}
+                    onClick={() => {
+                      setFilteredBu(null);
+                      setFilteredPriority(null);
+                    }}
                     className="block w-full text-left"
                   >
-                    <p className={`text-xs ${!filteredBu ? 'text-blue-500 font-bold' : 'text-muted-foreground'} hover:text-blue-400 transition-colors`}>{projects.length} Projects</p>
+                    <p className={`text-xs ${(!filteredBu && !filteredPriority) ? 'text-blue-500 font-bold' : 'text-muted-foreground'} hover:text-blue-400 transition-colors`}>{projects.length} Projects</p>
                   </button>
-                  <p className="text-xs text-muted-foreground mb-2">{groups.length} Groups</p>
+                  <p className="text-xs text-muted-foreground mb-4">{groups.length} Groups</p>
                   
-                  {Object.entries(
-                    projects.reduce((acc, p) => {
-                      const bu = p.bu || "None";
-                      acc[bu] = (acc[bu] || 0) + 1;
-                      return acc;
-                    }, {} as Record<string, number>)
-                  ).map(([bu, count]) => (
-                    <button
-                      key={bu}
-                      onClick={() => {
-                        setFilteredBu(bu);
-                        setActiveTab("projects");
-                      }}
-                      className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium mr-1 mb-1 transition-all ${
-                        filteredBu === bu 
-                          ? 'bg-blue-600 text-white' 
-                          : 'bg-blue-500/10 text-blue-500 hover:bg-blue-500/20'
-                      }`}
-                    >
-                      {bu} ({count})
-                    </button>
-                  ))}
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-1">Business Units</p>
+                  <div className="mb-3">
+                    {Object.entries(
+                      projects.reduce((acc, p) => {
+                        const bu = p.bu || "None";
+                        acc[bu] = (acc[bu] || 0) + 1;
+                        return acc;
+                      }, {} as Record<string, number>)
+                    ).map(([bu, count]) => (
+                      <button
+                        key={bu}
+                        onClick={() => {
+                          setFilteredBu(bu);
+                          setActiveTab("projects");
+                        }}
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium mr-1 mb-1 transition-all ${
+                          filteredBu === bu 
+                            ? 'bg-blue-600 text-white' 
+                            : 'bg-blue-500/10 text-blue-500 hover:bg-blue-500/20'
+                        }`}
+                      >
+                        {bu} ({count})
+                      </button>
+                    ))}
+                  </div>
+
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-1">Priority</p>
+                  <div>
+                    {PRIORITY_OPTIONS.map((opt) => {
+                      const count = projects.filter(p => p.priority === opt.value).length;
+                      if (count === 0) return null;
+                      return (
+                        <button
+                          key={opt.value}
+                          onClick={() => {
+                            setFilteredPriority(opt.value);
+                            setActiveTab("projects");
+                          }}
+                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium mr-1 mb-1 transition-all ${
+                            filteredPriority === opt.value 
+                              ? 'bg-blue-600 text-white' 
+                              : 'bg-blue-500/10 text-blue-500 hover:bg-blue-500/20'
+                          }`}
+                        >
+                          {opt.label} ({count})
+                        </button>
+                      );
+                    })}
+                    {(() => {
+                      const noneCount = projects.filter(p => !p.priority).length;
+                      if (noneCount === 0) return null;
+                      return (
+                        <button
+                          onClick={() => {
+                            setFilteredPriority("None");
+                            setActiveTab("projects");
+                          }}
+                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium mr-1 mb-1 transition-all ${
+                            filteredPriority === "None" 
+                              ? 'bg-blue-600 text-white' 
+                              : 'bg-blue-500/10 text-blue-500 hover:bg-blue-500/20'
+                          }`}
+                        >
+                          None ({noneCount})
+                        </button>
+                      );
+                    })()}
+                  </div>
                 </div>
               </div>
             )}
@@ -837,15 +887,23 @@ export default function AdminPage() {
           <TabsContent value="projects" className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-semibold">Projects {filteredBu && <span className="text-blue-500">— {filteredBu}</span>}</h2>
+                <h2 className="text-xl font-semibold">
+                  Projects 
+                  {filteredBu && <span className="text-blue-500 ml-1">[{filteredBu}]</span>}
+                  {filteredPriority && (
+                    <span className="text-blue-500 ml-1">
+                      [{filteredPriority === "None" ? "No Priority" : (PRIORITY_OPTIONS.find(o => o.value === filteredPriority)?.label || filteredPriority)}]
+                    </span>
+                  )}
+                </h2>
                 <p className="text-sm text-muted-foreground">
-                  {filteredBu ? `Showing projects for ${filteredBu}` : 'Manage the list of projects/initiatives for this session'}
+                  {filteredBu || filteredPriority ? `Showing filtered projects` : 'Manage the list of projects/initiatives for this session'}
                 </p>
               </div>
               <div className="flex gap-2">
-                {filteredBu && (
-                  <Button variant="ghost" onClick={() => setFilteredBu(null)}>
-                    Clear Filter
+                {(filteredBu || filteredPriority) && (
+                  <Button variant="ghost" onClick={() => { setFilteredBu(null); setFilteredPriority(null); }}>
+                    Clear Filters
                   </Button>
                 )}
                 <Button
@@ -864,9 +922,16 @@ export default function AdminPage() {
             <div className="grid gap-3">
               {projects
                 .filter(p => {
-                  if (!filteredBu) return true;
-                  if (filteredBu === "None") return !p.bu;
-                  return p.bu === filteredBu;
+                  let match = true;
+                  if (filteredBu) {
+                    if (filteredBu === "None") match = match && !p.bu;
+                    else match = match && p.bu === filteredBu;
+                  }
+                  if (filteredPriority) {
+                    if (filteredPriority === "None") match = match && !p.priority;
+                    else match = match && p.priority === filteredPriority;
+                  }
+                  return match;
                 })
                 .map((p) => {
                 const priorityColor = p.priority && PRIORITY_COLORS[p.priority] ? PRIORITY_COLORS[p.priority] : null;
