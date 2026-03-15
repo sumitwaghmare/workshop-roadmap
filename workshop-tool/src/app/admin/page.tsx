@@ -27,7 +27,10 @@ import {
   Lock,
   Plus,
   Trash2, 
-  Unlock
+  Unlock,
+  ChevronLeft,
+  ChevronRight,
+  LayoutGrid
 } from "lucide-react";
 
 // --- Types ---
@@ -102,6 +105,8 @@ export default function AdminPage() {
   const [roadmapData, setRoadmapData] = useState<RoadmapResult[]>([]);
   const [refreshInterval, setRefreshInterval] = useState(15);
   const [autoRefresh, setAutoRefresh] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [compactRoadmap, setCompactRoadmap] = useState(false);
 
   // --- Data loaders (declared before useEffects) ---
   const loadSessions = useCallback(async () => {
@@ -556,43 +561,71 @@ export default function AdminPage() {
       )}
 
       {activeSession && (
-        <Tabs defaultValue="projects" className="flex flex-col lg:flex-row gap-8">
-          <TabsList className="flex lg:flex-col h-auto bg-slate-900/50 p-1.5 gap-2 border border-slate-700/50 rounded-xl lg:w-64 shrink-0 overflow-x-auto lg:overflow-visible">
+        <Tabs defaultValue="projects" className="flex flex-col lg:flex-row gap-8 relative">
+          <TabsList className={`flex lg:flex-col h-auto bg-slate-900/50 p-1.5 gap-2 border border-slate-700/50 rounded-xl transition-all duration-300 ease-in-out shrink-0 overflow-x-auto lg:overflow-visible ${sidebarCollapsed ? 'lg:w-16' : 'lg:w-64'}`}>
+            <div className="hidden lg:flex justify-end mb-2 px-2 pt-1">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                className="h-8 w-8 text-slate-400 hover:text-white hover:bg-slate-800"
+              >
+                {sidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+              </Button>
+            </div>
+            
             <TabsTrigger 
               value="projects" 
-              className="w-full justify-start gap-3 data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400 hover:text-slate-200 rounded-lg px-4 py-3 transition-all font-bold group"
+              className={`w-full justify-start gap-3 data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400 hover:text-slate-200 rounded-lg px-4 py-3 transition-all font-bold group ${sidebarCollapsed ? 'px-2' : ''}`}
+              title={sidebarCollapsed ? "Projects" : ""}
             >
-              <div className="h-2 w-2 rounded-full bg-slate-600 group-data-[state=active]:bg-white"></div>
-              Projects
+              <div className="h-2 w-2 rounded-full bg-slate-600 group-data-[state=active]:bg-white shrink-0"></div>
+              {!sidebarCollapsed && <span>Projects</span>}
+              {sidebarCollapsed && <span className="lg:hidden">Projects</span>}
             </TabsTrigger>
             <TabsTrigger 
               value="groups" 
-              className="w-full justify-start gap-3 data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-300 hover:text-white rounded-lg px-4 py-3 transition-all font-bold group border border-transparent data-[state=active]:border-blue-400/50 shadow-lg"
+              className={`w-full justify-start gap-3 data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-300 hover:text-white rounded-lg px-4 py-3 transition-all font-bold group border border-transparent data-[state=active]:border-blue-400/50 shadow-lg ${sidebarCollapsed ? 'px-2' : ''}`}
+              title={sidebarCollapsed ? "Groups & Links" : ""}
             >
-              <div className="h-2 w-2 rounded-full bg-slate-600 group-data-[state=active]:bg-white"></div>
-              Groups & Links
+              <div className="h-2 w-2 rounded-full bg-slate-600 group-data-[state=active]:bg-white shrink-0"></div>
+              {!sidebarCollapsed && <span>Groups & Links</span>}
+              {sidebarCollapsed && <span className="lg:hidden">Groups & Links</span>}
             </TabsTrigger>
             <TabsTrigger 
               value="table" 
-              className="w-full justify-start gap-3 data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400 hover:text-slate-200 rounded-lg px-4 py-3 transition-all font-bold group"
+              className={`w-full justify-start gap-3 data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400 hover:text-slate-200 rounded-lg px-4 py-3 transition-all font-bold group ${sidebarCollapsed ? 'px-2' : ''}`}
+              title={sidebarCollapsed ? "Table View" : ""}
             >
-              <div className="h-2 w-2 rounded-full bg-slate-600 group-data-[state=active]:bg-white"></div>
-              Table View
+              <div className="h-2 w-2 rounded-full bg-slate-600 group-data-[state=active]:bg-white shrink-0"></div>
+              {!sidebarCollapsed && <span>Table View</span>}
+              {sidebarCollapsed && <span className="lg:hidden">Table View</span>}
             </TabsTrigger>
             <TabsTrigger 
               value="roadmap" 
-              className="w-full justify-start gap-3 data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400 hover:text-slate-200 rounded-lg px-4 py-3 transition-all font-bold group"
+              className={`w-full justify-start gap-3 data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400 hover:text-slate-200 rounded-lg px-4 py-3 transition-all font-bold group ${sidebarCollapsed ? 'px-2' : ''}`}
+              title={sidebarCollapsed ? "Roadmap View" : ""}
             >
-              <div className="h-2 w-2 rounded-full bg-slate-600 group-data-[state=active]:bg-white"></div>
-              Roadmap View
+              <div className="h-2 w-2 rounded-full bg-slate-600 group-data-[state=active]:bg-white shrink-0"></div>
+              {!sidebarCollapsed && <span>Roadmap View</span>}
+              {sidebarCollapsed && <span className="lg:hidden">Roadmap View</span>}
             </TabsTrigger>
-            <div className="mt-auto hidden lg:block p-4">
-              <div className="rounded-lg bg-blue-500/10 border border-blue-500/20 p-3">
-                <p className="text-[10px] text-blue-400 uppercase tracking-widest font-bold mb-1">Session Data</p>
-                <p className="text-xs text-slate-300">{projects.length} Projects</p>
-                <p className="text-xs text-slate-300">{groups.length} Groups</p>
+            {!sidebarCollapsed && (
+              <div className="mt-auto hidden lg:block p-4">
+                <div className="rounded-lg bg-blue-500/10 border border-blue-500/20 p-3">
+                  <p className="text-[10px] text-blue-400 uppercase tracking-widest font-bold mb-1">Session Data</p>
+                  <p className="text-xs text-slate-300">{projects.length} Projects</p>
+                  <p className="text-xs text-slate-300">{groups.length} Groups</p>
+                </div>
               </div>
-            </div>
+            )}
+            {sidebarCollapsed && (
+              <div className="mt-auto hidden lg:flex flex-col items-center gap-4 py-4">
+                <div className="text-blue-400" title={`${projects.length} Projects, ${groups.length} Groups`}>
+                   <LayoutGrid size={20} />
+                </div>
+              </div>
+            )}
           </TabsList>
 
           <div className="flex-1 min-w-0">
@@ -897,6 +930,19 @@ export default function AdminPage() {
                     </>
                   )}
                 </div>
+                <div className="flex items-center gap-2 border-l border-slate-700 pl-3 ml-1">
+                  <label className="text-muted-foreground text-sm cursor-pointer whitespace-nowrap">Fit View:</label>
+                  <input
+                    type="checkbox"
+                    checked={compactRoadmap}
+                    onChange={(e) => {
+                      setCompactRoadmap(e.target.checked);
+                      setSidebarCollapsed(e.target.checked);
+                    }}
+                    className="rounded cursor-pointer"
+                    title="Collapse sidebar and use compact grid"
+                  />
+                </div>
                 <Button variant="outline" size="sm" onClick={() => activeSession && loadRoadmap(activeSession.id)}>
                   Refresh Now
                 </Button>
@@ -927,6 +973,7 @@ export default function AdminPage() {
               onDragEnd={handleFinalDragEnd}
               readOnly={activeSession.active}
               showGroupBadges={true}
+              compact={compactRoadmap}
             />
           </TabsContent>
           </div>

@@ -34,6 +34,7 @@ interface RoadmapGridProps {
   readOnly?: boolean;
   showGroupBadges?: boolean;
   title?: string;
+  compact?: boolean;
 }
 
 // --- Draggable Project Card ---
@@ -41,10 +42,12 @@ function DraggableCard({
   project,
   showGroupBadges,
   readOnly,
+  compact,
 }: {
   project: ProjectItem;
   showGroupBadges?: boolean;
   readOnly?: boolean;
+  compact?: boolean;
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: project.id,
@@ -61,7 +64,7 @@ function DraggableCard({
       {...listeners}
       {...attributes}
       style={style}
-      className={`group relative rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm transition-all hover:bg-white/10 hover:border-primary/30 hover:shadow-[0_0_15px_rgba(59,130,246,0.2)] ${
+      className={`group relative rounded-lg border border-white/10 bg-white/5 ${compact ? 'px-2 py-1 text-xs' : 'px-3 py-2.5 text-sm'} transition-all hover:bg-white/10 hover:border-primary/30 hover:shadow-[0_0_15px_rgba(59,130,246,0.2)] ${
         readOnly ? "cursor-default" : "cursor-grab active:cursor-grabbing"
       } ${isDragging ? "z-50 ring-2 ring-primary bg-white/20" : ""}`}
       title={project.description || ""}
@@ -97,10 +100,12 @@ function DroppableCell({
   id,
   status,
   children,
+  compact,
 }: {
   id: string;
   status: string;
   children: React.ReactNode;
+  compact?: boolean;
 }) {
   const { isOver, setNodeRef } = useDroppable({ id });
   const colors = STATUS_COLORS[status as StatusType];
@@ -108,7 +113,7 @@ function DroppableCell({
   return (
     <div
       ref={setNodeRef}
-      className="flex min-h-[180px] flex-col gap-2 rounded-xl border p-3 transition-all relative overflow-hidden"
+      className={`flex ${compact ? 'min-h-[60px] p-1.5' : 'min-h-[180px] p-3'} flex-col gap-2 rounded-xl border transition-all relative overflow-hidden`}
       style={{
         background: isOver ? `${colors.bg.replace("0.15", "0.4")}` : colors.bg,
         borderColor: isOver ? colors.border : "rgba(255,255,255,0.08)",
@@ -127,12 +132,12 @@ function DroppableCell({
 }
 
 // --- Inbox Drop Zone ---
-function InboxDropZone({ children }: { children: React.ReactNode }) {
+function InboxDropZone({ children, compact }: { children: React.ReactNode, compact?: boolean }) {
   const { isOver, setNodeRef } = useDroppable({ id: "inbox" });
   return (
     <div
       ref={setNodeRef}
-      className={`min-h-[120px] rounded-xl border border-dashed p-4 transition-all glass ${
+      className={`${compact ? 'min-h-[60px] p-2' : 'min-h-[120px] p-4'} rounded-xl border border-dashed transition-all glass ${
         isOver
           ? "border-primary bg-primary/10 shadow-[0_0_20px_rgba(59,130,246,0.1)]"
           : "border-border/50 bg-white/[0.02]"
@@ -154,6 +159,7 @@ export default function RoadmapGrid({
   readOnly = false,
   showGroupBadges = false,
   title,
+  compact = false,
 }: RoadmapGridProps) {
   const [activeId, setActiveId] = React.useState<string | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
@@ -210,13 +216,14 @@ export default function RoadmapGrid({
         )}
 
         {/* Inbox */}
-        <InboxDropZone>
+        <InboxDropZone compact={compact}>
           {inboxProjects.map((p) => (
             <DraggableCard
               key={p.id}
               project={p}
               showGroupBadges={showGroupBadges}
               readOnly={readOnly}
+              compact={compact}
             />
           ))}
         </InboxDropZone>
@@ -226,8 +233,8 @@ export default function RoadmapGrid({
           <div
             className="grid gap-3"
             style={{
-              gridTemplateColumns: "140px repeat(3, 1fr)",
-              minWidth: "900px",
+              gridTemplateColumns: compact ? "100px repeat(3, 1fr)" : "140px repeat(3, 1fr)",
+              minWidth: compact ? "700px" : "900px",
             }}
           >
             {/* Header row */}
@@ -235,7 +242,7 @@ export default function RoadmapGrid({
             {HORIZONS.map((h, i) => (
               <div
                 key={h.index}
-                className="rounded-t-xl border-b-4 bg-slate-900/50 backdrop-blur-sm px-4 py-3 text-center font-bold uppercase tracking-wider glass"
+                className={`rounded-t-xl border-b-4 bg-slate-900/50 backdrop-blur-sm ${compact ? 'px-2 py-1.5' : 'px-4 py-3'} text-center font-bold uppercase tracking-wider glass`}
                 style={{
                   borderColor: HORIZON_COLORS[i].border,
                   color: HORIZON_COLORS[i].text,
@@ -253,15 +260,15 @@ export default function RoadmapGrid({
               <React.Fragment key={status}>
                 {/* Row label */}
                 <div
-                  className="flex items-center justify-center rounded-xl px-3 py-4 text-center font-bold uppercase tracking-wider"
+                  className={`flex items-center justify-center rounded-xl ${compact ? 'px-1.5 py-2' : 'px-3 py-4'} text-center font-bold uppercase tracking-wider`}
                   style={{
                     background: STATUS_COLORS[status].bg,
                     color: STATUS_COLORS[status].text,
                     writingMode: "vertical-rl",
                     textOrientation: "mixed",
                     transform: "rotate(180deg)",
-                    letterSpacing: "2px",
-                    fontSize: "14px",
+                    letterSpacing: compact ? "1px" : "2px",
+                    fontSize: compact ? "11px" : "14px",
                   }}
                 >
                   {status}
@@ -276,6 +283,7 @@ export default function RoadmapGrid({
                       key={cellId}
                       id={cellId}
                       status={status}
+                      compact={compact}
                     >
                       {cellProjects.map((p) => (
                         <DraggableCard
@@ -283,6 +291,7 @@ export default function RoadmapGrid({
                           project={p}
                           showGroupBadges={showGroupBadges}
                           readOnly={readOnly}
+                          compact={compact}
                         />
                       ))}
                     </DroppableCell>
