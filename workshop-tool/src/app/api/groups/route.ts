@@ -1,18 +1,31 @@
 export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { query } from "@/lib/db";
 import { isAdmin } from "@/lib/auth";
+import { v4 as uuidv4 } from "uuid";
 
 export async function GET(req: Request) {
+  if (!(await isAdmin())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { searchParams } = new URL(req.url);
   const sessionId = searchParams.get("sessionId");
-  if (!sessionId) return NextResponse.json({ error: "sessionId required" }, { status: 400 });
 
-  const groups = await prisma.group.findMany({
-    where: { sessionId },
-    include: { _count: { select: { placements: true } } },
-  });
-  return NextResponse.json(groups);
+  if (!sessionId) {
+    return NextResponse.json({ error: "sessionId is required" }, { status: 400 });
+  }
+
+  try {
+    const groups = await query(
+      "SELECT * FROM \`Group\` WHERE sessionId = ? ORDER BY name ASC",
+      [sessionId]
+    );
+    return NextResponse.json(groups);
+  } catch (error: any) {
+    console.error("GET /api/groups error:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
 }
 
 export async function POST(req: Request) {
@@ -20,11 +33,20 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { sessionId, name } = await req.json();
-  if (!sessionId || !name) {
-    return NextResponse.json({ error: "sessionId and name required" }, { status: 400 });
-  }
+  try {
+    const { sessionId, name } = await req.json();
+    const id = uuidv4();
+    const token = uuidv4(); // Unique token for group link
+    
+    await query(
+      "INSERT INTO \`Group\` (id, sessionId, name, token) VALUES (?, ?, ?, ?)",
+      [id, sessionId, name, token]
+    );
 
-  const group = await prisma.group.create({ data: { sessionId, name } });
-  return NextResponse.json(group, { status: 201 });
+    const [group] = await query("SELECT * FROM \`Group\` WHERE id = ?", [id]);
+    return NextResponse.json(group, { status: 201 });
+  } catch (error: any) {
+    console.error("POST /api/groups error:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
 }

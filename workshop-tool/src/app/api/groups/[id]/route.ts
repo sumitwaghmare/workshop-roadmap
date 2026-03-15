@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { query } from "@/lib/db";
 import { isAdmin } from "@/lib/auth";
 
 export async function DELETE(
@@ -11,7 +11,12 @@ export async function DELETE(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { id } = await params;
-  await prisma.group.delete({ where: { id } });
-  return NextResponse.json({ success: true });
+  try {
+    const { id } = await params;
+    await query("DELETE FROM \`Group\` WHERE id = ?", [id]);
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error("DELETE /api/groups/[id] error:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
 }

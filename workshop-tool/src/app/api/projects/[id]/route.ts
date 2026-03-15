@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { query } from "@/lib/db";
 import { isAdmin } from "@/lib/auth";
 
 export async function PATCH(
@@ -11,10 +11,21 @@ export async function PATCH(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { id } = await params;
-  const body = await req.json();
-  const project = await prisma.project.update({ where: { id }, data: body });
-  return NextResponse.json(project);
+  try {
+    const { id } = await params;
+    const { name, description } = await req.json();
+
+    await query(
+      "UPDATE Project SET name = ?, description = ? WHERE id = ?",
+      [name, description, id]
+    );
+
+    const [project] = await query("SELECT * FROM Project WHERE id = ?", [id]);
+    return NextResponse.json(project);
+  } catch (error: any) {
+    console.error("PATCH /api/projects/[id] error:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
 }
 
 export async function DELETE(
@@ -25,7 +36,12 @@ export async function DELETE(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { id } = await params;
-  await prisma.project.delete({ where: { id } });
-  return NextResponse.json({ success: true });
+  try {
+    const { id } = await params;
+    await query("DELETE FROM Project WHERE id = ?", [id]);
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error("DELETE /api/projects/[id] error:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
 }

@@ -1,48 +1,65 @@
 export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { query } from "@/lib/db";
+import { v4 as uuidv4 } from "uuid";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const sessionId = searchParams.get("sessionId");
   const groupId = searchParams.get("groupId");
 
-  if (!sessionId) return NextResponse.json({ error: "sessionId required" }, { status: 400 });
+  if (!sessionId) {
+    return NextResponse.json({ error: "sessionId is required" }, { status: 400 });
+  }
 
-  const where: Record<string, string> = {};
-  if (groupId) where.groupId = groupId;
-  // Filter by sessionId via project relation
-  const placements = await prisma.placement.findMany({
-    where: {
-      ...where,
-      project: { sessionId },
-    },
-    include: { project: true, group: true },
-  });
-  return NextResponse.json(placements);
+  try {
+    let sql = `
+      SELECT p.* 
+      FROM Placement p
+      JOIN Project pr ON p.projectId = pr.id
+      WHERE pr.sessionId = ?
+    `;
+    const params = [sessionId];
+
+    if (groupId) {
+      sql += " AND p.groupId = ?";
+      params.push(groupId);
+    }
+
+    const placements = await query(sql, params);
+    return NextResponse.json(placements);
+  } catch (error: any) {
+    console.error("GET /api/placements error:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
 }
 
 export async function PUT(req: Request) {
-  const { projectId, groupId, horizon, status } = await req.json();
+  try {
+    const { placements } = await req.json();
 
-  if (!projectId || !groupId) {
-    return NextResponse.json({ error: "projectId and groupId required" }, { status: 400 });
+    if (!Array.isArray(placements)) {
+      return NextResponse.json({ error: "Invalid placements data" }, { status: 400 });
+    }
+
+    // Process each placement
+    for (const p of placements) {
+      const { projectId, groupId, horizon, status } = p;
+      
+      // MySQL UPSERT using ON DUPLICATE KEY UPDATE
+      await query(`
+        INSERT INTO Placement (id, projectId, groupId, horizon, status, updatedAt)
+        VALUES (?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+          horizon = VALUES(horizon),
+          status = VALUES(status),
+          updatedAt = VALUES(updatedAt)
+      `, [uuidv4(), projectId, groupId, horizon, status, new Date()]);
+    }
+
+    return NextResponse.json({ success: true, count: placements.length });
+  } catch (error: any) {
+    console.error("PUT /api/placements error:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
-
-  // Verify the group's session is still active
-  const group = await prisma.group.findUnique({
-    where: { id: groupId },
-    include: { session: true },
-  });
-  if (!group) return NextResponse.json({ error: "Group not found" }, { status: 404 });
-  if (!group.session.active) {
-    return NextResponse.json({ error: "Session is no longer active" }, { status: 403 });
-  }
-
-  const placement = await prisma.placement.upsert({
-    where: { projectId_groupId: { projectId, groupId } },
-    create: { projectId, groupId, horizon, status },
-    update: { horizon, status },
-  });
-  return NextResponse.json(placement);
 }

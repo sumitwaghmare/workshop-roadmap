@@ -1,33 +1,30 @@
 export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { query } from "@/lib/db";
 
-// Validate group token and return group + session info
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ token: string }> }
 ) {
-  const { token } = await params;
-  const group = await prisma.group.findUnique({
-    where: { token },
-    include: { session: { include: { projects: { orderBy: { createdAt: "asc" } } } } },
-  });
+  try {
+    const { token } = await params;
+    
+    // Joint query to get group and its session status
+    const rows = await query(`
+      SELECT g.*, s.active as sessionActive
+      FROM \`Group\` g
+      JOIN Session s ON g.sessionId = s.id
+      WHERE g.token = ?
+    `, [token]);
+    
+    if (rows.length === 0) {
+      return NextResponse.json({ error: "Group not found" }, { status: 404 });
+    }
 
-  if (!group) return NextResponse.json({ error: "Invalid link" }, { status: 404 });
-
-  // Get this group's placements
-  const placements = await prisma.placement.findMany({
-    where: { groupId: group.id },
-  });
-
-  return NextResponse.json({
-    group: { id: group.id, name: group.name, token: group.token },
-    session: {
-      id: group.session.id,
-      name: group.session.name,
-      active: group.session.active,
-    },
-    projects: group.session.projects,
-    placements,
-  });
+    const group = rows[0];
+    return NextResponse.json(group);
+  } catch (error: any) {
+    console.error("GET /api/groups/by-token error:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
 }
