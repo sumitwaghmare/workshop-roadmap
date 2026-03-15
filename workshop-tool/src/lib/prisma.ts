@@ -4,14 +4,20 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
+function createPrismaClient(): PrismaClient {
+  return new PrismaClient({
+    datasourceUrl: process.env.DATABASE_URL,
+  });
+}
+
 export function getPrisma(): PrismaClient {
   if (!globalForPrisma.prisma) {
-    globalForPrisma.prisma = new PrismaClient();
+    globalForPrisma.prisma = createPrismaClient();
   }
   return globalForPrisma.prisma;
 }
 
-// Keep backward-compatible named export using getter
+// Proxy-based lazy init: PrismaClient only created on first property access
 export const prisma = new Proxy({} as PrismaClient, {
   get(_target, prop) {
     return (getPrisma() as unknown as Record<string | symbol, unknown>)[prop];
