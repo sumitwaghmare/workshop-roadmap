@@ -109,6 +109,9 @@ export default function AdminPage() {
   const [editProject, setEditProject] = useState<Project | null>(null);
   const [projectName, setProjectName] = useState("");
   const [projectDesc, setProjectDesc] = useState("");
+  const [projectIcon, setProjectIcon] = useState("");
+  const [projectPriority, setProjectPriority] = useState("");
+  const [projectBu, setProjectBu] = useState("");
 
   // Groups
   const [groups, setGroups] = useState<Group[]>([]);
@@ -247,7 +250,7 @@ export default function AdminPage() {
       await fetch(`/api/projects/${editProject.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: projectName, description: projectDesc }),
+        body: JSON.stringify({ name: projectName, description: projectDesc, icon: projectIcon || null, priority: projectPriority || null, bu: projectBu || null }),
       });
       toast.success("Project updated");
     } else {
@@ -258,6 +261,9 @@ export default function AdminPage() {
           sessionId: activeSession.id,
           name: projectName,
           description: projectDesc,
+          icon: projectIcon || null,
+          priority: projectPriority || null,
+          bu: projectBu || null,
         }),
       });
       toast.success("Project added");
@@ -266,6 +272,9 @@ export default function AdminPage() {
     setEditProject(null);
     setProjectName("");
     setProjectDesc("");
+    setProjectIcon("");
+    setProjectPriority("");
+    setProjectBu("");
     loadProjects(activeSession.id);
   };
 
@@ -819,6 +828,9 @@ export default function AdminPage() {
                           setEditProject(p);
                           setProjectName(p.name);
                           setProjectDesc(p.description || "");
+                          setProjectIcon(p.icon || "");
+                          setProjectPriority(p.priority || "");
+                          setProjectBu(p.bu || "");
                           setProjectDialogOpen(true);
                         }}
                       >
@@ -1191,6 +1203,39 @@ export default function AdminPage() {
                 placeholder="Brief description of the project..."
                 rows={3}
               />
+            </div>
+            <div className="space-y-2">
+              <Label>Icon (Font Awesome class)</Label>
+              <Input
+                value={projectIcon}
+                onChange={(e) => setProjectIcon(e.target.value)}
+                placeholder="e.g., fa-solid fa-rocket"
+              />
+            </div>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Priority</Label>
+                <select
+                  value={projectPriority}
+                  onChange={(e) => setProjectPriority(e.target.value)}
+                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 outline-none"
+                >
+                  <option value="">(none)</option>
+                  {PRIORITY_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>BU</Label>
+                <Input
+                  value={projectBu}
+                  onChange={(e) => setProjectBu(e.target.value)}
+                  placeholder="e.g., MCD"
+                />
+              </div>
             </div>
           </div>
           <DialogFooter>
