@@ -14,6 +14,7 @@ interface Project {
   name: string;
   description?: string | null;
   icon?: string | null;
+  priority?: string | null;
 }
 
 interface Placement {
@@ -183,6 +184,7 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
         name: p.name,
         description: p.description,
         icon: p.icon ?? null,
+        priority: p.priority ?? null,
         status: placement.status,
         horizon: placement.horizon,
         agreedGroups: [data.group.name], // For group view, they only see their own placement as "agreed"
@@ -200,6 +202,8 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
       name: p.name,
       description: p.description,
       icon: p.icon ?? null,
+      priority: p.priority ?? null,
+      agreedGroups: [],
       isPlaced: false,
     }));
 

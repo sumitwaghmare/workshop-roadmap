@@ -20,7 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import RoadmapGrid, { ProjectItem } from "@/components/roadmap-grid";
-import { STATUSES, STATUS_COLORS, type StatusType } from "@/lib/constants";
+import { STATUSES, STATUS_COLORS, PRIORITY_COLORS, type StatusType } from "@/lib/constants";
 import { 
   ClipboardCopy,
   Copy,
@@ -811,43 +811,50 @@ export default function AdminPage() {
             </div>
 
             <div className="grid gap-3">
-              {projects.map((p) => (
-                <Card key={p.id} className="bg-card border-border overflow-hidden shadow-md">
-                  <CardContent className="flex items-center justify-between p-5">
-                    <div className="space-y-1">
-                      <div className="font-bold text-foreground text-lg">{p.name}</div>
-                      {p.description && (
-                         <div className="text-sm text-muted-foreground font-medium line-clamp-2 max-w-2xl">{p.description}</div>
-                      )}
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setEditProject(p);
-                          setProjectName(p.name);
-                          setProjectDesc(p.description || "");
-                          setProjectIcon(p.icon || "");
-                          setProjectPriority(p.priority || "");
-                          setProjectBu(p.bu || "");
-                          setProjectDialogOpen(true);
-                        }}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-destructive"
-                        onClick={() => deleteProject(p.id)}
-                      >
-                        Delete
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+              {projects.map((p) => {
+                const priorityColor = p.priority && PRIORITY_COLORS[p.priority] ? PRIORITY_COLORS[p.priority] : null;
+                return (
+                  <Card 
+                    key={p.id} 
+                    className="bg-card border-border overflow-hidden shadow-md"
+                    style={priorityColor ? { borderColor: priorityColor.border, backgroundColor: priorityColor.bg } : {}}
+                  >
+                    <CardContent className="flex items-center justify-between p-5">
+                      <div className="space-y-1">
+                        <div className="font-bold text-foreground text-lg">{p.name}</div>
+                        {p.description && (
+                           <div className="text-sm text-muted-foreground font-medium line-clamp-2 max-w-2xl">{p.description}</div>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setEditProject(p);
+                            setProjectName(p.name);
+                            setProjectDesc(p.description || "");
+                            setProjectIcon(p.icon || "");
+                            setProjectPriority(p.priority || "");
+                            setProjectBu(p.bu || "");
+                            setProjectDialogOpen(true);
+                          }}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive"
+                          onClick={() => deleteProject(p.id)}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
               {projects.length === 0 && (
                 <div className="rounded-lg border border-dashed border-border/50 p-8 text-center text-muted-foreground">
                   No projects yet. Click &quot;+ Add Project&quot; to get started.
@@ -1032,15 +1039,20 @@ export default function AdminPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {projects.map((p) => (
-                    <TableRow key={p.id}>
-                      <TableCell className="font-medium">{p.name}</TableCell>
-                      {groups.map((g) => {
-                        const placement = getPlacementForCell(p.id, g.id);
-                        const text = formatPlacement(placement);
-                        const status = placement?.status as StatusType | undefined;
-                        return (
-                          <TableCell key={g.id} className="text-center">
+                  {projects.map((p) => {
+                    const priorityColor = p.priority && PRIORITY_COLORS[p.priority] ? PRIORITY_COLORS[p.priority] : null;
+                    return (
+                      <TableRow 
+                        key={p.id}
+                        style={priorityColor ? { borderLeftColor: priorityColor.border, borderLeftWidth: '4px' } : {}}
+                      >
+                        <TableCell className="font-medium">{p.name}</TableCell>
+                        {groups.map((g) => {
+                          const placement = getPlacementForCell(p.id, g.id);
+                          const text = formatPlacement(placement);
+                          const status = placement?.status as StatusType | undefined;
+                          return (
+                            <TableCell key={g.id} className="text-center">
                             {yAxisEnabled && status && STATUS_COLORS[status] ? (
                               <Badge
                                 className="text-xs"
@@ -1063,7 +1075,8 @@ export default function AdminPage() {
                         );
                       })}
                     </TableRow>
-                  ))}
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>

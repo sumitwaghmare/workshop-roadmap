@@ -14,7 +14,7 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { Edit3 } from "lucide-react";
-import { STATUSES, HORIZONS, STATUS_COLORS, HORIZON_COLORS, StatusType } from "@/lib/constants";
+import { STATUSES, HORIZONS, STATUS_COLORS, HORIZON_COLORS, PRIORITY_COLORS, StatusType } from "@/lib/constants";
 
 // --- Types ---
 export interface ProjectItem {
@@ -22,6 +22,7 @@ export interface ProjectItem {
   name: string;
   description?: string | null;
   icon?: string | null;
+  priority?: string | null;
   horizon?: number | null;
   status?: string | null;
   agreedGroups?: string[];
@@ -60,7 +61,9 @@ function DraggableCard({
     disabled: readOnly,
   });
 
-  const style = transform
+  const priorityColor = project.priority && PRIORITY_COLORS[project.priority] ? PRIORITY_COLORS[project.priority] : null;
+
+  const dragStyle = transform
     ? { transform: `translate(${transform.x}px, ${transform.y}px)`, opacity: isDragging ? 0.4 : 1 }
     : undefined;
 
@@ -74,8 +77,11 @@ function DraggableCard({
           onCardClick(project);
         }
       }}
-      style={style}
-      className={`group relative rounded-lg border border-border bg-card/50 ${compact ? 'px-2 py-1 text-xs' : 'px-3 py-2.5 text-sm'} transition-all hover:bg-card hover:border-primary/30 hover:shadow-[0_0_15px_rgba(59,130,246,0.2)] ${
+      style={{
+        ...dragStyle,
+        ...(priorityColor ? { borderColor: priorityColor.border, backgroundColor: priorityColor.bg } : {})
+      }}
+      className={`group relative rounded-lg border ${priorityColor ? 'border-opacity-100' : 'border-border'} bg-card/50 ${compact ? 'px-2 py-1 text-xs' : 'px-3 py-2.5 text-sm'} transition-all hover:bg-card hover:border-primary/30 hover:shadow-[0_0_15px_rgba(59,130,246,0.2)] ${
         readOnly ? "cursor-default" : "cursor-grab active:cursor-grabbing"
       } ${isDragging ? "z-50 ring-2 ring-primary bg-accent" : ""}`}
       title={project.description || ""}

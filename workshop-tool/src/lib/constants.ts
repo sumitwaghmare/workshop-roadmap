@@ -35,3 +35,9 @@ export const HORIZON_COLORS = [
   { border: "#8b5cf6", text: "#8b5cf6" },
   { border: "#10b981", text: "#10b981" },
 ];
+
+export const PRIORITY_COLORS: Record<string, { border: string; bg: string }> = {
+  "in-progress": { border: "#10b981", bg: "#10b98120" }, // Green
+  "in-discussion": { border: "#eab308", bg: "#eab30820" }, // Yellow
+  "to-plan": { border: "#ef4444", bg: "#ef444420" }, // Red
+};

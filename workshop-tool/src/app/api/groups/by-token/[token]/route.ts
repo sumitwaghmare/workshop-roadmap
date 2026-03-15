@@ -37,8 +37,9 @@ export async function GET(
       name: string;
       description: string | null;
       icon: string | null;
+      priority: string | null;
     }>(
-      "SELECT id, name, description, icon FROM Project WHERE sessionId = ?",
+      "SELECT id, name, description, icon, priority FROM Project WHERE sessionId = ?",
       [sessionId]
     );
 
