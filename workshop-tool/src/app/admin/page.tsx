@@ -117,6 +117,11 @@ export default function AdminPage() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [newGroupName, setNewGroupName] = useState("");
   const [bulkGroupsText, setBulkGroupsText] = useState("");
+  const bulkGroupNames = bulkGroupsText
+    .split("\n")
+    .map((n) => n.trim())
+    .filter(Boolean);
+  const bulkGroupCount = bulkGroupNames.length;
   const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
 
   // Table view
@@ -300,7 +305,7 @@ export default function AdminPage() {
 
   const handleBulkCreateGroups = async () => {
     if (!bulkGroupsText.trim() || !activeSession) return;
-    const names = bulkGroupsText.split("\n").map(n => n.trim()).filter(n => n.length > 0);
+    const names = bulkGroupNames;
     
     for (const name of names) {
       await fetch("/api/groups", {
@@ -880,9 +885,9 @@ export default function AdminPage() {
                 </Button>
 
                 <Dialog open={isBulkDialogOpen} onOpenChange={setIsBulkDialogOpen}>
-                  <DialogTrigger 
+                  <DialogTrigger
                     render={
-                      <Button variant="outline">
+                      <Button variant="outline" onClick={() => setIsBulkDialogOpen(true)}>
                         <Plus className="mr-2 h-4 w-4" /> Bulk Add
                       </Button>
                     }
@@ -892,17 +897,26 @@ export default function AdminPage() {
                       <DialogTitle>Bulk Create Groups</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-foreground">
                         Enter group names, one per line.
                       </p>
                       <Textarea
-                        placeholder="Group 1: Marketing&#10;Group 2: Sales&#10;Group 3: Product"
+                        placeholder={`Group 1: Marketing
+Group 2: Sales
+Group 3: Product`}
                         value={bulkGroupsText}
                         onChange={(e) => setBulkGroupsText(e.target.value)}
                         rows={8}
+                        className="font-mono"
                       />
-                      <Button className="w-full" onClick={handleBulkCreateGroups}>
-                        Generate {bulkGroupsText.split("\n").filter(n => n.trim()).length} Groups
+                      <Button
+                        className="w-full"
+                        onClick={handleBulkCreateGroups}
+                        disabled={bulkGroupCount === 0}
+                      >
+                        {bulkGroupCount > 0
+                          ? `Generate ${bulkGroupCount} Group${bulkGroupCount === 1 ? "" : "s"}`
+                          : "Generate Groups"}
                       </Button>
                     </div>
                   </DialogContent>
