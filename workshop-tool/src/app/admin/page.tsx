@@ -611,7 +611,7 @@ export default function AdminPage() {
   if (!authenticated) return null;
 
   return (
-    <div className="min-h-screen p-4 md:p-6">
+    <div className="min-h-screen p-4 md:p-6 flex flex-col">
       {/* Header */}
       <div className={`${fitView && activeTab === "roadmap" ? "hidden" : "mb-6"} flex flex-wrap items-center justify-between gap-4 border-b border-border/50 pb-4`}>
         <div>
@@ -717,8 +717,9 @@ export default function AdminPage() {
       )}
 
       {activeSession && (
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col lg:flex-row gap-8 relative">
-          <TabsList className={`flex lg:flex-col h-auto bg-muted/50 p-1.5 gap-2 border border-border/50 rounded-xl transition-all duration-300 ease-in-out shrink-0 overflow-x-auto lg:overflow-visible ${sidebarCollapsed ? 'lg:w-16' : 'lg:w-64'} ${fitView && activeTab === "roadmap" ? 'hidden' : ''}`}>
+        <div className="flex-1 flex min-h-0">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col lg:flex-row gap-8 relative h-full min-h-0">
+            <TabsList className={`flex lg:flex-col h-full min-h-0 bg-muted/50 p-1.5 gap-2 border border-border/50 rounded-xl transition-all duration-300 ease-in-out shrink-0 overflow-x-auto overflow-y-auto lg:overflow-visible ${sidebarCollapsed ? 'lg:w-16' : 'lg:w-64'} ${fitView && activeTab === "roadmap" ? 'hidden' : ''}`}>
             <div className="hidden lg:flex justify-end mb-2 px-2 pt-1">
               <Button 
                 variant="ghost" 
@@ -1191,6 +1192,7 @@ export default function AdminPage() {
           </TabsContent>
           </div>
         </Tabs>
+        </div>
       )}
 
       {/* Project Dialog */}
