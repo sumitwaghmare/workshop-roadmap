@@ -113,6 +113,14 @@ export default function AdminPage() {
   const [projectPriority, setProjectPriority] = useState("");
   const [projectBu, setProjectBu] = useState("");
 
+  const stripIconTag = (val: string) => {
+    if (!val) return val;
+    // Extract class from <i class="..."></i> or return as is
+    const match = val.match(/<i\s+class=["']([^"']+)["'][^>]*>/i);
+    if (match) return match[1];
+    return val.trim();
+  };
+
   // Groups
   const [groups, setGroups] = useState<Group[]>([]);
   const [newGroupName, setNewGroupName] = useState("");
@@ -252,13 +260,15 @@ export default function AdminPage() {
   const saveProject = async () => {
     if (!projectName.trim() || !activeSession) return;
     if (editProject) {
+      const strippedIcon = stripIconTag(projectIcon);
       await fetch(`/api/projects/${editProject.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: projectName, description: projectDesc, icon: projectIcon || null, priority: projectPriority || null, bu: projectBu || null }),
+        body: JSON.stringify({ name: projectName, description: projectDesc, icon: strippedIcon || null, priority: projectPriority || null, bu: projectBu || null }),
       });
       toast.success("Project updated");
     } else {
+      const strippedIcon = stripIconTag(projectIcon);
       await fetch("/api/projects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -266,7 +276,7 @@ export default function AdminPage() {
           sessionId: activeSession.id,
           name: projectName,
           description: projectDesc,
-          icon: projectIcon || null,
+          icon: strippedIcon || null,
           priority: projectPriority || null,
           bu: projectBu || null,
         }),
@@ -425,10 +435,11 @@ export default function AdminPage() {
   const saveRoadmapItemDetails = async () => {
     if (!activeSession || !selectedRoadmapItem) return;
 
+    const strippedIcon = stripIconTag(detailIcon || "");
     const updated = {
       name: detailName.trim(),
       description: detailDescription?.trim() || null,
-      icon: detailIcon?.trim() || null,
+      icon: strippedIcon || null,
       priority: detailPriority?.trim() || null,
       bu: detailBu?.trim() || null,
       owner: detailOwner?.trim() || null,
@@ -1245,6 +1256,7 @@ Group 3: Product`}
               <Input
                 value={projectIcon}
                 onChange={(e) => setProjectIcon(e.target.value)}
+                onBlur={() => setProjectIcon(stripIconTag(projectIcon))}
                 placeholder="e.g., fa-solid fa-rocket"
               />
             </div>
@@ -1304,6 +1316,7 @@ Group 3: Product`}
               <Input
                 value={detailIcon || ""}
                 onChange={(e) => setDetailIcon(e.target.value)}
+                onBlur={() => setDetailIcon(stripIconTag(detailIcon || ""))}
                 placeholder="e.g., fa-solid fa-rocket"
               />
             </div>
