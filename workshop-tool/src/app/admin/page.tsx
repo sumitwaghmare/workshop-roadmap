@@ -19,7 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import RoadmapGrid from "@/components/roadmap-grid";
+import RoadmapGrid, { ProjectItem } from "@/components/roadmap-grid";
 import { STATUSES, STATUS_COLORS, type StatusType } from "@/lib/constants";
 import { 
   ClipboardCopy,
@@ -386,16 +386,25 @@ export default function AdminPage() {
     }
   };
 
-  const openRoadmapItemDetails = (item: RoadmapResult) => {
-    setSelectedRoadmapItem(item);
-    setDetailName(item.name);
-    setDetailIcon(item.icon ?? "");
-    setDetailDescription(item.description ?? "");
-    setDetailStatus(item.status ?? "");
-    setDetailPriority(item.priority ?? "");
-    setDetailBu(item.bu ?? "");
-    setDetailOwner(item.owner ?? "");
-    setDetailTimeline(item.timeline ?? "");
+  const openRoadmapItemDetails = (item: ProjectItem | RoadmapResult) => {
+    const roadmapItem: RoadmapResult = {
+      ...item,
+      horizon: "horizon" in item ? (item.horizon ?? null) : null,
+      status: "status" in item ? (item.status ?? null) : null,
+      agreedGroups: "agreedGroups" in item ? item.agreedGroups ?? [] : [],
+      isFinal: "isFinal" in item ? (item.isFinal ?? false) : false,
+      hasMajority: "hasMajority" in item ? (item.hasMajority ?? false) : false,
+    };
+
+    setSelectedRoadmapItem(roadmapItem);
+    setDetailName(roadmapItem.name);
+    setDetailIcon(roadmapItem.icon ?? "");
+    setDetailDescription(roadmapItem.description ?? "");
+    setDetailStatus(roadmapItem.status ?? "");
+    setDetailPriority(roadmapItem.priority ?? "");
+    setDetailBu(roadmapItem.bu ?? "");
+    setDetailOwner(roadmapItem.owner ?? "");
+    setDetailTimeline(roadmapItem.timeline ?? "");
     setDetailsDialogOpen(true);
   };
 
