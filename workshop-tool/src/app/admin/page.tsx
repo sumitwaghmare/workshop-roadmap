@@ -32,6 +32,7 @@ import {
   ChevronRight,
   LayoutGrid
 } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 // --- Types ---
 interface Session {
@@ -492,12 +493,12 @@ export default function AdminPage() {
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-border/50 pb-4">
         <div>
           <h1 className="text-4xl font-extrabold text-blue-500 tracking-tight">Workshop Roadmap</h1>
-          <p className="text-sm text-slate-300 font-bold">Admin Dashboard</p>
+          <p className="text-sm text-slate-500 dark:text-slate-300 font-bold">Admin Dashboard</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <select
-              className="rounded-md border border-white/20 bg-slate-900 px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 outline-none cursor-pointer"
+              className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 outline-none cursor-pointer"
               value={activeSession?.id || ""}
               onChange={(e) => {
                 const s = sessions.find((s) => s.id === e.target.value);
@@ -506,7 +507,7 @@ export default function AdminPage() {
             >
               <option value="">Select Session...</option>
               {sessions.map((s) => (
-                <option key={s.id} value={s.id} className="bg-slate-900">
+                <option key={s.id} value={s.id} className="bg-background text-foreground">
                   {s.name} {s.active ? "🟢" : "🔴"}
                 </option>
               ))}
@@ -531,14 +532,15 @@ export default function AdminPage() {
                 className="hidden"
                 onChange={handleImportJSON}
               />
-              <div className="flex h-8 items-center gap-2 px-3 rounded-md border border-slate-700 bg-slate-800 text-white text-sm font-bold hover:bg-slate-700 transition-colors cursor-pointer">
+              <div className="flex h-8 items-center gap-2 px-3 rounded-md border border-border bg-card text-foreground text-sm font-bold hover:bg-accent transition-colors cursor-pointer">
                 Import JSON
               </div>
             </label>
-            <Button variant="outline" size="sm" onClick={handleExportJSON} className="bg-slate-800 border-slate-700 text-white font-bold hover:bg-slate-700">
+            <Button variant="outline" size="sm" onClick={handleExportJSON} className="bg-card border-border text-foreground font-bold hover:bg-accent">
               Export JSON
             </Button>
-            <Button variant="outline" size="sm" onClick={handleLogout} className="bg-slate-800 border-slate-700 text-white font-bold hover:bg-slate-700">
+            <ThemeToggle />
+            <Button variant="outline" size="sm" onClick={handleLogout} className="bg-card border-border text-foreground font-bold hover:bg-accent">
               Logout
             </Button>
           </div>
@@ -562,13 +564,13 @@ export default function AdminPage() {
 
       {activeSession && (
         <Tabs defaultValue="projects" className="flex flex-col lg:flex-row gap-8 relative">
-          <TabsList className={`flex lg:flex-col h-auto bg-slate-900/50 p-1.5 gap-2 border border-slate-700/50 rounded-xl transition-all duration-300 ease-in-out shrink-0 overflow-x-auto lg:overflow-visible ${sidebarCollapsed ? 'lg:w-16' : 'lg:w-64'}`}>
+          <TabsList className={`flex lg:flex-col h-auto bg-muted/50 p-1.5 gap-2 border border-border/50 rounded-xl transition-all duration-300 ease-in-out shrink-0 overflow-x-auto lg:overflow-visible ${sidebarCollapsed ? 'lg:w-16' : 'lg:w-64'}`}>
             <div className="hidden lg:flex justify-end mb-2 px-2 pt-1">
               <Button 
                 variant="ghost" 
                 size="icon" 
                 onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                className="h-8 w-8 text-slate-400 hover:text-white hover:bg-slate-800"
+                className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-accent"
               >
                 {sidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
               </Button>
@@ -576,46 +578,46 @@ export default function AdminPage() {
             
             <TabsTrigger 
               value="projects" 
-              className={`w-full justify-start gap-3 data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400 hover:text-slate-200 rounded-lg px-4 py-3 transition-all font-bold group ${sidebarCollapsed ? 'px-2' : ''}`}
+              className={`w-full justify-start gap-3 data-[state=active]:bg-blue-600 data-[state=active]:text-white text-muted-foreground hover:text-foreground rounded-lg px-4 py-3 transition-all font-bold group ${sidebarCollapsed ? 'px-2' : ''}`}
               title={sidebarCollapsed ? "Projects" : ""}
             >
-              <div className="h-2 w-2 rounded-full bg-slate-600 group-data-[state=active]:bg-white shrink-0"></div>
+              <div className="h-2 w-2 rounded-full bg-muted-foreground/30 group-data-[state=active]:bg-white shrink-0"></div>
               {!sidebarCollapsed && <span>Projects</span>}
               {sidebarCollapsed && <span className="lg:hidden">Projects</span>}
             </TabsTrigger>
             <TabsTrigger 
               value="groups" 
-              className={`w-full justify-start gap-3 data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-300 hover:text-white rounded-lg px-4 py-3 transition-all font-bold group border border-transparent data-[state=active]:border-blue-400/50 shadow-lg ${sidebarCollapsed ? 'px-2' : ''}`}
+              className={`w-full justify-start gap-3 data-[state=active]:bg-blue-600 data-[state=active]:text-white text-muted-foreground hover:text-foreground rounded-lg px-4 py-3 transition-all font-bold group border border-transparent data-[state=active]:border-blue-400/50 shadow-lg ${sidebarCollapsed ? 'px-2' : ''}`}
               title={sidebarCollapsed ? "Groups & Links" : ""}
             >
-              <div className="h-2 w-2 rounded-full bg-slate-600 group-data-[state=active]:bg-white shrink-0"></div>
+              <div className="h-2 w-2 rounded-full bg-muted-foreground/30 group-data-[state=active]:bg-white shrink-0"></div>
               {!sidebarCollapsed && <span>Groups & Links</span>}
               {sidebarCollapsed && <span className="lg:hidden">Groups & Links</span>}
             </TabsTrigger>
             <TabsTrigger 
               value="table" 
-              className={`w-full justify-start gap-3 data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400 hover:text-slate-200 rounded-lg px-4 py-3 transition-all font-bold group ${sidebarCollapsed ? 'px-2' : ''}`}
+              className={`w-full justify-start gap-3 data-[state=active]:bg-blue-600 data-[state=active]:text-white text-muted-foreground hover:text-foreground rounded-lg px-4 py-3 transition-all font-bold group ${sidebarCollapsed ? 'px-2' : ''}`}
               title={sidebarCollapsed ? "Table View" : ""}
             >
-              <div className="h-2 w-2 rounded-full bg-slate-600 group-data-[state=active]:bg-white shrink-0"></div>
+              <div className="h-2 w-2 rounded-full bg-muted-foreground/30 group-data-[state=active]:bg-white shrink-0"></div>
               {!sidebarCollapsed && <span>Table View</span>}
               {sidebarCollapsed && <span className="lg:hidden">Table View</span>}
             </TabsTrigger>
             <TabsTrigger 
               value="roadmap" 
-              className={`w-full justify-start gap-3 data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400 hover:text-slate-200 rounded-lg px-4 py-3 transition-all font-bold group ${sidebarCollapsed ? 'px-2' : ''}`}
+              className={`w-full justify-start gap-3 data-[state=active]:bg-blue-600 data-[state=active]:text-white text-muted-foreground hover:text-foreground rounded-lg px-4 py-3 transition-all font-bold group ${sidebarCollapsed ? 'px-2' : ''}`}
               title={sidebarCollapsed ? "Roadmap View" : ""}
             >
-              <div className="h-2 w-2 rounded-full bg-slate-600 group-data-[state=active]:bg-white shrink-0"></div>
+              <div className="h-2 w-2 rounded-full bg-slate-300 dark:bg-slate-600 group-data-[state=active]:bg-white shrink-0"></div>
               {!sidebarCollapsed && <span>Roadmap View</span>}
               {sidebarCollapsed && <span className="lg:hidden">Roadmap View</span>}
             </TabsTrigger>
             {!sidebarCollapsed && (
               <div className="mt-auto hidden lg:block p-4">
                 <div className="rounded-lg bg-blue-500/10 border border-blue-500/20 p-3">
-                  <p className="text-[10px] text-blue-400 uppercase tracking-widest font-bold mb-1">Session Data</p>
-                  <p className="text-xs text-slate-300">{projects.length} Projects</p>
-                  <p className="text-xs text-slate-300">{groups.length} Groups</p>
+                  <p className="text-[10px] text-blue-500 dark:text-blue-400 uppercase tracking-widest font-bold mb-1">Session Data</p>
+                  <p className="text-xs text-muted-foreground">{projects.length} Projects</p>
+                  <p className="text-xs text-muted-foreground">{groups.length} Groups</p>
                 </div>
               </div>
             )}
@@ -656,12 +658,12 @@ export default function AdminPage() {
 
             <div className="grid gap-3">
               {projects.map((p) => (
-                <Card key={p.id} className="bg-slate-800 border-slate-700 overflow-hidden shadow-md">
+                <Card key={p.id} className="bg-card border-border overflow-hidden shadow-md">
                   <CardContent className="flex items-center justify-between p-5">
                     <div className="space-y-1">
-                      <div className="font-bold text-white text-lg">{p.name}</div>
+                      <div className="font-bold text-foreground text-lg">{p.name}</div>
                       {p.description && (
-                         <div className="text-sm text-slate-300 font-medium line-clamp-2 max-w-2xl">{p.description}</div>
+                         <div className="text-sm text-muted-foreground font-medium line-clamp-2 max-w-2xl">{p.description}</div>
                       )}
                     </div>
                     <div className="flex gap-2">
@@ -720,7 +722,7 @@ export default function AdminPage() {
                       </Button>
                     }
                   />
-                  <DialogContent>
+                  <DialogContent className="glass border-border shadow-2xl backdrop-blur-2xl">
                     <DialogHeader>
                       <DialogTitle>Bulk Create Groups</DialogTitle>
                     </DialogHeader>
@@ -762,14 +764,14 @@ export default function AdminPage() {
 
             <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {groups.map((g) => (
-                <Card key={g.id} className="overflow-hidden border-slate-700 bg-slate-800/50 hover:bg-slate-800 transition-all duration-200 shadow-lg group">
+                <Card key={g.id} className="overflow-hidden border-border bg-card/50 hover:bg-card transition-all duration-200 shadow-lg group">
                   <div className="p-5">
                     <div className="mb-4 flex items-center justify-between">
-                      <h4 className="font-bold text-slate-100 text-lg group-hover:text-blue-400 transition-colors">{g.name}</h4>
+                      <h4 className="font-bold text-foreground text-lg group-hover:text-blue-500 transition-colors">{g.name}</h4>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-9 w-9 text-slate-500 hover:text-red-400 hover:bg-red-400/10 rounded-full transition-all"
+                        className="h-9 w-9 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-full transition-all"
                         onClick={() => deleteGroup(g.id)}
                       >
                         <Trash2 className="h-5 w-5" />
@@ -777,14 +779,14 @@ export default function AdminPage() {
                     </div>
                     
                     <div className="space-y-4">
-                      <div className="flex items-center gap-2 rounded-lg bg-slate-900/80 p-3 border border-slate-700/50 group-hover:border-blue-500/30 transition-colors">
-                        <code className="flex-1 truncate text-xs text-blue-400 font-mono">
+                      <div className="flex items-center gap-2 rounded-lg bg-background p-3 border border-border group-hover:border-blue-500/30 transition-colors">
+                        <code className="flex-1 truncate text-xs text-blue-600 dark:text-blue-400 font-mono">
                           {getGroupLink(g.token)}
                         </code>
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 text-slate-400 hover:text-blue-400 hover:bg-blue-400/10"
+                          className="h-8 w-8 text-muted-foreground hover:text-blue-500 hover:bg-blue-500/10"
                           onClick={() => {
                             copyLink(g.token);
                           }}
@@ -794,17 +796,17 @@ export default function AdminPage() {
                         </Button>
                       </div>
 
-                      <div className="flex items-center justify-between border-t border-slate-700/50 pt-4 mt-2">
+                      <div className="flex items-center justify-between border-t border-border pt-4 mt-2">
                         <div className="flex flex-col">
-                          <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Status</span>
-                          <span className={`text-xs font-bold flex items-center gap-1.5 ${activeSession.active ? "text-green-500" : "text-amber-500"}`}>
+                          <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Status</span>
+                          <span className={`text-xs font-bold flex items-center gap-1.5 ${activeSession.active ? "text-green-600 dark:text-green-500" : "text-amber-600 dark:text-amber-500"}`}>
                             <span className={`h-2 w-2 rounded-full ${activeSession.active ? "bg-green-500 animate-pulse" : "bg-amber-500"}`}></span>
                             {activeSession.active ? "Active" : "Locked"}
                           </span>
                         </div>
                         <div className="flex flex-col items-end">
-                          <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Placements</span>
-                          <span className="text-xs font-bold text-slate-200">
+                          <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Placements</span>
+                          <span className="text-xs font-bold text-foreground">
                             {g._count?.placements || 0} Projects
                           </span>
                         </div>
@@ -814,12 +816,12 @@ export default function AdminPage() {
                 </Card>
               ))}
               {groups.length === 0 && (
-                <div className="col-span-full rounded-xl border border-dashed border-slate-700 p-12 text-center">
-                  <div className="mx-auto w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center mb-4">
-                    <Plus className="text-slate-500" />
+                <div className="col-span-full rounded-xl border border-dashed border-border p-12 text-center">
+                  <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4">
+                    <Plus className="text-muted-foreground" />
                   </div>
-                  <h3 className="text-lg font-bold text-slate-300">No groups yet</h3>
-                  <p className="text-sm text-slate-500 mt-1 max-w-xs mx-auto">
+                  <h3 className="text-lg font-bold text-foreground">No groups yet</h3>
+                  <p className="text-sm text-muted-foreground mt-1 max-w-xs mx-auto">
                     Create groups to generate unique session links for your workshop participants.
                   </p>
                 </div>
@@ -848,7 +850,7 @@ export default function AdminPage() {
               </Button>
             </div>
 
-            <div className="overflow-x-auto rounded-lg border border-slate-700 bg-slate-800">
+            <div className="overflow-x-auto rounded-lg border border-border bg-card">
               <Table className="premium-table">
                 <TableHeader>
                   <TableRow>
@@ -930,7 +932,7 @@ export default function AdminPage() {
                     </>
                   )}
                 </div>
-                <div className="flex items-center gap-2 border-l border-slate-700 pl-3 ml-1">
+                <div className="flex items-center gap-2 border-l border-border pl-3 ml-1">
                   <label className="text-muted-foreground text-sm cursor-pointer whitespace-nowrap">Fit View:</label>
                   <input
                     type="checkbox"
@@ -982,7 +984,7 @@ export default function AdminPage() {
 
       {/* Project Dialog */}
       <Dialog open={projectDialogOpen} onOpenChange={setProjectDialogOpen}>
-        <DialogContent>
+        <DialogContent className="glass border-border shadow-2xl backdrop-blur-2xl">
           <DialogHeader>
             <DialogTitle>{editProject ? "Edit Project" : "Add Project"}</DialogTitle>
           </DialogHeader>

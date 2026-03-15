@@ -64,9 +64,9 @@ function DraggableCard({
       {...listeners}
       {...attributes}
       style={style}
-      className={`group relative rounded-lg border border-white/10 bg-white/5 ${compact ? 'px-2 py-1 text-xs' : 'px-3 py-2.5 text-sm'} transition-all hover:bg-white/10 hover:border-primary/30 hover:shadow-[0_0_15px_rgba(59,130,246,0.2)] ${
+      className={`group relative rounded-lg border border-border bg-card/50 ${compact ? 'px-2 py-1 text-xs' : 'px-3 py-2.5 text-sm'} transition-all hover:bg-card hover:border-primary/30 hover:shadow-[0_0_15px_rgba(59,130,246,0.2)] ${
         readOnly ? "cursor-default" : "cursor-grab active:cursor-grabbing"
-      } ${isDragging ? "z-50 ring-2 ring-primary bg-white/20" : ""}`}
+      } ${isDragging ? "z-50 ring-2 ring-primary bg-accent" : ""}`}
       title={project.description || ""}
     >
       <div className="flex items-center gap-2">
@@ -116,7 +116,7 @@ function DroppableCell({
       className={`flex ${compact ? 'min-h-[60px] p-1.5' : 'min-h-[180px] p-3'} flex-col gap-2 rounded-xl border transition-all relative overflow-hidden`}
       style={{
         background: isOver ? `${colors.bg.replace("0.15", "0.4")}` : colors.bg,
-        borderColor: isOver ? colors.border : "rgba(255,255,255,0.08)",
+        borderColor: isOver ? colors.border : "var(--color-border)",
         boxShadow: isOver ? `0 0 20px -5px ${colors.border}` : "none",
       }}
     >
@@ -140,7 +140,7 @@ function InboxDropZone({ children, compact }: { children: React.ReactNode, compa
       className={`${compact ? 'min-h-[60px] p-2' : 'min-h-[120px] p-4'} rounded-xl border border-dashed transition-all glass ${
         isOver
           ? "border-primary bg-primary/10 shadow-[0_0_20px_rgba(59,130,246,0.1)]"
-          : "border-border/50 bg-white/[0.02]"
+          : "border-border/50 bg-muted/30"
       }`}
     >
       <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -242,7 +242,7 @@ export default function RoadmapGrid({
             {HORIZONS.map((h, i) => (
               <div
                 key={h.index}
-                className={`rounded-t-xl border-b-4 bg-slate-900/50 backdrop-blur-sm ${compact ? 'px-2 py-1.5' : 'px-4 py-3'} text-center font-bold uppercase tracking-wider glass`}
+                className={`rounded-t-xl border-b-4 bg-muted/50 backdrop-blur-sm ${compact ? 'px-2 py-1.5' : 'px-4 py-3'} text-center font-bold uppercase tracking-wider glass`}
                 style={{
                   borderColor: HORIZON_COLORS[i].border,
                   color: HORIZON_COLORS[i].text,

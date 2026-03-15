@@ -1,6 +1,7 @@
 import "@/app/globals.css";
 import type { Metadata } from "next";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
   title: "Workshop Roadmap Tool",
@@ -13,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -23,8 +24,15 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen bg-background font-urbanist antialiased">
-        {children}
-        <Toaster richColors position="bottom-right" />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+          <Toaster richColors position="bottom-right" />
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -207,7 +207,7 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
         <div className="space-y-1">
           <h1 className="text-4xl font-bold text-primary tracking-tight text-glow">{data.session.name}</h1>
           <p className="text-sm text-muted-foreground font-medium">
-            Project Prioritization • <span className="text-foreground">{data.group.name}</span>
+            Project Prioritization • <span className="text-foreground font-bold">{data.group.name}</span>
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -248,7 +248,7 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
 
       {/* Add Project Dialog */}
       <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
-        <DialogContent className="glass border-white/10 shadow-2xl backdrop-blur-2xl">
+        <DialogContent className="glass border-border shadow-2xl backdrop-blur-2xl">
           <DialogHeader>
             <DialogTitle>Add New Project</DialogTitle>
           </DialogHeader>

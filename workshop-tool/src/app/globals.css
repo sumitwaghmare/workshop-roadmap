@@ -3,49 +3,117 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@theme inline {
-  --color-background: #0f172a; /* Tailwind Slate 900 */
-  --color-foreground: #ffffff;
-  --color-card: #1e293b; /* Tailwind Slate 800 */
-  --color-card-foreground: #ffffff;
-  --color-popover: #1e293b;
-  --color-popover-foreground: #ffffff;
-  --color-primary: #3b82f6; /* Tailwind Blue 500 */
-  --color-primary-foreground: #ffffff;
-  --color-secondary: #334155; /* Tailwind Slate 700 */
-  --color-secondary-foreground: #ffffff;
-  --color-muted: #1e293b;
-  --color-muted-foreground: #94a3b8;
-  --color-accent: #334155;
-  --color-accent-foreground: #ffffff;
-  --color-destructive: #ef4444;
-  --color-destructive-foreground: #ffffff;
-  --color-border: #334155;
-  --color-input: #334155;
-  --color-ring: #3b82f6;
+:root {
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --card: #f8fafc;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #0f172a;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #f1f5f9;
+  --accent-foreground: #0f172a;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #3b82f6;
   --radius: 0.5rem;
+
+  /* Status Colors (Light Mode - Darker text) */
+  --status-protect: #0284c7;
+  --status-grow: #7c3aed;
+  --status-expand: #059669;
+  --status-reimagine: #e11d48;
+
+  --status-protect-bg: rgba(2, 132, 199, 0.1);
+  --status-grow-bg: rgba(124, 58, 237, 0.1);
+  --status-expand-bg: rgba(5, 150, 105, 0.1);
+  --status-reimagine-bg: rgba(225, 29, 72, 0.1);
+}
+
+.dark {
+  --background: #0f172a;
+  --foreground: #ffffff;
+  --card: #1e293b;
+  --card-foreground: #ffffff;
+  --popover: #1e293b;
+  --popover-foreground: #ffffff;
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+  --secondary: #334155;
+  --secondary-foreground: #ffffff;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --accent: #334155;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #334155;
+  --input: #334155;
+  --ring: #3b82f6;
+
+  /* Status Colors (Dark Mode - Lighter text) */
+  --status-protect: #38bdf8;
+  --status-grow: #a78bfa;
+  --status-expand: #34d399;
+  --status-reimagine: #fb7185;
+
+  --status-protect-bg: rgba(56, 189, 248, 0.1);
+  --status-grow-bg: rgba(167, 139, 250, 0.1);
+  --status-expand-bg: rgba(52, 211, 153, 0.1);
+  --status-reimagine-bg: rgba(251, 113, 133, 0.1);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius: var(--radius);
   --font-family-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-family-urbanist: "Urbanist", sans-serif;
 }
 
 body {
-  font-family: var(--font-family-sans);
+  font-family: var(--font-family-urbanist);
   background-color: var(--color-background);
   color: var(--color-foreground);
 }
 
 .premium-table thead th {
-  background-color: #1e293b;
-  color: #f8fafc;
+  background-color: var(--color-secondary);
+  color: var(--color-foreground);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.025em;
   font-size: 0.75rem;
   padding: 0.75rem;
-  border-bottom: 2px solid #334155;
+  border-bottom: 2px solid var(--color-border);
 }
 
 .premium-table tbody td {
-  border-bottom: 1px solid #334155;
+  border-bottom: 1px solid var(--color-border);
   padding: 0.75rem;
 }
 
@@ -53,12 +121,31 @@ body {
   width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: var(--color-background);
 }
 ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: var(--color-border);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: var(--color-muted-foreground);
+}
+.glass {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .glass {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.text-glow {
+  text-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+}
+
+.dark .text-glow {
+  text-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
 }
