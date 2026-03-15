@@ -826,11 +826,18 @@ export default function AdminPage() {
                     style={priorityColor ? { borderColor: priorityColor.border, backgroundColor: priorityColor.bg } : {}}
                   >
                     <CardContent className="flex items-center justify-between p-5">
-                      <div className="space-y-1">
-                        <div className="font-bold text-foreground text-lg">{p.name}</div>
-                        {p.description && (
-                           <div className="text-sm text-muted-foreground font-medium line-clamp-2 max-w-2xl">{p.description}</div>
+                      <div className="flex items-center gap-4">
+                        {p.icon && (
+                          <div className="flex bg-blue-500/10 h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-blue-500/20 text-blue-500 shadow-sm">
+                            <i className={`${p.icon} text-2xl`} aria-hidden="true" />
+                          </div>
                         )}
+                        <div className="space-y-1">
+                          <div className="font-bold text-foreground text-lg">{p.name}</div>
+                          {p.description && (
+                            <div className="text-sm text-muted-foreground font-medium line-clamp-2 max-w-2xl">{p.description}</div>
+                          )}
+                        </div>
                       </div>
                       <div className="flex gap-2">
                         <Button
