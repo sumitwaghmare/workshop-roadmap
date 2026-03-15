@@ -26,7 +26,7 @@ export async function GET(req: Request) {
       params.push(groupId);
     }
 
-    const placements = await query(sql, params);
+    const placements = await query<Record<string, unknown>>(sql, params);
     return NextResponse.json(placements);
   } catch (error: unknown) {
     console.error("GET /api/placements error:", error);
@@ -43,7 +43,7 @@ export async function PUT(req: Request) {
     }
 
     // Process each placement
-    for (const p of placements) {
+    for (const p of placements as { projectId: string; groupId: string; horizon: number | null; status: string | null }[]) {
       const { projectId, groupId, horizon, status } = p;
       
       // MySQL UPSERT using ON DUPLICATE KEY UPDATE

@@ -17,7 +17,7 @@ export async function PATCH(
 
     await query("UPDATE Session SET active = ? WHERE id = ?", [active, id]);
     
-    const [session] = await query("SELECT * FROM Session WHERE id = ?", [id]);
+    const [session] = await query<Record<string, unknown>>("SELECT * FROM Session WHERE id = ?", [id]);
     return NextResponse.json(session);
   } catch (error: unknown) {
     console.error("PATCH /api/sessions/[id] error:", error);

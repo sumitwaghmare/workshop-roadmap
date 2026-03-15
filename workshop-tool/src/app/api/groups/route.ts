@@ -17,7 +17,7 @@ export async function GET(req: Request) {
   }
 
   try {
-    const groups = await query(
+    const groups = await query<Record<string, unknown>>(
       "SELECT * FROM \`Group\` WHERE sessionId = ? ORDER BY name ASC",
       [sessionId]
     );
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
       [id, sessionId, name, token]
     );
 
-    const [group] = await query("SELECT * FROM \`Group\` WHERE id = ?", [id]);
+    const [group] = await query<Record<string, unknown>>("SELECT * FROM \`Group\` WHERE id = ?", [id]);
     return NextResponse.json(group, { status: 201 });
   } catch (error: unknown) {
     console.error("POST /api/groups error:", error);

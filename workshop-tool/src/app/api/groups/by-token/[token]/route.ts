@@ -10,7 +10,7 @@ export async function GET(
     const { token } = await params;
     
     // Joint query to get group and its session status
-    const rows = await query(`
+    const rows = await query<Record<string, unknown>>(`
       SELECT g.*, s.active as sessionActive
       FROM \`Group\` g
       JOIN Session s ON g.sessionId = s.id

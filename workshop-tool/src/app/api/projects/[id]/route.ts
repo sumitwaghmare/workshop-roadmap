@@ -20,7 +20,7 @@ export async function PATCH(
       [name, description, id]
     );
 
-    const [project] = await query("SELECT * FROM Project WHERE id = ?", [id]);
+    const [project] = await query<Record<string, unknown>>("SELECT * FROM Project WHERE id = ?", [id]);
     return NextResponse.json(project);
   } catch (error: unknown) {
     console.error("PATCH /api/projects/[id] error:", error);

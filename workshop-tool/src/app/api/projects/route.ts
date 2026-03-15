@@ -12,7 +12,7 @@ export async function GET(req: Request) {
   }
 
   try {
-    const projects = await query(
+    const projects = await query<Record<string, unknown>>(
       "SELECT * FROM Project WHERE sessionId = ? ORDER BY createdAt ASC",
       [sessionId]
     );
@@ -33,7 +33,7 @@ export async function POST(req: Request) {
       [id, sessionId, name, description, createdBy || "admin", new Date()]
     );
 
-    const [project] = await query("SELECT * FROM Project WHERE id = ?", [id]);
+    const [project] = await query<Record<string, unknown>>("SELECT * FROM Project WHERE id = ?", [id]);
     return NextResponse.json(project, { status: 201 });
   } catch (error: unknown) {
     console.error("POST /api/projects error:", error);
