@@ -30,6 +30,8 @@ export async function ensureProjectFields() {
     await query("ALTER TABLE Project ADD COLUMN IF NOT EXISTS bu VARCHAR(255) NULL");
     await query("ALTER TABLE Project ADD COLUMN IF NOT EXISTS owner VARCHAR(255) NULL");
     await query("ALTER TABLE Project ADD COLUMN IF NOT EXISTS timeline VARCHAR(255) NULL");
+    await query("ALTER TABLE Project ADD COLUMN IF NOT EXISTS createdBy VARCHAR(255) NULL");
+    await query("ALTER TABLE Project ADD COLUMN IF NOT EXISTS createdAt DATETIME NULL");
   } catch (error) {
     // Some MySQL versions may not support IF NOT EXISTS for columns.
     // Ignore failures so the app can still run if columns are managed externally.

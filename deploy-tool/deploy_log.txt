@@ -1,4 +1,4 @@
-Deployment Started: 14/3/2026, 8:19:18 pm
+Deployment Started: 17/3/2026, 2:20:27 pm
 ============================================================
 
 >>> UPDATING TARGET: \\acevs125.acedesigners.co.in\htdocs\projeX
@@ -7,7 +7,7 @@ Deployment Started: 14/3/2026, 8:19:18 pm
    ROBOCOPY     ::     Robust File Copy for Windows                              
 -------------------------------------------------------------------------------
 
-  Started : 14 March 2026 08:19 PM
+  Started : 17 March 2026 02:20 PM
    Source : \\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\
      Dest : \\acevs125.acedesigners.co.in\htdocs\projeX\
 
@@ -149,7 +149,6 @@ Exc Files : *.env
 	      modified		    2039	index.php
 	      modified		     807	inspect_db.php
 	      modified		  110520	interactive_roadmap.php
-	      modified		  416376	light_gantt_app.php
 	      modified		    4316	lock_mom.php
 	      modified		    9682	login.php
 	      modified		     290	logout.php
@@ -230,12 +229,12 @@ Exc Files : *.env
 	          same		     117	.htaccess
 	          same		      57	2026-02-27 12-33-13.txt
 	          same		    4106	api_user_handler.php
-	          same		   59165	cxo_project_slides.php
 	          same		    7028	git_diff.txt
 	          same		   10249	goal_statistics.php
+	          same		  416376	light_gantt_app.php
 	          same		  416946	light_gantt_app_.php
 	          same		  416946	light_gantt_app_v0.php
-	          same		   75685	log.txt
+	          same		   78841	log.txt
 	          same		  185931	my-page.php
 	          same		    8457	PROGRAM_MANAGEMENT_FEATURE.md
 	          same		   30902	schema.sql
@@ -243,22 +242,27 @@ Exc Files : *.env
 	          same		    2376	sync_me.bat
 	          same		     622	update_schema_task_comments.php
 	          same		    1417	upload.php
+	    Newer     		   60052	cxo_project_slides.php100%  
 
 ------------------------------------------------------------------------------
 
                Total    Copied   Skipped  Mismatch    FAILED    Extras
     Dirs :         1         0         1         0         0         0
-   Files :       203         0       203         0         0        13
-   Bytes :    5.01 m         0    5.01 m         0         0   463.6 k
+   Files :       203         1       202         0         0        13
+   Bytes :    5.01 m    58.6 k    4.96 m         0         0   463.6 k
    Times :   0:00:00   0:00:00                       0:00:00   0:00:00
-   Ended : 14 March 2026 08:19 PM
+
+
+   Speed :            2,76,737 Bytes/sec.
+   Speed :              15.835 MegaBytes/min.
+   Ended : 17 March 2026 02:20 PM
 
 
 -------------------------------------------------------------------------------
    ROBOCOPY     ::     Robust File Copy for Windows                              
 -------------------------------------------------------------------------------
 
-  Started : 14 March 2026 08:19 PM
+  Started : 17 March 2026 02:20 PM
    Source : \\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\partials\
      Dest : \\acevs125.acedesigners.co.in\htdocs\projeX\partials\
 
@@ -291,14 +295,14 @@ Exc Files : *.env
    Files :         5         0         5         0         0         0
    Bytes :    87.1 k         0    87.1 k         0         0         0
    Times :   0:00:00   0:00:00                       0:00:00   0:00:00
-   Ended : 14 March 2026 08:19 PM
+   Ended : 17 March 2026 02:20 PM
 
 
 -------------------------------------------------------------------------------
    ROBOCOPY     ::     Robust File Copy for Windows                              
 -------------------------------------------------------------------------------
 
-  Started : 14 March 2026 08:19 PM
+  Started : 17 March 2026 02:20 PM
    Source : \\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\cron\
      Dest : \\acevs125.acedesigners.co.in\htdocs\projeX\cron\
 
@@ -397,7 +401,7 @@ Exc Files : *.env
    Files :        11         0        11         0         0        60
    Bytes :   103.0 k         0   103.0 k         0         0    99.7 k
    Times :   0:00:00   0:00:00                       0:00:00   0:00:00
-   Ended : 14 March 2026 08:19 PM
+   Ended : 17 March 2026 02:20 PM
 
 
 >>> UPDATING TARGET: \\acevs125.acedesigners.co.in\htdocs\projeX-IT
@@ -406,7 +410,7 @@ Exc Files : *.env
    ROBOCOPY     ::     Robust File Copy for Windows                              
 -------------------------------------------------------------------------------
 
-  Started : 14 March 2026 08:19 PM
+  Started : 17 March 2026 02:20 PM
    Source : \\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\
      Dest : \\acevs125.acedesigners.co.in\htdocs\projeX-IT\
 
@@ -481,7 +485,6 @@ Exc Files : *.env
 	      modified		    1796	create_comment_tables.php
 	      modified		      56	cron.php
 	      modified		    4916	cron_weekly_summary.php
-	      modified		   59165	cxo_project_slides.php
 	      modified		     249	debug_idf.php
 	      modified		    4700	debug_perf.php
 	      modified		     598	debug_schema.php
@@ -617,7 +620,7 @@ Exc Files : *.env
 	          same		    3067	get_todos_for_project.php
 	          same		   10249	goal_statistics.php
 	          same		  416376	light_gantt_app.php
-	          same		   75685	log.txt
+	          same		   78841	log.txt
 	          same		    9682	login.php
 	          same		   16753	momGen.php
 	          same		   65454	project_status_report.php
@@ -626,6 +629,7 @@ Exc Files : *.env
 	          same		    7607	register.php
 	          same		   30902	schema.sql
 	          same		    2507	send_followup_email.php
+	          same		    2376	sync_me.bat
 	          same		   35523	team_management.php
 	          same		   57564	technology_check.php
 	          same		   14309	time_tracker.css
@@ -638,27 +642,27 @@ Exc Files : *.env
 	          same		    4960	update_profile.php
 	          same		    4328	update_todo_status.php
 	          same		    1417	upload.php
-	    New File  		    2376	sync_me.bat100%  
+	    Newer     		   60052	cxo_project_slides.php100%  
 
 ------------------------------------------------------------------------------
 
                Total    Copied   Skipped  Mismatch    FAILED    Extras
     Dirs :         1         0         1         0         0         0
    Files :       203         1       202         0         0        10
-   Bytes :    5.01 m     2.3 k    5.01 m         0         0    55.4 k
+   Bytes :    5.01 m    58.6 k    4.96 m         0         0    55.4 k
    Times :   0:00:00   0:00:00                       0:00:00   0:00:00
 
 
-   Speed :              13,813 Bytes/sec.
-   Speed :               0.790 MegaBytes/min.
-   Ended : 14 March 2026 08:19 PM
+   Speed :            2,69,291 Bytes/sec.
+   Speed :              15.409 MegaBytes/min.
+   Ended : 17 March 2026 02:20 PM
 
 
 -------------------------------------------------------------------------------
    ROBOCOPY     ::     Robust File Copy for Windows                              
 -------------------------------------------------------------------------------
 
-  Started : 14 March 2026 08:19 PM
+  Started : 17 March 2026 02:20 PM
    Source : \\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\partials\
      Dest : \\acevs125.acedesigners.co.in\htdocs\projeX-IT\partials\
 
@@ -691,14 +695,14 @@ Exc Files : *.env
    Files :         5         0         5         0         0         0
    Bytes :    87.1 k         0    87.1 k         0         0         0
    Times :   0:00:00   0:00:00                       0:00:00   0:00:00
-   Ended : 14 March 2026 08:19 PM
+   Ended : 17 March 2026 02:20 PM
 
 
 -------------------------------------------------------------------------------
    ROBOCOPY     ::     Robust File Copy for Windows                              
 -------------------------------------------------------------------------------
 
-  Started : 14 March 2026 08:19 PM
+  Started : 17 March 2026 02:20 PM
    Source : \\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\cron\
      Dest : \\acevs125.acedesigners.co.in\htdocs\projeX-IT\cron\
 
@@ -750,7 +754,7 @@ Exc Files : *.env
    Files :        11         0        11         0         0        13
    Bytes :   103.0 k         0   103.0 k         0         0    18.8 k
    Times :   0:00:00   0:00:00                       0:00:00   0:00:00
-   Ended : 14 March 2026 08:19 PM
+   Ended : 17 March 2026 02:20 PM
 
 
 >>> UPDATING TARGET: \\acevs125.acedesigners.co.in\htdocs\projeX-PMG
@@ -759,7 +763,7 @@ Exc Files : *.env
    ROBOCOPY     ::     Robust File Copy for Windows                              
 -------------------------------------------------------------------------------
 
-  Started : 14 March 2026 08:19 PM
+  Started : 17 March 2026 02:20 PM
    Source : \\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\
      Dest : \\acevs125.acedesigners.co.in\htdocs\projeX-PMG\
 
@@ -786,7 +790,6 @@ Exc Files : *.env
 	         named		      52	package.json
 	         named		     640	settings.json
 	         named		   18148	sync_config.json
-	      modified		   59165	cxo_project_slides.php
 	      modified		  185931	my-page.php
 	          same		     255	.gitignore
 	          same		     117	.htaccess
@@ -900,7 +903,7 @@ Exc Files : *.env
 	          same		  416946	light_gantt_app_.php
 	          same		  416946	light_gantt_app_v0.php
 	          same		    4316	lock_mom.php
-	          same		   75685	log.txt
+	          same		   78841	log.txt
 	          same		    9682	login.php
 	          same		     290	logout.php
 	          same		    1662	log_update_mom.txt
@@ -949,6 +952,7 @@ Exc Files : *.env
 	          same		     858	setup_performance_db.php
 	          same		    2589	setup_program_mgmt.php
 	          same		    8460	setup_trl_db.php
+	          same		    2376	sync_me.bat
 	          same		   35523	team_management.php
 	          same		   57564	technology_check.php
 	          same		    1290	test_fmea.php
@@ -982,27 +986,27 @@ Exc Files : *.env
 	          same		    1118	utils.php
 	          same		    6045	verify_gates.php
 	          same		     521	verify_trl.php
-	    New File  		    2376	sync_me.bat100%  
+	    Newer     		   60052	cxo_project_slides.php100%  
 
 ------------------------------------------------------------------------------
 
                Total    Copied   Skipped  Mismatch    FAILED    Extras
     Dirs :         1         0         1         0         0         0
    Files :       203         1       202         0         0         1
-   Bytes :    5.01 m     2.3 k    5.01 m         0         0       327
+   Bytes :    5.01 m    58.6 k    4.96 m         0         0       327
    Times :   0:00:00   0:00:00                       0:00:00   0:00:00
 
 
-   Speed :              15,037 Bytes/sec.
-   Speed :               0.860 MegaBytes/min.
-   Ended : 14 March 2026 08:19 PM
+   Speed :            2,64,546 Bytes/sec.
+   Speed :              15.137 MegaBytes/min.
+   Ended : 17 March 2026 02:20 PM
 
 
 -------------------------------------------------------------------------------
    ROBOCOPY     ::     Robust File Copy for Windows                              
 -------------------------------------------------------------------------------
 
-  Started : 14 March 2026 08:19 PM
+  Started : 17 March 2026 02:20 PM
    Source : \\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\partials\
      Dest : \\acevs125.acedesigners.co.in\htdocs\projeX-PMG\partials\
 
@@ -1035,14 +1039,14 @@ Exc Files : *.env
    Files :         5         0         5         0         0         0
    Bytes :    87.1 k         0    87.1 k         0         0         0
    Times :   0:00:00   0:00:00                       0:00:00   0:00:00
-   Ended : 14 March 2026 08:19 PM
+   Ended : 17 March 2026 02:20 PM
 
 
 -------------------------------------------------------------------------------
    ROBOCOPY     ::     Robust File Copy for Windows                              
 -------------------------------------------------------------------------------
 
-  Started : 14 March 2026 08:19 PM
+  Started : 17 March 2026 02:20 PM
    Source : \\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\cron\
      Dest : \\acevs125.acedesigners.co.in\htdocs\projeX-PMG\cron\
 
@@ -1081,7 +1085,7 @@ Exc Files : *.env
    Files :        11         0        11         0         0         0
    Bytes :   103.0 k         0   103.0 k         0         0         0
    Times :   0:00:00   0:00:00                       0:00:00   0:00:00
-   Ended : 14 March 2026 08:19 PM
+   Ended : 17 March 2026 02:20 PM
 
 
 >>> UPDATING TARGET: \\acevs125.acedesigners.co.in\htdocs\jetAdminReport
@@ -1090,7 +1094,7 @@ Exc Files : *.env
    ROBOCOPY     ::     Robust File Copy for Windows                              
 -------------------------------------------------------------------------------
 
-  Started : 14 March 2026 08:19 PM
+  Started : 17 March 2026 02:20 PM
    Source : \\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\
      Dest : \\acevs125.acedesigners.co.in\htdocs\jetAdminReport\
 
@@ -1123,7 +1127,7 @@ Exc Files : *.env
 	         named		      52	package.json
 	         named		     640	settings.json
 	         named		   18148	sync_config.json
-	         older		   75685	log.txt
+	         older		   78841	log.txt
 	         older		     175	script_log.txt
 	      modified		     255	.gitignore
 	      modified		    3337	add_issue.php
@@ -1150,7 +1154,6 @@ Exc Files : *.env
 	      modified		     311	check_risk.php
 	      modified		   20602	comments_modal.php
 	      modified		    1796	create_comment_tables.php
-	      modified		   59165	cxo_project_slides.php
 	      modified		   16762	cxo_selection.php
 	      modified		  309623	dashboard.php
 	      modified		    4797	db.php
@@ -1174,7 +1177,6 @@ Exc Files : *.env
 	      modified		    4119	get_user_todos.php
 	      modified		   10249	goal_statistics.php
 	      modified		   15659	identity_migration_manager.php
-	      modified		  416376	light_gantt_app.php
 	      modified		    9682	login.php
 	      modified		   16753	momGen.php
 	      modified		  185931	my-page.php
@@ -1268,6 +1270,7 @@ Exc Files : *.env
 	          same		    2039	index.php
 	          same		     807	inspect_db.php
 	          same		  110520	interactive_roadmap.php
+	          same		  416376	light_gantt_app.php
 	          same		  416946	light_gantt_app_.php
 	          same		  416946	light_gantt_app_v0.php
 	          same		    4316	lock_mom.php
@@ -1320,22 +1323,27 @@ Exc Files : *.env
 	          same		    1118	utils.php
 	          same		    6045	verify_gates.php
 	          same		     521	verify_trl.php
+	    Newer     		   60052	cxo_project_slides.php100%  
 
 ------------------------------------------------------------------------------
 
                Total    Copied   Skipped  Mismatch    FAILED    Extras
     Dirs :         1         0         1         0         0         0
-   Files :       203         0       203         0         0         7
-   Bytes :    5.01 m         0    5.01 m         0         0   423.0 k
+   Files :       203         1       202         0         0         7
+   Bytes :    5.01 m    58.6 k    4.96 m         0         0   423.0 k
    Times :   0:00:00   0:00:00                       0:00:00   0:00:00
-   Ended : 14 March 2026 08:19 PM
+
+
+   Speed :            2,78,018 Bytes/sec.
+   Speed :              15.908 MegaBytes/min.
+   Ended : 17 March 2026 02:20 PM
 
 
 -------------------------------------------------------------------------------
    ROBOCOPY     ::     Robust File Copy for Windows                              
 -------------------------------------------------------------------------------
 
-  Started : 14 March 2026 08:19 PM
+  Started : 17 March 2026 02:20 PM
    Source : \\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\partials\
      Dest : \\acevs125.acedesigners.co.in\htdocs\jetAdminReport\partials\
 
@@ -1368,14 +1376,14 @@ Exc Files : *.env
    Files :         5         0         5         0         0         0
    Bytes :    87.1 k         0    87.1 k         0         0         0
    Times :   0:00:00   0:00:00                       0:00:00   0:00:00
-   Ended : 14 March 2026 08:19 PM
+   Ended : 17 March 2026 02:20 PM
 
 
 -------------------------------------------------------------------------------
    ROBOCOPY     ::     Robust File Copy for Windows                              
 -------------------------------------------------------------------------------
 
-  Started : 14 March 2026 08:19 PM
+  Started : 17 March 2026 02:20 PM
    Source : \\acevs125.acedesigners.co.in\htdocs\jetAdminReport-test3\cron\
      Dest : \\acevs125.acedesigners.co.in\htdocs\jetAdminReport\cron\
 
@@ -1456,6 +1464,7 @@ Exc Files : *.env
 	   *named file		    1703	daily_email_log_2026-03-10.json
 	   *named file		    1703	daily_email_log_2026-03-11.json
 	   *named file		    1702	daily_email_log_2026-03-12.json
+	   *named file		    1702	daily_email_log_2026-03-17.json
 	         named		    1703	daily_email_log_2025-12-25.json
 	         named		    1703	daily_email_log_2025-12-26.json
 	         named		    1703	daily_email_log_2025-12-27.json
@@ -1472,12 +1481,12 @@ Exc Files : *.env
 
                Total    Copied   Skipped  Mismatch    FAILED    Extras
     Dirs :         1         0         1         0         0         0
-   Files :        11         0        11         0         0        61
-   Bytes :   103.0 k         0   103.0 k         0         0   101.4 k
+   Files :        11         0        11         0         0        62
+   Bytes :   103.0 k         0   103.0 k         0         0   103.1 k
    Times :   0:00:00   0:00:00                       0:00:00   0:00:00
-   Ended : 14 March 2026 08:19 PM
+   Ended : 17 March 2026 02:20 PM
 
 
 
 ============================================================
-Deployment Finished: 14/3/2026, 8:19:22 pm
+Deployment Finished: 17/3/2026, 2:20:31 pm

@@ -58,6 +58,9 @@ interface Project {
   owner?: string | null;
   timeline?: string | null;
   sessionId: string;
+  // Captures the group (or admin) that created this project
+  createdBy?: string | null;
+  createdAt?: string | null;
 }
 
 interface Group {
@@ -953,6 +956,9 @@ export default function AdminPage() {
                           {p.description && (
                             <div className="text-sm text-muted-foreground font-medium line-clamp-2 max-w-2xl">{p.description}</div>
                           )}
+                          <div className="text-xs text-muted-foreground mt-1">
+                            Added by <span className="font-medium text-foreground">{p.createdBy || "admin"}</span>
+                          </div>
                         </div>
                       </div>
                       <div className="flex gap-2">
