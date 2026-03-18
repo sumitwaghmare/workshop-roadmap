@@ -149,6 +149,7 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<"projects" | "groups" | "table" | "roadmap">("projects");
   const [filteredBu, setFilteredBu] = useState<string | null>(null);
   const [filteredPriority, setFilteredPriority] = useState<string | null>(null);
+  const [filteredUser, setFilteredUser] = useState<string | null>(null);
 
   // Roadmap Item Details (locked session editing)
   const [selectedRoadmapItem, setSelectedRoadmapItem] = useState<RoadmapResult | null>(null);
@@ -796,10 +797,11 @@ export default function AdminPage() {
                     onClick={() => {
                       setFilteredBu(null);
                       setFilteredPriority(null);
+                      setFilteredUser(null);
                     }}
                     className="block w-full text-left"
                   >
-                    <p className={`text-xs ${(!filteredBu && !filteredPriority) ? 'text-blue-500 font-bold' : 'text-muted-foreground'} hover:text-blue-400 transition-colors`}>{projects.length} Projects</p>
+                    <p className={`text-xs ${(!filteredBu && !filteredPriority && !filteredUser) ? 'text-blue-500 font-bold' : 'text-muted-foreground'} hover:text-blue-400 transition-colors`}>{projects.length} Projects</p>
                   </button>
                   <p className="text-xs text-muted-foreground mb-4">{groups.length} Groups</p>
                   
@@ -830,7 +832,7 @@ export default function AdminPage() {
                   </div>
 
                   <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-1">Priority</p>
-                  <div>
+                  <div className="mb-3">
                     {PRIORITY_OPTIONS.map((opt) => {
                       const count = projects.filter(p => p.priority === opt.value).length;
                       if (count === 0) return null;
@@ -871,6 +873,32 @@ export default function AdminPage() {
                       );
                     })()}
                   </div>
+
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-1">Added By</p>
+                  <div>
+                    {Object.entries(
+                      projects.reduce((acc, p) => {
+                        const user = p.createdBy || "admin";
+                        acc[user] = (acc[user] || 0) + 1;
+                        return acc;
+                      }, {} as Record<string, number>)
+                    ).map(([user, count]) => (
+                      <button
+                        key={user}
+                        onClick={() => {
+                          setFilteredUser(user);
+                          setActiveTab("projects");
+                        }}
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium mr-1 mb-1 transition-all ${
+                          filteredUser === user 
+                            ? 'bg-blue-600 text-white' 
+                            : 'bg-blue-500/10 text-blue-500 hover:bg-blue-500/20'
+                        }`}
+                      >
+                        {user} ({count})
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
@@ -898,14 +926,15 @@ export default function AdminPage() {
                       [{filteredPriority === "None" ? "No Priority" : (PRIORITY_OPTIONS.find(o => o.value === filteredPriority)?.label || filteredPriority)}]
                     </span>
                   )}
+                  {filteredUser && <span className="text-blue-500 ml-1">[{filteredUser}]</span>}
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  {filteredBu || filteredPriority ? `Showing filtered projects` : 'Manage the list of projects/initiatives for this session'}
+                  {filteredBu || filteredPriority || filteredUser ? `Showing filtered projects` : 'Manage the list of projects/initiatives for this session'}
                 </p>
               </div>
               <div className="flex gap-2">
-                {(filteredBu || filteredPriority) && (
-                  <Button variant="ghost" onClick={() => { setFilteredBu(null); setFilteredPriority(null); }}>
+                {(filteredBu || filteredPriority || filteredUser) && (
+                  <Button variant="ghost" onClick={() => { setFilteredBu(null); setFilteredPriority(null); setFilteredUser(null); }}>
                     Clear Filters
                   </Button>
                 )}
@@ -933,6 +962,10 @@ export default function AdminPage() {
                   if (filteredPriority) {
                     if (filteredPriority === "None") match = match && !p.priority;
                     else match = match && p.priority === filteredPriority;
+                  }
+                  if (filteredUser) {
+                    const user = p.createdBy || "admin";
+                    match = match && user === filteredUser;
                   }
                   return match;
                 })
