@@ -13,7 +13,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { Edit3 } from "lucide-react";
+import { Edit3, Trash2 } from "lucide-react";
 import { STATUSES, HORIZONS, STATUS_COLORS, HORIZON_COLORS, PRIORITY_COLORS, StatusType } from "@/lib/constants";
 
 // --- Types ---
@@ -40,6 +40,7 @@ interface RoadmapGridProps {
   fitView?: boolean;
   yAxisEnabled?: boolean;
   onCardClick?: (project: ProjectItem) => void;
+  onCardDoubleClick?: (project: ProjectItem) => void;
 }
 
 // --- Draggable Project Card ---
@@ -49,12 +50,14 @@ function DraggableCard({
   readOnly,
   compact,
   onCardClick,
+  onCardDoubleClick,
 }: {
   project: ProjectItem;
   showGroupBadges?: boolean;
   readOnly?: boolean;
   compact?: boolean;
   onCardClick?: (project: ProjectItem) => void;
+  onCardDoubleClick?: (project: ProjectItem) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: project.id,
@@ -75,6 +78,11 @@ function DraggableCard({
       onClick={() => {
         if (!readOnly && !isDragging && onCardClick) {
           onCardClick(project);
+        }
+      }}
+      onDoubleClick={() => {
+        if (!readOnly && !isDragging && onCardDoubleClick) {
+          onCardDoubleClick(project);
         }
       }}
       style={{
@@ -100,6 +108,20 @@ function DraggableCard({
         <div className="absolute top-2 right-2 flex items-center justify-center rounded-full bg-background/80 p-1 text-slate-500 hover:text-slate-900 hover:bg-background">
           <Edit3 size={14} />
         </div>
+      )}
+      {project.isPlaced && !readOnly && !isDragging && onCardDoubleClick && (
+        <button
+          type="button"
+          onPointerDown={(e) => e.stopPropagation()} // Prevents dnd-kit from intercepting the click as a drag
+          onClick={(e) => {
+            e.stopPropagation(); // Prevents the card's overall onClick (edit) from firing
+            onCardDoubleClick(project);
+          }}
+          className="absolute bottom-1.5 right-1.5 z-10 flex items-center justify-center rounded-md bg-background/80 p-1 text-muted-foreground transition-all hover:bg-red-500/20 hover:text-red-500 opacity-60 hover:opacity-100"
+          title="Move back to Inbox"
+        >
+          <Trash2 size={13} />
+        </button>
       )}
       {showGroupBadges && project.agreedGroups && project.agreedGroups.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1.5">
@@ -193,6 +215,7 @@ export default function RoadmapGrid({
   fitView = false,
   yAxisEnabled = true,
   onCardClick,
+  onCardDoubleClick,
 }: RoadmapGridProps) {
   const [activeId, setActiveId] = React.useState<string | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
@@ -289,6 +312,7 @@ export default function RoadmapGrid({
               readOnly={readOnly}
               compact={compact}
               onCardClick={onCardClick}
+              onCardDoubleClick={onCardDoubleClick}
             />
           ))}
         </InboxDropZone>
@@ -366,6 +390,7 @@ export default function RoadmapGrid({
                           readOnly={readOnly}
                           compact={compact}
                           onCardClick={onCardClick}
+                          onCardDoubleClick={onCardDoubleClick}
                         />
                       ))}
                     </DroppableCell>

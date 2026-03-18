@@ -127,6 +127,15 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
     }
   };
 
+  const handleCardDoubleClick = async (item: { id: string; status?: string | null; horizon?: number | null }) => {
+    if (!data?.session?.active) return;
+    
+    // If the project is currently placed in the grid, move it back to inbox
+    if (item.status != null && item.horizon != null) {
+      await handleDragEnd(item.id, null, null);
+    }
+  };
+
   const addProject = async () => {
     if (!newProjectName.trim() || !data) return;
     try {
@@ -239,7 +248,7 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
             </div>
             <div>
               <strong className="text-foreground">Instructions:</strong> Drag projects from the
-              Inbox and drop them into the grid. Your choices are saved instantly. 
+              Inbox and drop them into the grid. Double-click a placed project to return it to the inbox. Your choices are saved instantly. 
               You can also contribute by adding new projects to the pool.
             </div>
           </div>
@@ -250,6 +259,7 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
         projects={placedProjects}
         inboxProjects={inboxProjects}
         onDragEnd={handleDragEnd}
+        onCardDoubleClick={handleCardDoubleClick}
         readOnly={!data.session.active}
       />
 

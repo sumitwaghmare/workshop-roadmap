@@ -416,6 +416,12 @@ export default function AdminPage() {
     }
   };
 
+  const handleFinalCardDoubleClick = async (item: ProjectItem) => {
+    if (activeSession && !activeSession.active) {
+      await handleFinalDragEnd(item.id, null, null);
+    }
+  };
+
   const openRoadmapItemDetails = (item: ProjectItem | RoadmapResult) => {
     const roadmapItem: RoadmapResult = {
       ...item,
@@ -1359,6 +1365,7 @@ Group 3: Product`}
                 }))}
               onDragEnd={handleFinalDragEnd}
               onCardClick={activeSession && !activeSession.active ? openRoadmapItemDetails : undefined}
+        onCardDoubleClick={activeSession && !activeSession.active ? handleFinalCardDoubleClick : undefined}
               readOnly={activeSession.active}
               showGroupBadges={true}
               compact={compactRoadmap}
