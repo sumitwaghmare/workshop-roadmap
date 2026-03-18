@@ -15,6 +15,7 @@ import {
   RULE_CATEGORY_LIMITS 
 } from "@/lib/constants";
 import { CheckCircle2, XCircle, AlertCircle } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 interface Project {
   id: string;
@@ -304,6 +305,7 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
               🔒 Session ended — Read-only mode
             </div>
           )}
+          <ThemeToggle />
         </div>
       </div>
 
