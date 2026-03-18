@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import RoadmapGrid from "@/components/roadmap-grid";
+import { CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 
 interface Project {
   id: string;
@@ -96,6 +97,35 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
     if (!data?.session?.active) {
       toast.error("Session is no longer active — links have been killed");
       return;
+    }
+
+    // Evaluate constraints before applying changes
+    const currentPlacement = localPlacements.get(projectId);
+    const isCurrentlyH1 = currentPlacement?.horizon === 0;
+    
+    if (horizon === 0 && !isCurrentlyH1) {
+      const h1Count = Array.from(localPlacements.values()).filter(p => p.horizon === 0).length;
+      if (h1Count >= 10) {
+        toast.error("Rule 1: Maximum 10 projects allowed in Horizon 1.");
+        return;
+      }
+    }
+
+    const isCurrentlyKillBox = !currentPlacement || currentPlacement.horizon === null || (currentPlacement.status && (currentPlacement.status.toLowerCase().includes("kill") || currentPlacement.status.toLowerCase().includes("defer")));
+    const isNextKillBox = horizon === null || (status && (status.toLowerCase().includes("kill") || status.toLowerCase().includes("defer")));
+
+    if (!isNextKillBox && isCurrentlyKillBox) {
+      const placedNotKillDeferCount = Array.from(localPlacements.values()).filter(p => {
+        if (p.horizon === null) return false;
+        if (p.status && (p.status.toLowerCase().includes("kill") || p.status.toLowerCase().includes("defer"))) return false;
+        return true;
+      }).length;
+      const currentKillBoxCount = data.projects.length - placedNotKillDeferCount;
+      const minUnplacedReq = Math.ceil(data.projects.length * 0.2);
+      if (currentKillBoxCount - 1 < minUnplacedReq) {
+        toast.error(`Rule 2: At least 20% (${minUnplacedReq}) of projects must remain in the Inbox or be marked Kill/Defer.`);
+        return;
+      }
     }
 
     // Update local state immediately
@@ -216,6 +246,11 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
       isPlaced: false,
     }));
 
+  const horizon1Count = placedProjects.filter((p) => p.horizon === 0).length;
+  const totalProjectsCount = data.projects.length;
+  const minUnplacedRequired = Math.ceil(totalProjectsCount * 0.2);
+  const killBoxCount = inboxProjects.length + placedProjects.filter((p) => p.status && (p.status.toLowerCase().includes("kill") || p.status.toLowerCase().includes("defer"))).length;
+
   return (
     <div className="min-h-screen p-4 md:p-8 space-y-8">
       {/* Header */}
@@ -250,6 +285,47 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
               <strong className="text-foreground">Instructions:</strong> Drag projects from the
               Inbox and drop them into the grid. Double-click a placed project to return it to the inbox. Your choices are saved instantly. 
               You can also contribute by adding new projects to the pool.
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Rules */}
+      {data.session.active && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-4 duration-500 delay-150 fill-mode-both">
+          {/* Rule 1 */}
+          <div className={`rounded-xl border p-4 text-sm flex items-start gap-3 transition-colors glass ${
+            horizon1Count <= 10 
+              ? 'border-green-500/30 bg-green-500/10 text-green-700 dark:text-green-400' 
+              : 'border-destructive/30 bg-destructive/10 text-destructive'
+          }`}>
+            <div className={`mt-0.5 p-1 rounded-full ${horizon1Count <= 10 ? 'bg-green-500/20' : 'bg-destructive/20'}`}>
+              {horizon1Count <= 10 ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+            </div>
+            <div>
+              <strong className="block mb-1 text-foreground">Rule 1: The Horizon 1 Cap</strong>
+              No group is allowed to place more than 10 total projects into Horizon 1.
+              <div className="mt-2 font-medium">
+                Current: {horizon1Count} / 10
+              </div>
+            </div>
+          </div>
+
+          {/* Rule 2 */}
+          <div className={`rounded-xl border p-4 text-sm flex items-start gap-3 transition-colors glass ${
+            killBoxCount >= minUnplacedRequired 
+              ? 'border-green-500/30 bg-green-500/10 text-green-700 dark:text-green-400' 
+              : 'border-destructive/30 bg-destructive/10 text-destructive'
+          }`}>
+             <div className={`mt-0.5 p-1 rounded-full ${killBoxCount >= minUnplacedRequired ? 'bg-green-500/20' : 'bg-destructive/20'}`}>
+               {killBoxCount >= minUnplacedRequired ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+             </div>
+             <div>
+              <strong className="block mb-1 text-foreground">Rule 2: The Kill Box</strong>
+              At least 20% of projects must remain unplaced or be explicitly marked &quot;Kill/Defer&quot;.
+              <div className="mt-2 font-medium">
+                Current: {killBoxCount} / {minUnplacedRequired} required
+              </div>
             </div>
           </div>
         </div>
