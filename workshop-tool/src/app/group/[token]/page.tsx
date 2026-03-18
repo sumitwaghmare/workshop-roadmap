@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import RoadmapGrid from "@/components/roadmap-grid";
+import { PROJECT_CATEGORIES } from "@/lib/constants";
 import { CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 
 interface Project {
@@ -16,6 +17,7 @@ interface Project {
   description?: string | null;
   icon?: string | null;
   priority?: string | null;
+  category?: string | null;
 }
 
 interface Placement {
@@ -41,6 +43,13 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
   const [newProjectDesc, setNewProjectDesc] = useState("");
+  const [newProjectCategory, setNewProjectCategory] = useState("");
+
+  const CATEGORY_LIMITS: Record<string, number> = {
+    NPD: 5,
+    CoE: 5,
+    Technology: 3,
+  };
 
   // Local placements for immediate UI updates
   const [localPlacements, setLocalPlacements] = useState<Map<string, { status: string | null; horizon: number | null }>>(
@@ -128,6 +137,26 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
       }
     }
 
+    // Check category limits for Horizon 1
+    if (horizon === 0 && !isCurrentlyH1) {
+      const project = data.projects.find(p => p.id === projectId);
+      if (project?.category) {
+        const limit = CATEGORY_LIMITS[project.category];
+        if (limit !== undefined) {
+          const currentH1InCategory = data.projects
+            .filter(p => p.category === project.category)
+            .filter(p => {
+              const placement = localPlacements.get(p.id);
+              return placement?.horizon === 0;
+            }).length;
+          if (currentH1InCategory >= limit) {
+            toast.error(`Rule 3: Maximum ${limit} ${project.category} projects allowed in Horizon 1.`);
+            return;
+          }
+        }
+      }
+    }
+
     // Update local state immediately
     setLocalPlacements((prev) => {
       const next = new Map(prev);
@@ -176,6 +205,7 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
           sessionId: data.session?.id,
           name: newProjectName,
           description: newProjectDesc,
+          category: newProjectCategory || null,
           createdBy: data.group?.name,
         }),
       });
@@ -183,6 +213,7 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
         toast.success("Project added — visible to all groups");
         setNewProjectName("");
         setNewProjectDesc("");
+        setNewProjectCategory("");
         setAddDialogOpen(false);
         loadData(); // Reload to see new project
       }
@@ -224,6 +255,7 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
         description: p.description,
         icon: p.icon ?? null,
         priority: p.priority ?? null,
+        category: p.category ?? null,
         status: placement.status,
         horizon: placement.horizon,
         agreedGroups: [data.group.name], // For group view, they only see their own placement as "agreed"
@@ -242,6 +274,7 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
       description: p.description,
       icon: p.icon ?? null,
       priority: p.priority ?? null,
+      category: p.category ?? null,
       agreedGroups: [],
       isPlaced: false,
     }));
@@ -328,6 +361,35 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
               </div>
             </div>
           </div>
+
+          {/* Rule 3: Category Limits */}
+          {Object.entries(CATEGORY_LIMITS).map(([category, limit]) => {
+            const currentH1InCategory = data.projects
+              .filter(p => p.category === category)
+              .filter(p => {
+                const placement = localPlacements.get(p.id);
+                return placement?.horizon === 0;
+              }).length;
+            const isValid = currentH1InCategory <= limit;
+            return (
+              <div key={category} className={`rounded-xl border p-4 text-sm flex items-start gap-3 transition-colors glass ${
+                isValid 
+                  ? 'border-green-500/30 bg-green-500/10 text-green-700 dark:text-green-400' 
+                  : 'border-destructive/30 bg-destructive/10 text-destructive'
+              }`}>
+                <div className={`mt-0.5 p-1 rounded-full ${isValid ? 'bg-green-500/20' : 'bg-destructive/20'}`}>
+                  {isValid ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+                </div>
+                <div>
+                  <strong className="block mb-1 text-foreground">Rule 3: {category} Limit</strong>
+                  Maximum {limit} {category} projects allowed in Horizon 1.
+                  <div className="mt-2 font-medium">
+                    Current: {currentH1InCategory} / {limit}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
 
@@ -362,6 +424,21 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
                 placeholder="Brief description..."
                 rows={3}
               />
+            </div>
+            <div className="space-y-2">
+              <Label>Category</Label>
+              <select
+                value={newProjectCategory}
+                onChange={(e) => setNewProjectCategory(e.target.value)}
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 outline-none"
+              >
+                <option value="">(none)</option>
+                {PROJECT_CATEGORIES.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
           <DialogFooter>

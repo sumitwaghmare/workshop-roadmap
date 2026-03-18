@@ -15,11 +15,11 @@ export async function PATCH(
   try {
     await ensureProjectFields();
     const { id } = await params;
-    const { name, description, icon, priority, bu, owner, timeline } = await req.json();
+    const { name, description, icon, priority, bu, owner, timeline, category } = await req.json();
 
     await query(
-      "UPDATE Project SET name = ?, description = ?, icon = ?, priority = ?, bu = ?, owner = ?, timeline = ? WHERE id = ?",
-      [name, description, icon || null, priority || null, bu || null, owner || null, timeline || null, id]
+      "UPDATE Project SET name = ?, description = ?, icon = ?, priority = ?, bu = ?, owner = ?, timeline = ?, category = ? WHERE id = ?",
+      [name, description, icon || null, priority || null, bu || null, owner || null, timeline || null, category || null, id]
     );
 
     const [project] = await query<Record<string, unknown>>("SELECT * FROM Project WHERE id = ?", [id]);

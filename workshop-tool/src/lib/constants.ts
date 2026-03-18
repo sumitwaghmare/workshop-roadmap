@@ -41,3 +41,15 @@ export const PRIORITY_COLORS: Record<string, { border: string; bg: string }> = {
   "in-discussion": { border: "#eab308", bg: "#eab30820" }, // Yellow
   "to-plan": { border: "#ef4444", bg: "#ef444420" }, // Red
 };
+
+export const PROJECT_CATEGORIES = [
+  { value: "NPD", label: "NPD" },
+  { value: "Technology", label: "Technology" },
+  { value: "CoE", label: "CoE" },
+  { value: "DAC", label: "DAC" },
+  { value: "ID", label: "ID" },
+  { value: "PMO", label: "PMO" },
+  { value: "AMIT", label: "AMIT" },
+] as const;
+
+export type ProjectCategory = (typeof PROJECT_CATEGORIES)[number]["value"];

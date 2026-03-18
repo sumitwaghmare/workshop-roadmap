@@ -14,6 +14,7 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { Edit3, Trash2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { STATUSES, HORIZONS, STATUS_COLORS, HORIZON_COLORS, PRIORITY_COLORS, StatusType } from "@/lib/constants";
 
 // --- Types ---
@@ -23,6 +24,10 @@ export interface ProjectItem {
   description?: string | null;
   icon?: string | null;
   priority?: string | null;
+  bu?: string | null;
+  owner?: string | null;
+  timeline?: string | null;
+  category?: string | null;
   horizon?: number | null;
   status?: string | null;
   agreedGroups?: string[];
@@ -41,6 +46,7 @@ interface RoadmapGridProps {
   yAxisEnabled?: boolean;
   onCardClick?: (project: ProjectItem) => void;
   onCardDoubleClick?: (project: ProjectItem) => void;
+  horizonLimits?: Record<number, number>;
 }
 
 // --- Draggable Project Card ---
@@ -103,6 +109,11 @@ function DraggableCard({
           />
         ) : null}
         <span className="truncate font-medium">{project.name}</span>
+        {project.category && (
+          <Badge className="mt-1 text-[10px]" variant="secondary">
+            {project.category}
+          </Badge>
+        )}
       </div>
       {onCardClick && !readOnly && (
         <div className="absolute top-2 right-2 flex items-center justify-center rounded-full bg-background/80 p-1 text-slate-500 hover:text-slate-900 hover:bg-background">
@@ -216,6 +227,7 @@ export default function RoadmapGrid({
   yAxisEnabled = true,
   onCardClick,
   onCardDoubleClick,
+  horizonLimits,
 }: RoadmapGridProps) {
   const [activeId, setActiveId] = React.useState<string | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
@@ -328,21 +340,39 @@ export default function RoadmapGrid({
           >
             {/* Header row */}
             <div /> {/* empty corner */}
-            {visibleHorizons.map((h) => (
-              <div
-                key={h.index}
-                className={`rounded-t-xl border-b-4 bg-muted/50 backdrop-blur-sm ${compact ? 'px-2 py-1.5' : 'px-4 py-3'} text-center font-bold uppercase tracking-wider glass`}
-                style={{
-                  borderColor: HORIZON_COLORS[h.index].border,
-                  color: HORIZON_COLORS[h.index].text,
-                }}
-              >
-                {h.name}
-                <div className="mt-1 text-xs font-normal normal-case text-muted-foreground">
-                  {h.sub}
+            {visibleHorizons.map((h) => {
+              const count = projects.filter(p => p.horizon === h.index).length;
+              const limit = horizonLimits ? horizonLimits[h.index] : (h.index === 0 ? 10 : null);
+              const isOverLimit = limit !== null && limit !== undefined && count > limit;
+
+              return (
+                <div
+                  key={h.index}
+                  className={`rounded-t-xl border-b-4 bg-muted/50 backdrop-blur-sm ${compact ? 'px-2 py-1.5' : 'px-4 py-3'} text-center font-bold uppercase tracking-wider glass flex flex-col items-center justify-between`}
+                  style={{
+                    borderColor: HORIZON_COLORS[h.index].border,
+                    color: HORIZON_COLORS[h.index].text,
+                  }}
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <span>{h.name}</span>
+                    <span 
+                      className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold tracking-normal leading-none shadow-sm ${
+                        isOverLimit 
+                          ? 'bg-destructive text-destructive-foreground' 
+                          : 'bg-background/80 text-foreground border border-border/50'
+                      }`}
+                      title={limit !== null ? `Target: ${limit}` : `Placed: ${count}`}
+                    >
+                      {count}{limit !== null ? ` / ${limit}` : ''}
+                    </span>
+                  </div>
+                  <div className="mt-1 text-xs font-normal normal-case text-muted-foreground">
+                    {h.sub}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
             {/* Grid rows */}
             {visibleStatuses.map((status) => (

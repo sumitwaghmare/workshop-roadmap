@@ -20,7 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import RoadmapGrid, { ProjectItem } from "@/components/roadmap-grid";
-import { STATUSES, STATUS_COLORS, PRIORITY_COLORS, type StatusType } from "@/lib/constants";
+import { STATUSES, STATUS_COLORS, PRIORITY_COLORS, PROJECT_CATEGORIES, type StatusType } from "@/lib/constants";
 import { 
   ClipboardCopy,
   Copy,
@@ -57,6 +57,7 @@ interface Project {
   bu?: string | null;
   owner?: string | null;
   timeline?: string | null;
+  category?: string | null;
   sessionId: string;
   // Captures the group (or admin) that created this project
   createdBy?: string | null;
@@ -88,6 +89,7 @@ interface RoadmapResult {
   bu?: string | null;
   owner?: string | null;
   timeline?: string | null;
+  category?: string | null;
   horizon: number | null;
   status: string | null;
   agreedGroups: string[];
@@ -114,6 +116,7 @@ export default function AdminPage() {
   const [projectDesc, setProjectDesc] = useState("");
   const [projectIcon, setProjectIcon] = useState("");
   const [projectPriority, setProjectPriority] = useState("");
+  const [projectCategory, setProjectCategory] = useState("");
   const [projectBu, setProjectBu] = useState("");
 
   const stripIconTag = (val: string) => {
@@ -150,6 +153,7 @@ export default function AdminPage() {
   const [filteredBu, setFilteredBu] = useState<string | null>(null);
   const [filteredPriority, setFilteredPriority] = useState<string | null>(null);
   const [filteredUser, setFilteredUser] = useState<string | null>(null);
+  const [filteredCategory, setFilteredCategory] = useState<string | null>(null);
 
   // Roadmap Item Details (locked session editing)
   const [selectedRoadmapItem, setSelectedRoadmapItem] = useState<RoadmapResult | null>(null);
@@ -159,6 +163,7 @@ export default function AdminPage() {
   const [detailDescription, setDetailDescription] = useState<string | null>(null);
   const [detailStatus, setDetailStatus] = useState<string | null>(null);
   const [detailPriority, setDetailPriority] = useState<string | null>(null);
+  const [detailCategory, setDetailCategory] = useState<string | null>(null);
   const [detailBu, setDetailBu] = useState<string | null>(null);
   const [detailOwner, setDetailOwner] = useState<string | null>(null);
   const [detailTimeline, setDetailTimeline] = useState<string | null>(null);
@@ -270,7 +275,14 @@ export default function AdminPage() {
       await fetch(`/api/projects/${editProject.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: projectName, description: projectDesc, icon: strippedIcon || null, priority: projectPriority || null, bu: projectBu || null }),
+        body: JSON.stringify({
+          name: projectName,
+          description: projectDesc,
+          icon: strippedIcon || null,
+          priority: projectPriority || null,
+          category: projectCategory || null,
+          bu: projectBu || null,
+        }),
       });
       toast.success("Project updated");
     } else {
@@ -284,6 +296,7 @@ export default function AdminPage() {
           description: projectDesc,
           icon: strippedIcon || null,
           priority: projectPriority || null,
+          category: projectCategory || null,
           bu: projectBu || null,
         }),
       });
@@ -295,6 +308,7 @@ export default function AdminPage() {
     setProjectDesc("");
     setProjectIcon("");
     setProjectPriority("");
+    setProjectCategory("");
     setProjectBu("");
     loadProjects(activeSession.id);
   };
@@ -438,6 +452,7 @@ export default function AdminPage() {
     setDetailDescription(roadmapItem.description ?? "");
     setDetailStatus(roadmapItem.status ?? "");
     setDetailPriority(roadmapItem.priority ?? "");
+    setDetailCategory(roadmapItem.category ?? "");
     setDetailBu(roadmapItem.bu ?? "");
     setDetailOwner(roadmapItem.owner ?? "");
     setDetailTimeline(roadmapItem.timeline ?? "");
@@ -453,6 +468,7 @@ export default function AdminPage() {
       description: detailDescription?.trim() || null,
       icon: strippedIcon || null,
       priority: detailPriority?.trim() || null,
+      category: detailCategory?.trim() || null,
       bu: detailBu?.trim() || null,
       owner: detailOwner?.trim() || null,
       timeline: detailTimeline?.trim() || null,
@@ -804,10 +820,11 @@ export default function AdminPage() {
                       setFilteredBu(null);
                       setFilteredPriority(null);
                       setFilteredUser(null);
+                      setFilteredCategory(null);
                     }}
                     className="block w-full text-left"
                   >
-                    <p className={`text-xs ${(!filteredBu && !filteredPriority && !filteredUser) ? 'text-blue-500 font-bold' : 'text-muted-foreground'} hover:text-blue-400 transition-colors`}>{projects.length} Projects</p>
+                    <p className={`text-xs ${(!filteredBu && !filteredPriority && !filteredCategory && !filteredUser) ? 'text-blue-500 font-bold' : 'text-muted-foreground'} hover:text-blue-400 transition-colors`}>{projects.length} Projects</p>
                   </button>
                   <p className="text-xs text-muted-foreground mb-4">{groups.length} Groups</p>
                   
@@ -880,6 +897,49 @@ export default function AdminPage() {
                     })()}
                   </div>
 
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-1">Category</p>
+                  <div className="mb-3">
+                    {PROJECT_CATEGORIES.map((opt) => {
+                      const count = projects.filter(p => p.category === opt.value).length;
+                      if (count === 0) return null;
+                      return (
+                        <button
+                          key={opt.value}
+                          onClick={() => {
+                            setFilteredCategory(opt.value);
+                            setActiveTab("projects");
+                          }}
+                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium mr-1 mb-1 transition-all ${
+                            filteredCategory === opt.value 
+                              ? 'bg-blue-600 text-white' 
+                              : 'bg-blue-500/10 text-blue-500 hover:bg-blue-500/20'
+                          }`}
+                        >
+                          {opt.label} ({count})
+                        </button>
+                      );
+                    })}
+                    {(() => {
+                      const noneCount = projects.filter(p => !p.category).length;
+                      if (noneCount === 0) return null;
+                      return (
+                        <button
+                          onClick={() => {
+                            setFilteredCategory("None");
+                            setActiveTab("projects");
+                          }}
+                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium mr-1 mb-1 transition-all ${
+                            filteredCategory === "None" 
+                              ? 'bg-blue-600 text-white' 
+                              : 'bg-blue-500/10 text-blue-500 hover:bg-blue-500/20'
+                          }`}
+                        >
+                          None ({noneCount})
+                        </button>
+                      );
+                    })()}
+                  </div>
+
                   <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-1">Added By</p>
                   <div>
                     {Object.entries(
@@ -932,15 +992,20 @@ export default function AdminPage() {
                       [{filteredPriority === "None" ? "No Priority" : (PRIORITY_OPTIONS.find(o => o.value === filteredPriority)?.label || filteredPriority)}]
                     </span>
                   )}
+                  {filteredCategory && (
+                    <span className="text-blue-500 ml-1">
+                      [{filteredCategory === "None" ? "No Category" : (PROJECT_CATEGORIES.find(o => o.value === filteredCategory)?.label || filteredCategory)}]
+                    </span>
+                  )}
                   {filteredUser && <span className="text-blue-500 ml-1">[{filteredUser}]</span>}
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  {filteredBu || filteredPriority || filteredUser ? `Showing filtered projects` : 'Manage the list of projects/initiatives for this session'}
+                  {filteredBu || filteredPriority || filteredCategory || filteredUser ? `Showing filtered projects` : 'Manage the list of projects/initiatives for this session'}
                 </p>
               </div>
               <div className="flex gap-2">
-                {(filteredBu || filteredPriority || filteredUser) && (
-                  <Button variant="ghost" onClick={() => { setFilteredBu(null); setFilteredPriority(null); setFilteredUser(null); }}>
+                {(filteredBu || filteredPriority || filteredCategory || filteredUser) && (
+                  <Button variant="ghost" onClick={() => { setFilteredBu(null); setFilteredPriority(null); setFilteredCategory(null); setFilteredUser(null); }}>
                     Clear Filters
                   </Button>
                 )}
@@ -969,6 +1034,10 @@ export default function AdminPage() {
                     if (filteredPriority === "None") match = match && !p.priority;
                     else match = match && p.priority === filteredPriority;
                   }
+                  if (filteredCategory) {
+                    if (filteredCategory === "None") match = match && !p.category;
+                    else match = match && p.category === filteredCategory;
+                  }
                   if (filteredUser) {
                     const user = p.createdBy || "admin";
                     match = match && user === filteredUser;
@@ -992,6 +1061,11 @@ export default function AdminPage() {
                         )}
                         <div className="space-y-1">
                           <div className="font-bold text-foreground text-lg">{p.name}</div>
+                          {p.category && (
+                            <Badge className="text-xs" variant="secondary">
+                              {p.category}
+                            </Badge>
+                          )}
                           {p.description && (
                             <div className="text-sm text-muted-foreground font-medium line-clamp-2 max-w-2xl">{p.description}</div>
                           )}
@@ -1010,6 +1084,7 @@ export default function AdminPage() {
                             setProjectDesc(p.description || "");
                             setProjectIcon(p.icon || "");
                             setProjectPriority(p.priority || "");
+                            setProjectCategory(p.category || "");
                             setProjectBu(p.bu || "");
                             setProjectDialogOpen(true);
                           }}
@@ -1428,6 +1503,21 @@ Group 3: Product`}
                 </select>
               </div>
               <div className="space-y-2">
+                <Label>Category</Label>
+                <select
+                  value={projectCategory}
+                  onChange={(e) => setProjectCategory(e.target.value)}
+                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 outline-none"
+                >
+                  <option value="">(none)</option>
+                  {PROJECT_CATEGORIES.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2 md:col-span-2">
                 <Label>BU</Label>
                 <Input
                   value={projectBu}
@@ -1507,6 +1597,21 @@ Group 3: Product`}
                   {PRIORITY_OPTIONS.map((p) => (
                     <option key={p.value} value={p.value}>
                       {p.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Category</Label>
+                <select
+                  value={detailCategory || ""}
+                  onChange={(e) => setDetailCategory(e.target.value)}
+                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 outline-none"
+                >
+                  <option value="">(none)</option>
+                  {PROJECT_CATEGORIES.map((c) => (
+                    <option key={c.value} value={c.value}>
+                      {c.label}
                     </option>
                   ))}
                 </select>
