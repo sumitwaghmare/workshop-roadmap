@@ -53,3 +53,15 @@ export const PROJECT_CATEGORIES = [
 ] as const;
 
 export type ProjectCategory = (typeof PROJECT_CATEGORIES)[number]["value"];
+
+// The fraction of total groups that must agree on a placement for it to be considered consensus.
+export const MAJORITY_THRESHOLD = 0.5;
+
+// Validation Rules for group placements
+export const RULE_MAX_H1_PROJECTS = 12;
+export const RULE_MIN_UNPLACED_PERCENTAGE = 0.2; // 20%
+export const RULE_CATEGORY_LIMITS: Record<string, number> = {
+  NPD: 5,
+  CoE: 5,
+  Technology: 3,
+};

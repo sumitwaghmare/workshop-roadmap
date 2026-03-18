@@ -1,4 +1,5 @@
 // Majority-rule algorithm for computing consolidated roadmap placements
+import { MAJORITY_THRESHOLD } from "./constants";
 
 export interface PlacementInput {
   projectId: string;
@@ -50,8 +51,8 @@ export function computeMajority(
       }
     }
 
-    // Check majority (>50% of total groups)
-    const hasMajority = bestGroups.length > totalGroupCount / 2;
+    // Check majority based on threshold (e.g., >50% of total groups)
+    const hasMajority = bestGroups.length > totalGroupCount * MAJORITY_THRESHOLD;
 
     if (hasMajority && bestKey) {
       const [status, horizonStr] = bestKey.split("|");

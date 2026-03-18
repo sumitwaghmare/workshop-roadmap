@@ -8,7 +8,12 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import RoadmapGrid from "@/components/roadmap-grid";
-import { PROJECT_CATEGORIES } from "@/lib/constants";
+import { 
+  PROJECT_CATEGORIES, 
+  RULE_MAX_H1_PROJECTS, 
+  RULE_MIN_UNPLACED_PERCENTAGE, 
+  RULE_CATEGORY_LIMITS 
+} from "@/lib/constants";
 import { CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 
 interface Project {
@@ -44,12 +49,6 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
   const [newProjectName, setNewProjectName] = useState("");
   const [newProjectDesc, setNewProjectDesc] = useState("");
   const [newProjectCategory, setNewProjectCategory] = useState("");
-
-  const CATEGORY_LIMITS: Record<string, number> = {
-    NPD: 5,
-    CoE: 5,
-    Technology: 3,
-  };
 
   // Local placements for immediate UI updates
   const [localPlacements, setLocalPlacements] = useState<Map<string, { status: string | null; horizon: number | null }>>(
@@ -114,8 +113,8 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
     
     if (horizon === 0 && !isCurrentlyH1) {
       const h1Count = Array.from(localPlacements.values()).filter(p => p.horizon === 0).length;
-      if (h1Count >= 10) {
-        toast.error("Rule 1: Maximum 10 projects allowed in Horizon 1.");
+      if (h1Count >= RULE_MAX_H1_PROJECTS) {
+        toast.error(`Rule 1: Maximum ${RULE_MAX_H1_PROJECTS} projects allowed in Horizon 1.`);
         return;
       }
     }
@@ -130,9 +129,9 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
         return true;
       }).length;
       const currentKillBoxCount = data.projects.length - placedNotKillDeferCount;
-      const minUnplacedReq = Math.ceil(data.projects.length * 0.2);
+      const minUnplacedReq = Math.ceil(data.projects.length * RULE_MIN_UNPLACED_PERCENTAGE);
       if (currentKillBoxCount - 1 < minUnplacedReq) {
-        toast.error(`Rule 2: At least 20% (${minUnplacedReq}) of projects must remain in the Inbox or be marked Kill/Defer.`);
+        toast.error(`Rule 2: At least ${RULE_MIN_UNPLACED_PERCENTAGE * 100}% (${minUnplacedReq}) of projects must remain in the Inbox or be marked Kill/Defer.`);
         return;
       }
     }
@@ -141,7 +140,7 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
     if (horizon === 0 && !isCurrentlyH1) {
       const project = data.projects.find(p => p.id === projectId);
       if (project?.category) {
-        const limit = CATEGORY_LIMITS[project.category];
+        const limit = RULE_CATEGORY_LIMITS[project.category];
         if (limit !== undefined) {
           const currentH1InCategory = data.projects
             .filter(p => p.category === project.category)
@@ -281,7 +280,7 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
 
   const horizon1Count = placedProjects.filter((p) => p.horizon === 0).length;
   const totalProjectsCount = data.projects.length;
-  const minUnplacedRequired = Math.ceil(totalProjectsCount * 0.2);
+  const minUnplacedRequired = Math.ceil(totalProjectsCount * RULE_MIN_UNPLACED_PERCENTAGE);
   const killBoxCount = inboxProjects.length + placedProjects.filter((p) => p.status && (p.status.toLowerCase().includes("kill") || p.status.toLowerCase().includes("defer"))).length;
 
   return (
@@ -328,18 +327,18 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-4 duration-500 delay-150 fill-mode-both">
           {/* Rule 1 */}
           <div className={`rounded-xl border p-4 text-sm flex items-start gap-3 transition-colors glass ${
-            horizon1Count <= 10 
+            horizon1Count <= RULE_MAX_H1_PROJECTS 
               ? 'border-green-500/30 bg-green-500/10 text-green-700 dark:text-green-400' 
               : 'border-destructive/30 bg-destructive/10 text-destructive'
           }`}>
-            <div className={`mt-0.5 p-1 rounded-full ${horizon1Count <= 10 ? 'bg-green-500/20' : 'bg-destructive/20'}`}>
-              {horizon1Count <= 10 ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+            <div className={`mt-0.5 p-1 rounded-full ${horizon1Count <= RULE_MAX_H1_PROJECTS ? 'bg-green-500/20' : 'bg-destructive/20'}`}>
+              {horizon1Count <= RULE_MAX_H1_PROJECTS ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
             </div>
             <div>
               <strong className="block mb-1 text-foreground">Rule 1: The Horizon 1 Cap</strong>
-              No group is allowed to place more than 10 total projects into Horizon 1.
+              No group is allowed to place more than {RULE_MAX_H1_PROJECTS} total projects into Horizon 1.
               <div className="mt-2 font-medium">
-                Current: {horizon1Count} / 10
+                Current: {horizon1Count} / {RULE_MAX_H1_PROJECTS}
               </div>
             </div>
           </div>
@@ -355,7 +354,7 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
              </div>
              <div>
               <strong className="block mb-1 text-foreground">Rule 2: The Kill Box</strong>
-              At least 20% of projects must remain unplaced or be explicitly marked &quot;Kill/Defer&quot;.
+              At least {RULE_MIN_UNPLACED_PERCENTAGE * 100}% of projects must remain unplaced or be explicitly marked &quot;Kill/Defer&quot;.
               <div className="mt-2 font-medium">
                 Current: {killBoxCount} / {minUnplacedRequired} required
               </div>
@@ -363,7 +362,7 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
           </div>
 
           {/* Rule 3: Category Limits */}
-          {Object.entries(CATEGORY_LIMITS).map(([category, limit]) => {
+          {Object.entries(RULE_CATEGORY_LIMITS).map(([category, limit]) => {
             const currentH1InCategory = data.projects
               .filter(p => p.category === category)
               .filter(p => {
