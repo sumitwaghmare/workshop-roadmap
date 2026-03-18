@@ -344,6 +344,7 @@ export default function RoadmapGrid({
               const count = projects.filter(p => p.horizon === h.index).length;
               const limit = horizonLimits ? horizonLimits[h.index] : (h.index === 0 ? RULE_MAX_H1_PROJECTS : null);
               const isOverLimit = limit !== null && limit !== undefined && count > limit;
+              const isSeverelyOverLimit = limit !== null && limit !== undefined && count > limit + 2;
 
               return (
                 <div
@@ -358,9 +359,11 @@ export default function RoadmapGrid({
                     <span>{h.name}</span>
                     <span 
                       className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold tracking-normal leading-none shadow-sm ${
-                        isOverLimit 
+                        isSeverelyOverLimit
                           ? 'bg-destructive text-destructive-foreground' 
-                          : 'bg-background/80 text-foreground border border-border/50'
+                          : isOverLimit
+                            ? 'bg-amber-500 text-amber-950 dark:bg-amber-500/20 dark:text-amber-400 dark:border dark:border-amber-500/30'
+                            : 'bg-background/80 text-foreground border border-border/50'
                       }`}
                       title={limit !== null ? `Target: ${limit}` : `Placed: ${count}`}
                     >

@@ -113,9 +113,10 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
     
     if (horizon === 0 && !isCurrentlyH1) {
       const h1Count = Array.from(localPlacements.values()).filter(p => p.horizon === 0).length;
-      if (h1Count >= RULE_MAX_H1_PROJECTS) {
-        toast.error(`Rule 1: Maximum ${RULE_MAX_H1_PROJECTS} projects allowed in Horizon 1.`);
-        return;
+      if (h1Count >= RULE_MAX_H1_PROJECTS + 2) {
+        toast.error(`Horizon 1 cap severely exceeded.`);
+      } else if (h1Count >= RULE_MAX_H1_PROJECTS) {
+        toast('Horizon 1 cap exceeded.', { icon: '⚠️' });
       }
     }
 
@@ -329,14 +330,22 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
           <div className={`rounded-xl border p-4 text-sm flex items-start gap-3 transition-colors glass ${
             horizon1Count <= RULE_MAX_H1_PROJECTS 
               ? 'border-green-500/30 bg-green-500/10 text-green-700 dark:text-green-400' 
-              : 'border-destructive/30 bg-destructive/10 text-destructive'
+              : horizon1Count <= RULE_MAX_H1_PROJECTS + 2
+                ? 'border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400'
+                : 'border-destructive/30 bg-destructive/10 text-destructive'
           }`}>
-            <div className={`mt-0.5 p-1 rounded-full ${horizon1Count <= RULE_MAX_H1_PROJECTS ? 'bg-green-500/20' : 'bg-destructive/20'}`}>
-              {horizon1Count <= RULE_MAX_H1_PROJECTS ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+            <div className={`mt-0.5 p-1 rounded-full ${
+              horizon1Count <= RULE_MAX_H1_PROJECTS 
+                ? 'bg-green-500/20' 
+                : horizon1Count <= RULE_MAX_H1_PROJECTS + 2
+                  ? 'bg-amber-500/20'
+                  : 'bg-destructive/20'
+            }`}>
+              {horizon1Count <= RULE_MAX_H1_PROJECTS ? <CheckCircle2 className="w-4 h-4" /> : horizon1Count <= RULE_MAX_H1_PROJECTS + 2 ? <AlertCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
             </div>
             <div>
               <strong className="block mb-1 text-foreground">Rule 1: The Horizon 1 Cap</strong>
-              No group is allowed to place more than {RULE_MAX_H1_PROJECTS} total projects into Horizon 1.
+              Recommended maximum {RULE_MAX_H1_PROJECTS} total projects in Horizon 1.
               <div className="mt-2 font-medium">
                 Current: {horizon1Count} / {RULE_MAX_H1_PROJECTS}
               </div>
