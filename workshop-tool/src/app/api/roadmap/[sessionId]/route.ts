@@ -15,6 +15,15 @@ export async function GET(
     // Parse query params
     const { searchParams } = new URL(_req.url);
     const yAxisEnabled = searchParams.get("yAxis") !== "false";
+    const groupId = searchParams.get("groupId");
+
+    interface Placement {
+      projectId: string;
+      groupId: string;
+      groupName: string;
+      horizon: number | null;
+      status: string | null;
+    }
 
     // 1. Get session info
     const sessionRows = await query<{ active: boolean }>(
@@ -47,12 +56,7 @@ export async function GET(
     );
 
     // 4. Get all placements for this session with group names
-    const placements = await query<{ 
-      projectId: string; 
-      groupName: string; 
-      horizon: number | null; 
-      status: string | null 
-    }>(`
+    const placements = await query<Placement>(`
       SELECT p.*, g.name as groupName
       FROM Placement p
       JOIN \`Group\` g ON p.groupId = g.id
@@ -103,14 +107,25 @@ export async function GET(
         }
       }
 
+      // GROUP FILTER LOGIC (NEW)
+      let groupSpecificPlacement: Placement | null = null;
+      if (groupId) {
+        groupSpecificPlacement = placements.find(p => p.projectId === project.id && p.groupId === groupId) || null;
+      }
+
       // DETERMINISTIC LOGIC:
-      // If session is ACTIVE: Only use majority consensus (Consolidated Roadmap).
-      // If session is LOCKED: Use manual override (Final Roadmap), fallback to majority.
+      // If groupId is provided: Show EXACTLY what that group chose.
+      // Else if session is ACTIVE: Only use majority consensus (Consolidated Roadmap).
+      // Else if session is LOCKED: Use manual override (Final Roadmap), fallback to majority.
       let horizon: number | null = null;
       let status: string | null = null;
       const hasMajority = !!majorityCell;
 
-      if (sessionActive) {
+      if (groupId) {
+        // Group-specific view
+        horizon = groupSpecificPlacement ? groupSpecificPlacement.horizon : null;
+        status = groupSpecificPlacement ? (yAxisEnabled ? groupSpecificPlacement.status : null) : null;
+      } else if (sessionActive) {
         // Active session: consolidated view from live group votes
         horizon = majorityCell ? majorityCell.horizon : null;
         status = majorityCell ? majorityCell.status : null;
@@ -154,7 +169,11 @@ export async function GET(
 
       // If project is in Inbox (no horizon, or no status when yAxis is enabled), show all groups that voted for it
       if (horizon === null || (yAxisEnabled && status === null)) {
-        agreedGroups = projectPlacements.map(p => p.groupName);
+        if (groupId) {
+          agreedGroups = groupSpecificPlacement ? [groupSpecificPlacement.groupName] : [];
+        } else {
+          agreedGroups = projectPlacements.map((p) => p.groupName);
+        }
       }
 
       // Ensure groups are unique, especially on raw placement mapping

@@ -48,6 +48,7 @@ interface RoadmapGridProps {
   onCardClick?: (project: ProjectItem) => void;
   onCardDoubleClick?: (project: ProjectItem) => void;
   horizonLimits?: Record<number, number>;
+  allowInboxExpansion?: boolean;
 }
 
 // --- Draggable Project Card ---
@@ -58,6 +59,7 @@ function DraggableCard({
   compact,
   onCardClick,
   onCardDoubleClick,
+  isInbox = false,
 }: {
   project: ProjectItem;
   showGroupBadges?: boolean;
@@ -65,6 +67,7 @@ function DraggableCard({
   compact?: boolean;
   onCardClick?: (project: ProjectItem) => void;
   onCardDoubleClick?: (project: ProjectItem) => void;
+  isInbox?: boolean;
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: project.id,
@@ -76,6 +79,9 @@ function DraggableCard({
   const dragStyle = transform
     ? { transform: `translate(${transform.x}px, ${transform.y}px)`, opacity: isDragging ? 0.4 : 1 }
     : undefined;
+
+  const cardPadding = isInbox ? "px-2 py-1" : compact ? "px-2 py-1 text-xs" : "px-3 py-2.5 text-sm";
+  const fontSize = isInbox ? "text-[11px]" : compact ? "text-xs" : "text-sm";
 
   return (
     <div
@@ -96,17 +102,26 @@ function DraggableCard({
         ...dragStyle,
         ...(priorityColor ? { borderColor: priorityColor.border, backgroundColor: priorityColor.bg } : {})
       }}
-      className={`group relative rounded-lg border ${priorityColor ? 'border-opacity-100' : 'border-border'} bg-card/50 ${compact ? 'px-2 py-1 text-xs' : 'px-3 py-2.5 text-sm'} transition-all hover:bg-card hover:border-primary/30 hover:shadow-[0_0_15px_rgba(59,130,246,0.2)] ${
+      className={`group relative rounded-lg border ${priorityColor ? 'border-opacity-100' : 'border-border'} bg-card/50 ${cardPadding} ${fontSize} transition-all hover:bg-card hover:border-primary/30 hover:shadow-[0_0_15px_rgba(59,130,246,0.2)] ${
         readOnly ? "cursor-default" : "cursor-grab active:cursor-grabbing"
       } ${isDragging ? "z-50 ring-2 ring-primary bg-accent" : ""}`}
-      title={project.description || ""}
     >
+      {/* Custom Tooltip */}
+      <div className="absolute bottom-full left-1/2 mb-2 w-64 -translate-x-1/2 scale-0 rounded-lg border border-border bg-popover p-2 text-xs font-normal text-popover-foreground shadow-xl transition-all group-hover:scale-100 z-[100] pointer-events-none">
+        <div className="font-bold mb-1 text-blue-500">{project.name}</div>
+        {project.description ? (
+          <div className="text-muted-foreground leading-relaxed">{project.description}</div>
+        ) : (
+          <div className="italic text-muted-foreground/60">No description available</div>
+        )}
+        <div className="absolute -bottom-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-b border-r border-border bg-popover" />
+      </div>
+
       <div className="flex items-center gap-2">
         {project.icon ? (
           <i
-            className={`${project.icon} text-blue-400 text-lg leading-none`}
+            className={`${project.icon} text-blue-400 ${isInbox ? 'text-sm' : 'text-lg'} leading-none`}
             aria-hidden="true"
-            title={project.icon}
           />
         ) : null}
         <span className="truncate font-medium">{project.name}</span>
@@ -197,21 +212,48 @@ function DroppableCell({
 }
 
 // --- Inbox Drop Zone ---
-function InboxDropZone({ children, compact }: { children: React.ReactNode, compact?: boolean }) {
+function InboxDropZone({ 
+  children, 
+  isExpanded, 
+  onToggleExpand,
+  showExpandButton 
+}: { 
+  children: React.ReactNode, 
+  isExpanded: boolean,
+  onToggleExpand: () => void,
+  showExpandButton: boolean
+}) {
   const { isOver, setNodeRef } = useDroppable({ id: "inbox" });
+  
   return (
     <div
       ref={setNodeRef}
-      className={`${compact ? 'min-h-[60px] p-2' : 'min-h-[120px] p-4'} rounded-xl border border-dashed transition-all glass ${
+      className={`rounded-xl border border-dashed transition-all glass ${
         isOver
           ? "border-primary bg-primary/10 shadow-[0_0_20px_rgba(59,130,246,0.1)]"
-          : "border-border/50 bg-muted/30"
+          : "border-border/50 bg-muted/20"
       }`}
     >
-      <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-        Inbox — Unplaced Projects
+      <div className="flex items-center justify-between px-4 pt-3 mb-2">
+        <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/80">
+          Inbox — Unplaced Projects
+        </div>
+        {showExpandButton && (
+          <button
+            onClick={onToggleExpand}
+            className="text-[10px] font-bold uppercase tracking-wider text-blue-500 hover:text-blue-400 transition-colors bg-blue-500/10 px-2 py-1 rounded border border-blue-500/20"
+          >
+            {isExpanded ? "Collapse" : "Show all"}
+          </button>
+        )}
       </div>
-      <div className="flex flex-wrap gap-2">{children}</div>
+      <div 
+        className={`px-4 pb-4 overflow-hidden transition-all duration-500 ease-in-out ${
+          isExpanded ? "max-h-[2000px]" : "max-h-[105px]"
+        }`}
+      >
+        <div className="flex flex-wrap gap-2">{children}</div>
+      </div>
     </div>
   );
 }
@@ -230,8 +272,10 @@ export default function RoadmapGrid({
   onCardClick,
   onCardDoubleClick,
   horizonLimits,
+  allowInboxExpansion = false,
 }: RoadmapGridProps) {
   const [activeId, setActiveId] = React.useState<string | null>(null);
+  const [isInboxExpanded, setIsInboxExpanded] = React.useState(false);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -317,7 +361,11 @@ export default function RoadmapGrid({
         )}
 
         {/* Inbox */}
-        <InboxDropZone compact={compact}>
+        <InboxDropZone 
+          isExpanded={allowInboxExpansion ? isInboxExpanded : true}
+          onToggleExpand={() => setIsInboxExpanded(!isInboxExpanded)}
+          showExpandButton={allowInboxExpansion && inboxProjects.length > 10}
+        >
           {inboxProjects.map((p) => (
             <DraggableCard
               key={p.id}
@@ -327,6 +375,7 @@ export default function RoadmapGrid({
               compact={compact}
               onCardClick={onCardClick}
               onCardDoubleClick={onCardDoubleClick}
+              isInbox={true}
             />
           ))}
         </InboxDropZone>

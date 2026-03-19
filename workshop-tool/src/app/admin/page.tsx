@@ -160,6 +160,7 @@ export default function AdminPage() {
   const [filteredPriority, setFilteredPriority] = useState<string | null>(null);
   const [filteredUser, setFilteredUser] = useState<string | null>(null);
   const [filteredCategory, setFilteredCategory] = useState<string | null>(null);
+  const [filteredGroupId, setFilteredGroupId] = useState<string | null>(null);
 
   // Roadmap Item Details (locked session editing)
   const [selectedRoadmapItem, setSelectedRoadmapItem] = useState<RoadmapResult | null>(null);
@@ -199,8 +200,9 @@ export default function AdminPage() {
     setPlacements(await res.json());
   }, []);
 
-  const loadRoadmap = useCallback(async (sessionId: string, currentYAxis: boolean) => {
-    const res = await fetch(`/api/roadmap/${sessionId}?yAxis=${currentYAxis}`);
+  const loadRoadmap = useCallback(async (sessionId: string, currentYAxis: boolean, groupId: string | null = null) => {
+    const url = `/api/roadmap/${sessionId}?yAxis=${currentYAxis}${groupId ? `&groupId=${groupId}` : ""}`;
+    const res = await fetch(url);
     const data = await res.json();
     setRoadmapData(data || []);
   }, []);
@@ -226,19 +228,19 @@ export default function AdminPage() {
       loadProjects(activeSession.id);
       loadGroups(activeSession.id);
       loadPlacements(activeSession.id);
-      loadRoadmap(activeSession.id, yAxisEnabled);
+      loadRoadmap(activeSession.id, yAxisEnabled, filteredGroupId);
     }
-  }, [activeSession, authenticated, loadProjects, loadGroups, loadPlacements, loadRoadmap, yAxisEnabled]);
+  }, [activeSession, authenticated, loadProjects, loadGroups, loadPlacements, loadRoadmap, yAxisEnabled, filteredGroupId]);
 
   // Auto refresh
   useEffect(() => {
     if (!autoRefresh || !activeSession) return;
     const interval = setInterval(() => {
       loadPlacements(activeSession.id);
-      loadRoadmap(activeSession.id, yAxisEnabled);
+      loadRoadmap(activeSession.id, yAxisEnabled, filteredGroupId);
     }, refreshInterval * 1000 || 5000); 
     return () => clearInterval(interval);
-  }, [autoRefresh, refreshInterval, activeSession, loadPlacements, loadRoadmap, yAxisEnabled]);
+  }, [autoRefresh, refreshInterval, activeSession, loadPlacements, loadRoadmap, yAxisEnabled, filteredGroupId]);
 
   // CRUD: Sessions
   const createSession = async () => {
@@ -1422,10 +1424,36 @@ Group 3: Product`}
                     title="Enable Y-axis (Status) grouping"
                   />
                 </div>
-                <Button variant="outline" size="sm" onClick={() => activeSession && loadRoadmap(activeSession.id, yAxisEnabled)}>
+                <Button variant="outline" size="sm" onClick={() => activeSession && loadRoadmap(activeSession.id, yAxisEnabled, filteredGroupId)}>
                   Refresh Now
                 </Button>
               </div>
+            </div>
+
+            {/* Filter by Group */}
+            <div className="flex flex-wrap items-center gap-2 mb-2 p-3 bg-muted/30 rounded-xl border border-border/50">
+              <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground mr-2">View perspective:</span>
+              <Button
+                variant={filteredGroupId === null ? "default" : "outline"}
+                size="sm"
+                onClick={() => setFilteredGroupId(null)}
+                className="h-8 rounded-full text-xs font-bold"
+              >
+                Consolidated
+              </Button>
+              {groups.map((g) => (
+                <Button
+                  key={g.id}
+                  variant={filteredGroupId === g.id ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setFilteredGroupId(g.id)}
+                  className={`h-8 rounded-full text-xs font-bold ${
+                    filteredGroupId === g.id ? "bg-blue-600 hover:bg-blue-700" : "hover:border-blue-500/50 hover:text-blue-500"
+                  }`}
+                >
+                  {g.name}
+                </Button>
+              ))}
             </div>
 
             <RoadmapGrid
@@ -1469,6 +1497,7 @@ Group 3: Product`}
               compact={compactRoadmap}
               fitView={fitView}
               yAxisEnabled={yAxisEnabled}
+              allowInboxExpansion={true}
             />
           </TabsContent>
           </div>
