@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,8 +31,10 @@ import {
   Unlock,
   ChevronLeft,
   ChevronRight,
-  LayoutGrid
+  LayoutGrid,
+  Timer
 } from "lucide-react";
+import CountdownTimer from "@/components/countdown-timer";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 const PRIORITY_OPTIONS = [
@@ -155,7 +158,7 @@ export default function AdminPage() {
   const [compactRoadmap, setCompactRoadmap] = useState(false);
   const [fitView, setFitView] = useState(false);
   const [yAxisEnabled, setYAxisEnabled] = useState(true);
-  const [activeTab, setActiveTab] = useState<"projects" | "groups" | "table" | "roadmap">("projects");
+  const [activeTab, setActiveTab] = useState<"projects" | "groups" | "table" | "roadmap" | "timer">("projects");
   const [filteredBu, setFilteredBu] = useState<string | null>(null);
   const [filteredPriority, setFilteredPriority] = useState<string | null>(null);
   const [filteredUser, setFilteredUser] = useState<string | null>(null);
@@ -238,7 +241,7 @@ export default function AdminPage() {
     const interval = setInterval(() => {
       loadPlacements(activeSession.id);
       loadRoadmap(activeSession.id, yAxisEnabled, filteredGroupId);
-    }, refreshInterval * 1000 || 5000); 
+    }, refreshInterval * 1000 || 5000);
     return () => clearInterval(interval);
   }, [autoRefresh, refreshInterval, activeSession, loadPlacements, loadRoadmap, yAxisEnabled, filteredGroupId]);
 
@@ -797,6 +800,16 @@ export default function AdminPage() {
               <div className="h-2 w-2 rounded-full bg-muted-foreground/30 group-data-[state=active]:bg-white shrink-0"></div>
               {!sidebarCollapsed && <span>Projects</span>}
               {sidebarCollapsed && <span className="lg:hidden">Projects</span>}
+            </TabsTrigger>
+
+            <TabsTrigger 
+              value="timer" 
+              className={`w-full justify-start gap-3 data-[state=active]:bg-blue-600 data-[state=active]:text-white text-muted-foreground hover:text-foreground rounded-lg px-4 py-3 transition-all font-bold group ${sidebarCollapsed ? 'px-2' : ''}`}
+              title={sidebarCollapsed ? "Timer" : ""}
+            >
+              <Timer className="size-4 shrink-0" />
+              {!sidebarCollapsed && <span>Session Timer</span>}
+              {sidebarCollapsed && <span className="lg:hidden">Session Timer</span>}
             </TabsTrigger>
             <TabsTrigger 
               value="groups" 
@@ -1364,142 +1377,177 @@ Group 3: Product`}
           </TabsContent>
 
           {/* === ROADMAP VIEW === */}
-          <TabsContent value="roadmap" className="space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <h2 className="text-xl font-semibold">
-                  {activeSession.active ? "Consolidated Roadmap" : "Final Roadmap (Editable)"}
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  {activeSession.active
-                    ? "Projects placed by majority rule across all groups"
-                    : "Drag and drop to finalize the roadmap"}
-                </p>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 text-sm">
-                  <label className="text-muted-foreground">Auto-refresh:</label>
-                  <input
-                    type="checkbox"
-                    checked={autoRefresh}
-                    onChange={(e) => setAutoRefresh(e.target.checked)}
-                    className="rounded"
-                  />
-                  {autoRefresh && (
-                    <>
-                      <Input
-                        type="number"
-                        min={5}
-                        max={120}
-                        value={refreshInterval}
-                        onChange={(e) => setRefreshInterval(Number(e.target.value))}
-                        className="w-16"
+            <TabsContent value="roadmap" className="flex-1 min-h-0 bg-background/30 rounded-xl border border-border/50 p-4 relative">
+              {activeSession && (
+                <CountdownTimer sessionId={activeSession.id} variant="floating" />
+              )}
+              <div className="flex flex-col h-full">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h2 className="text-xl font-semibold">
+                      {activeSession.active ? "Consolidated Roadmap" : "Final Roadmap (Editable)"}
+                    </h2>
+                    <p className="text-sm text-muted-foreground">
+                      {activeSession.active
+                        ? "Projects placed by majority rule across all groups"
+                        : "Drag and drop to finalize the roadmap"}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 text-sm">
+                      <label className="text-muted-foreground">Auto-refresh:</label>
+                      <input
+                        type="checkbox"
+                        checked={autoRefresh}
+                        onChange={(e) => setAutoRefresh(e.target.checked)}
+                        className="rounded"
                       />
-                      <span className="text-muted-foreground">sec</span>
-                    </>
-                  )}
+                      {autoRefresh && (
+                        <>
+                          <Input
+                            type="number"
+                            min={5}
+                            max={120}
+                            value={refreshInterval}
+                            onChange={(e) => setRefreshInterval(Number(e.target.value))}
+                            className="w-16"
+                          />
+                          <span className="text-muted-foreground">sec</span>
+                        </>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 border-l border-border pl-3 ml-1">
+                      <label className="text-muted-foreground text-sm cursor-pointer whitespace-nowrap">Fit View:</label>
+                      <input
+                        type="checkbox"
+                        checked={fitView}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          setFitView(checked);
+                          setCompactRoadmap(checked);
+                          setSidebarCollapsed(checked);
+                        }}
+                        className="rounded cursor-pointer"
+                        title="Collapse sidebar, use compact grid, and show only filled cells"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2 border-l border-border pl-3 ml-1">
+                      <label className="text-muted-foreground text-sm cursor-pointer whitespace-nowrap">Y-Axis:</label>
+                      <input
+                        type="checkbox"
+                        checked={yAxisEnabled}
+                        onChange={(e) => setYAxisEnabled(e.target.checked)}
+                        className="rounded cursor-pointer"
+                        title="Enable Y-axis (Status) grouping"
+                      />
+                    </div>
+                    <Button variant="outline" size="sm" onClick={() => activeSession && loadRoadmap(activeSession.id, yAxisEnabled, filteredGroupId)}>
+                      Refresh Now
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 border-l border-border pl-3 ml-1">
-                  <label className="text-muted-foreground text-sm cursor-pointer whitespace-nowrap">Fit View:</label>
-                  <input
-                    type="checkbox"
-                    checked={fitView}
-                    onChange={(e) => {
-                      const checked = e.target.checked;
-                      setFitView(checked);
-                      setCompactRoadmap(checked);
-                      setSidebarCollapsed(checked);
-                    }}
-                    className="rounded cursor-pointer"
-                    title="Collapse sidebar, use compact grid, and show only filled cells"
-                  />
+
+                {/* Filter by Group */}
+                <div className="flex flex-wrap items-center gap-2 mb-2 p-3 bg-muted/30 rounded-xl border border-border/50">
+                  <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground mr-2">View perspective:</span>
+                  <Button
+                    variant={filteredGroupId === null ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setFilteredGroupId(null)}
+                    className="h-8 rounded-full text-xs font-bold"
+                  >
+                    Consolidated
+                  </Button>
+                  {groups.map((g) => (
+                    <Button
+                      key={g.id}
+                      variant={filteredGroupId === g.id ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setFilteredGroupId(g.id)}
+                      className={`h-8 rounded-full text-xs font-bold ${
+                        filteredGroupId === g.id ? "bg-blue-600 hover:bg-blue-700" : "hover:border-blue-500/50 hover:text-blue-500"
+                      }`}
+                    >
+                      {g.name}
+                    </Button>
+                  ))}
                 </div>
-                <div className="flex items-center gap-2 border-l border-border pl-3 ml-1">
-                  <label className="text-muted-foreground text-sm cursor-pointer whitespace-nowrap">Y-Axis:</label>
-                  <input
-                    type="checkbox"
-                    checked={yAxisEnabled}
-                    onChange={(e) => setYAxisEnabled(e.target.checked)}
-                    className="rounded cursor-pointer"
-                    title="Enable Y-axis (Status) grouping"
-                  />
-                </div>
-                <Button variant="outline" size="sm" onClick={() => activeSession && loadRoadmap(activeSession.id, yAxisEnabled, filteredGroupId)}>
-                  Refresh Now
-                </Button>
+
+                <RoadmapGrid
+                  projects={(roadmapData as RoadmapResult[])
+                    .filter((r) => r.horizon !== null && (!yAxisEnabled || r.status !== null))
+                    .map((r) => ({
+                      id: r.id,
+                      name: r.name,
+                      description: r.description,
+                      icon: r.icon,
+                      priority: r.priority,
+                      bu: r.bu,
+                      owner: r.owner,
+                      timeline: r.timeline,
+                      status: r.status,
+                      horizon: r.horizon,
+                      agreedGroups: r.agreedGroups,
+                      isPlaced: true,
+                      isPinned: r.pinnedHorizon !== null && r.pinnedHorizon !== undefined && !!r.pinnedStatus,
+                    }))}
+                  inboxProjects={(roadmapData as RoadmapResult[])
+                    .filter((r) => r.horizon === null || (yAxisEnabled && r.status === null))
+                    .map((r) => ({
+                      id: r.id,
+                      name: r.name,
+                      description: r.description,
+                      icon: r.icon,
+                      priority: r.priority,
+                      bu: r.bu,
+                      owner: r.owner,
+                      timeline: r.timeline,
+                      agreedGroups: r.agreedGroups,
+                      isPlaced: false,
+                      isPinned: r.pinnedHorizon !== null && r.pinnedHorizon !== undefined && !!r.pinnedStatus,
+                    }))}
+                  onDragEnd={handleFinalDragEnd}
+                  onCardClick={activeSession && !activeSession.active ? openRoadmapItemDetails : undefined}
+            onCardDoubleClick={activeSession && !activeSession.active ? handleFinalCardDoubleClick : undefined}
+                  readOnly={activeSession.active}
+                  showGroupBadges={true}
+                  compact={compactRoadmap}
+                  fitView={fitView}
+                  yAxisEnabled={yAxisEnabled}
+                  allowInboxExpansion={true}
+                />
               </div>
-            </div>
+            </TabsContent>
+            <TabsContent value="timer" className="flex-1 min-h-0 bg-background/30 rounded-xl border border-border/50 p-8">
+              {activeSession ? (
+                <div className="max-w-4xl mx-auto space-y-12">
+                  <div className="space-y-4">
+                    <h2 className="text-3xl font-black uppercase tracking-tight text-primary">Workshop Session Timer</h2>
+                    <p className="text-muted-foreground">Control the countdown for all participants. The timer will appear as a floating button on their roadmap views.</p>
+                  </div>
 
-            {/* Filter by Group */}
-            <div className="flex flex-wrap items-center gap-2 mb-2 p-3 bg-muted/30 rounded-xl border border-border/50">
-              <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground mr-2">View perspective:</span>
-              <Button
-                variant={filteredGroupId === null ? "default" : "outline"}
-                size="sm"
-                onClick={() => setFilteredGroupId(null)}
-                className="h-8 rounded-full text-xs font-bold"
-              >
-                Consolidated
-              </Button>
-              {groups.map((g) => (
-                <Button
-                  key={g.id}
-                  variant={filteredGroupId === g.id ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setFilteredGroupId(g.id)}
-                  className={`h-8 rounded-full text-xs font-bold ${
-                    filteredGroupId === g.id ? "bg-blue-600 hover:bg-blue-700" : "hover:border-blue-500/50 hover:text-blue-500"
-                  }`}
-                >
-                  {g.name}
-                </Button>
-              ))}
-            </div>
+                  <CountdownTimer sessionId={activeSession.id} variant="admin" />
 
-            <RoadmapGrid
-              projects={(roadmapData as RoadmapResult[])
-                .filter((r) => r.horizon !== null && (!yAxisEnabled || r.status !== null))
-                .map((r) => ({
-                  id: r.id,
-                  name: r.name,
-                  description: r.description,
-                  icon: r.icon,
-                  priority: r.priority,
-                  bu: r.bu,
-                  owner: r.owner,
-                  timeline: r.timeline,
-                  status: r.status,
-                  horizon: r.horizon,
-                  agreedGroups: r.agreedGroups,
-                  isPlaced: true,
-                  isPinned: r.pinnedHorizon !== null && r.pinnedHorizon !== undefined && !!r.pinnedStatus,
-                }))}
-              inboxProjects={(roadmapData as RoadmapResult[])
-                .filter((r) => r.horizon === null || (yAxisEnabled && r.status === null))
-                .map((r) => ({
-                  id: r.id,
-                  name: r.name,
-                  description: r.description,
-                  icon: r.icon,
-                  priority: r.priority,
-                  bu: r.bu,
-                  owner: r.owner,
-                  timeline: r.timeline,
-                  agreedGroups: r.agreedGroups,
-                  isPlaced: false,
-                  isPinned: r.pinnedHorizon !== null && r.pinnedHorizon !== undefined && !!r.pinnedStatus,
-                }))}
-              onDragEnd={handleFinalDragEnd}
-              onCardClick={activeSession && !activeSession.active ? openRoadmapItemDetails : undefined}
-        onCardDoubleClick={activeSession && !activeSession.active ? handleFinalCardDoubleClick : undefined}
-              readOnly={activeSession.active}
-              showGroupBadges={true}
-              compact={compactRoadmap}
-              fitView={fitView}
-              yAxisEnabled={yAxisEnabled}
-              allowInboxExpansion={true}
-            />
-          </TabsContent>
+                  <div className="pt-8 border-t border-border/50">
+                    <div className="flex items-center justify-between p-8 rounded-3xl bg-blue-600/10 border border-blue-600/20 shadow-2xl shadow-blue-500/10">
+                      <div className="space-y-2">
+                        <h3 className="text-2xl font-black text-blue-500 uppercase italic">Full Screen View</h3>
+                        <p className="text-sm text-blue-400/80 font-medium tracking-wide">Project this on the main screen for maximum impact and a sense of urgency.</p>
+                      </div>
+                      <Link href={`/admin/timer/${activeSession.id}`} target="_blank">
+                        <Button size="lg" className="bg-blue-600 hover:bg-blue-500 text-white font-black px-12 py-8 text-xl rounded-2xl shadow-xl shadow-blue-600/40 hover:scale-105 transition-all">
+                          GO FULL SCREEN
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="h-full flex items-center justify-center text-muted-foreground font-bold">
+                  Please select an active session first.
+                </div>
+              )}
+            </TabsContent>
           </div>
         </Tabs>
         </div>

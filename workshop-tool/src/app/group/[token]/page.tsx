@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import RoadmapGrid from "@/components/roadmap-grid";
+import CountdownTimer from "@/components/countdown-timer";
 import { 
   PROJECT_CATEGORIES, 
   RULE_MAX_H1_PROJECTS, 
@@ -422,6 +423,9 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
         </div>
       )}
 
+      {data.session.id && (
+        <CountdownTimer sessionId={data.session.id} variant="floating" />
+      )}
       <RoadmapGrid
         projects={placedProjects}
         inboxProjects={inboxProjects}
