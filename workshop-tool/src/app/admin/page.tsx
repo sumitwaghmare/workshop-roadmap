@@ -32,7 +32,8 @@ import {
   ChevronLeft,
   ChevronRight,
   LayoutGrid,
-  Timer
+  Timer,
+  RotateCcw
 } from "lucide-react";
 import CountdownTimer from "@/components/countdown-timer";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -416,6 +417,17 @@ export default function AdminPage() {
     await fetch(`/api/groups/${id}`, { method: "DELETE" });
     toast.success("Group deleted");
     if (activeSession) loadGroups(activeSession.id);
+  };
+
+  const resetGroupBoard = async (id: string, name: string) => {
+    if (!confirm(`Are you sure you want to reset the board for "${name}"? ALL their project placements will be cleared.`)) return;
+    const res = await fetch(`/api/groups/${id}/reset`, { method: "POST" });
+    if (res.ok) {
+      toast.success(`Board for "${name}" reset`);
+      if (activeSession) loadGroups(activeSession.id);
+    } else {
+      toast.error("Failed to reset board");
+    }
   };
 
   // Final roadmap save
@@ -1226,14 +1238,26 @@ Group 3: Product`}
                   <div className="p-5">
                     <div className="mb-4 flex items-center justify-between">
                       <h4 className="font-bold text-foreground text-lg group-hover:text-blue-500 transition-colors">{g.name}</h4>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-9 w-9 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-full transition-all"
-                        onClick={() => deleteGroup(g.id)}
-                      >
-                        <Trash2 className="h-5 w-5" />
-                      </Button>
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-9 w-9 text-muted-foreground hover:text-blue-500 hover:bg-blue-500/10 rounded-full transition-all"
+                          onClick={() => resetGroupBoard(g.id, g.name)}
+                          title="Reset Board"
+                        >
+                          <RotateCcw className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-9 w-9 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-full transition-all"
+                          onClick={() => deleteGroup(g.id)}
+                          title="Delete Group"
+                        >
+                          <Trash2 className="h-5 w-5" />
+                        </Button>
+                      </div>
                     </div>
                     
                     <div className="space-y-4">

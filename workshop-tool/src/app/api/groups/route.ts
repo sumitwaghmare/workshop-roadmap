@@ -18,11 +18,24 @@ export async function GET(req: Request) {
   }
 
   try {
-    const groups = await query<Record<string, unknown>>(
-      "SELECT * FROM \`Group\` WHERE sessionId = ? ORDER BY name ASC",
+    const groups = await query<any>(
+      `SELECT g.*, 
+        (SELECT COUNT(*) FROM Placement p WHERE p.groupId = g.id AND p.horizon IS NOT NULL) as placementsCount
+       FROM \`Group\` g 
+       WHERE g.sessionId = ? 
+       ORDER BY g.name ASC`,
       [sessionId]
     );
-    return NextResponse.json(groups);
+
+    // Map to include the _count structure expected by the frontend
+    const mappedGroups = groups.map(g => ({
+      ...g,
+      _count: {
+        placements: g.placementsCount || 0
+      }
+    }));
+
+    return NextResponse.json(mappedGroups);
   } catch (error: unknown) {
     console.error("GET /api/groups error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
