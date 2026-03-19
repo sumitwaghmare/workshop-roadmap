@@ -39,8 +39,10 @@ export async function GET(
       icon: string | null;
       priority: string | null;
       category: string | null;
+      pinnedHorizon: number | null;
+      pinnedStatus: string | null;
     }>(
-      "SELECT id, name, description, icon, priority, category FROM Project WHERE sessionId = ?",
+      "SELECT id, name, description, icon, priority, category, pinnedHorizon, pinnedStatus FROM Project WHERE sessionId = ?",
       [sessionId]
     );
 

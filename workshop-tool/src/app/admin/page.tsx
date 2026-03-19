@@ -62,6 +62,8 @@ interface Project {
   // Captures the group (or admin) that created this project
   createdBy?: string | null;
   createdAt?: string | null;
+  pinnedHorizon?: number | null;
+  pinnedStatus?: string | null;
 }
 
 interface Group {
@@ -95,6 +97,8 @@ interface RoadmapResult {
   agreedGroups: string[];
   isFinal: boolean;
   hasMajority: boolean;
+  pinnedHorizon?: number | null;
+  pinnedStatus?: string | null;
 }
 
 export default function AdminPage() {
@@ -118,6 +122,8 @@ export default function AdminPage() {
   const [projectPriority, setProjectPriority] = useState("");
   const [projectCategory, setProjectCategory] = useState("");
   const [projectBu, setProjectBu] = useState("");
+  const [projectPinnedHorizon, setProjectPinnedHorizon] = useState("");
+  const [projectPinnedStatus, setProjectPinnedStatus] = useState("");
 
   const stripIconTag = (val: string) => {
     if (!val) return val;
@@ -282,6 +288,8 @@ export default function AdminPage() {
           priority: projectPriority || null,
           category: projectCategory || null,
           bu: projectBu || null,
+          pinnedHorizon: projectPinnedHorizon !== "" ? parseInt(projectPinnedHorizon, 10) : null,
+          pinnedStatus: projectPinnedStatus || null,
         }),
       });
       toast.success("Project updated");
@@ -298,6 +306,8 @@ export default function AdminPage() {
           priority: projectPriority || null,
           category: projectCategory || null,
           bu: projectBu || null,
+          pinnedHorizon: projectPinnedHorizon !== "" ? parseInt(projectPinnedHorizon, 10) : null,
+          pinnedStatus: projectPinnedStatus || null,
         }),
       });
       toast.success("Project added");
@@ -310,6 +320,8 @@ export default function AdminPage() {
     setProjectPriority("");
     setProjectCategory("");
     setProjectBu("");
+    setProjectPinnedHorizon("");
+    setProjectPinnedStatus("");
     loadProjects(activeSession.id);
   };
 
@@ -1014,6 +1026,8 @@ export default function AdminPage() {
                     setEditProject(null);
                     setProjectName("");
                     setProjectDesc("");
+                    setProjectPinnedHorizon("");
+                    setProjectPinnedStatus("");
                     setProjectDialogOpen(true);
                   }}
                 >
@@ -1072,6 +1086,11 @@ export default function AdminPage() {
                           <div className="text-xs text-muted-foreground mt-1">
                             Added by <span className="font-medium text-foreground">{p.createdBy || "admin"}</span>
                           </div>
+                          {p.pinnedHorizon !== null && p.pinnedHorizon !== undefined && p.pinnedStatus && (
+                            <div className="text-xs text-amber-500 font-bold flex items-center gap-1.5 mt-2 bg-amber-500/10 px-2 py-1 rounded-md w-fit border border-amber-500/20">
+                              <Lock size={12} /> Pinned to {p.pinnedStatus} / H{p.pinnedHorizon + 1}
+                            </div>
+                          )}
                         </div>
                       </div>
                       <div className="flex gap-2">
@@ -1086,6 +1105,8 @@ export default function AdminPage() {
                             setProjectPriority(p.priority || "");
                             setProjectCategory(p.category || "");
                             setProjectBu(p.bu || "");
+                            setProjectPinnedHorizon(p.pinnedHorizon !== null && p.pinnedHorizon !== undefined ? String(p.pinnedHorizon) : "");
+                            setProjectPinnedStatus(p.pinnedStatus || "");
                             setProjectDialogOpen(true);
                           }}
                         >
@@ -1423,6 +1444,7 @@ Group 3: Product`}
                   horizon: r.horizon,
                   agreedGroups: r.agreedGroups,
                   isPlaced: true,
+                  isPinned: r.pinnedHorizon !== null && r.pinnedHorizon !== undefined && !!r.pinnedStatus,
                 }))}
               inboxProjects={(roadmapData as RoadmapResult[])
                 .filter((r) => r.horizon === null || (yAxisEnabled && r.status === null))
@@ -1437,6 +1459,7 @@ Group 3: Product`}
                   timeline: r.timeline,
                   agreedGroups: r.agreedGroups,
                   isPlaced: false,
+                  isPinned: r.pinnedHorizon !== null && r.pinnedHorizon !== undefined && !!r.pinnedStatus,
                 }))}
               onDragEnd={handleFinalDragEnd}
               onCardClick={activeSession && !activeSession.active ? openRoadmapItemDetails : undefined}
@@ -1524,6 +1547,36 @@ Group 3: Product`}
                   onChange={(e) => setProjectBu(e.target.value)}
                   placeholder="e.g., MCD"
                 />
+              </div>
+              <div className="space-y-2">
+                <Label>Pinned Horizon</Label>
+                <select
+                  value={projectPinnedHorizon}
+                  onChange={(e) => setProjectPinnedHorizon(e.target.value)}
+                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 outline-none"
+                >
+                  <option value="">(Not Pinned)</option>
+                  {[0, 1, 2].map((h) => (
+                    <option key={h} value={h}>
+                      Horizon {h + 1}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Pinned Status</Label>
+                <select
+                  value={projectPinnedStatus}
+                  onChange={(e) => setProjectPinnedStatus(e.target.value)}
+                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 outline-none"
+                >
+                  <option value="">(Not Pinned)</option>
+                  {STATUSES.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>

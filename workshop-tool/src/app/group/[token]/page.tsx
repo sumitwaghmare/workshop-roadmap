@@ -24,6 +24,8 @@ interface Project {
   icon?: string | null;
   priority?: string | null;
   category?: string | null;
+  pinnedHorizon?: number | null;
+  pinnedStatus?: string | null;
 }
 
 interface Placement {
@@ -105,6 +107,12 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
   ) => {
     if (!data?.session?.active) {
       toast.error("Session is no longer active — links have been killed");
+      return;
+    }
+
+    const project = data.projects.find(p => p.id === projectId);
+    if (project && project.pinnedHorizon !== null && project.pinnedHorizon !== undefined && !!project.pinnedStatus) {
+      toast.error("This project is pinned and cannot be moved.");
       return;
     }
 
@@ -245,11 +253,18 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
   // Build placed and inbox lists from local state
   const placedProjects = data.projects
     .filter((p) => {
+      const isPinned = p.pinnedHorizon !== null && p.pinnedHorizon !== undefined && !!p.pinnedStatus;
+      if (isPinned) return true;
       const placement = localPlacements.get(p.id);
       return placement && placement.status !== null && placement.horizon !== null;
     })
     .map((p) => {
-      const placement = localPlacements.get(p.id)!;
+      const isPinned = p.pinnedHorizon !== null && p.pinnedHorizon !== undefined && !!p.pinnedStatus;
+      const placement = localPlacements.get(p.id);
+      
+      const effectiveStatus = isPinned ? p.pinnedStatus : placement!.status;
+      const effectiveHorizon = isPinned ? p.pinnedHorizon : placement!.horizon;
+      
       return {
         id: p.id,
         name: p.name,
@@ -257,15 +272,18 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
         icon: p.icon ?? null,
         priority: p.priority ?? null,
         category: p.category ?? null,
-        status: placement.status,
-        horizon: placement.horizon,
+        status: effectiveStatus,
+        horizon: effectiveHorizon,
         agreedGroups: [data.group.name], // For group view, they only see their own placement as "agreed"
         isPlaced: true,
+        isPinned,
       };
     });
 
   const inboxProjects = data.projects
     .filter((p) => {
+      const isPinned = p.pinnedHorizon !== null && p.pinnedHorizon !== undefined && !!p.pinnedStatus;
+      if (isPinned) return false;
       const placement = localPlacements.get(p.id);
       return !placement || placement.status === null || placement.horizon === null;
     })
@@ -278,6 +296,7 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
       category: p.category ?? null,
       agreedGroups: [],
       isPlaced: false,
+      isPinned: false,
     }));
 
   const horizon1Count = placedProjects.filter((p) => p.horizon === 0).length;

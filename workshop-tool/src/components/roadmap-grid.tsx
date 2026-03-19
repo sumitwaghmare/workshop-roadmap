@@ -13,7 +13,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { Edit3, Trash2 } from "lucide-react";
+import { Edit3, Trash2, Lock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { STATUSES, HORIZONS, STATUS_COLORS, HORIZON_COLORS, PRIORITY_COLORS, StatusType, RULE_MAX_H1_PROJECTS } from "@/lib/constants";
 
@@ -32,6 +32,7 @@ export interface ProjectItem {
   status?: string | null;
   agreedGroups?: string[];
   isPlaced?: boolean;
+  isPinned?: boolean;
 }
 
 interface RoadmapGridProps {
@@ -67,7 +68,7 @@ function DraggableCard({
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: project.id,
-    disabled: readOnly,
+    disabled: readOnly || project.isPinned,
   });
 
   const priorityColor = project.priority && PRIORITY_COLORS[project.priority] ? PRIORITY_COLORS[project.priority] : null;
@@ -109,6 +110,7 @@ function DraggableCard({
           />
         ) : null}
         <span className="truncate font-medium">{project.name}</span>
+        {project.isPinned && <span title="Pinned by Admin"><Lock size={12} className="text-amber-500 mb-0.5" /></span>}
         {project.category && (
           <Badge className="mt-1 text-[10px]" variant="secondary">
             {project.category}
@@ -120,7 +122,7 @@ function DraggableCard({
           <Edit3 size={14} />
         </div>
       )}
-      {project.isPlaced && !readOnly && !isDragging && onCardDoubleClick && (
+      {project.isPlaced && !readOnly && !project.isPinned && !isDragging && onCardDoubleClick && (
         <button
           type="button"
           onPointerDown={(e) => e.stopPropagation()} // Prevents dnd-kit from intercepting the click as a drag
