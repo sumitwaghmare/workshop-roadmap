@@ -50,8 +50,9 @@ export async function GET(
       owner?: string | null;
       timeline?: string | null;
       category?: string | null;
+      createdAt: string | null;
     }>(
-      "SELECT id, name, description, icon, priority, bu, owner, timeline, category FROM Project WHERE sessionId = ?",
+      "SELECT id, name, description, icon, priority, bu, owner, timeline, category, createdAt FROM Project WHERE sessionId = ?",
       [sessionId]
     );
 

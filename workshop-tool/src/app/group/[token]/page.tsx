@@ -27,6 +27,7 @@ interface Project {
   category?: string | null;
   pinnedHorizon?: number | null;
   pinnedStatus?: string | null;
+  createdAt?: string | null;
 }
 
 interface Placement {
@@ -94,12 +95,29 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
         const res = await fetch(`/api/groups/by-token/${token}`);
         if (res.ok) {
           const d: GroupData = await res.json();
-          setData((prev) => prev ? { ...prev, projects: d.projects, session: d.session } : d);
+          
+          // Check for new projects
+          setData((prev) => {
+            if (prev) {
+              const newProjects = d.projects.filter(
+                (np) => !prev.projects.some((pp) => pp.id === np.id)
+              );
+              if (newProjects.length > 0) {
+                newProjects.forEach((p) => {
+                  toast.success(`New project available: ${p.name}`, {
+                    description: "Keep an eye on the roadmap!",
+                    icon: <div className="size-2 rounded-full bg-blue-500 animate-pulse-glow" />,
+                  });
+                });
+              }
+            }
+            return prev ? { ...prev, projects: d.projects, session: d.session } : d;
+          });
         }
       } catch { /* ignore */ }
     }, 5000);
     return () => clearInterval(interval);
-  }, [data?.session?.active, token]);
+  }, [data?.session?.id, data?.session?.active, data?.projects, token]);
 
   const handleDragEnd = async (
     projectId: string,
@@ -278,6 +296,7 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
         agreedGroups: [data.group.name], // For group view, they only see their own placement as "agreed"
         isPlaced: true,
         isPinned,
+        createdAt: p.createdAt,
       };
     });
 
@@ -298,6 +317,7 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
       agreedGroups: [],
       isPlaced: false,
       isPinned: false,
+      createdAt: p.createdAt,
     }));
 
   const horizon1Count = placedProjects.filter((p) => p.horizon === 0).length;

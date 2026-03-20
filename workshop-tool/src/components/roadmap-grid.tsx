@@ -33,6 +33,7 @@ export interface ProjectItem {
   agreedGroups?: string[];
   isPlaced?: boolean;
   isPinned?: boolean;
+  createdAt?: string | null;
 }
 
 interface RoadmapGridProps {
@@ -83,6 +84,15 @@ function DraggableCard({
   const cardPadding = isInbox ? "px-2 py-1" : compact ? "px-2 py-1 text-xs" : "px-3 py-2.5 text-sm";
   const fontSize = isInbox ? "text-[11px]" : compact ? "text-xs" : "text-sm";
 
+  // Check if project is "new" (added in the last 10 minutes)
+  const isNew = React.useMemo(() => {
+    if (!project.createdAt) return false;
+    const createdDate = new Date(project.createdAt).getTime();
+    const now = new Date().getTime();
+    // Use 60 minutes to be safe against different timezones or clock drifts
+    return Math.abs(now - createdDate) < 60 * 60 * 1000;
+  }, [project.createdAt]);
+
   return (
     <div
       ref={setNodeRef}
@@ -118,6 +128,12 @@ function DraggableCard({
       </div>
 
       <div className="flex items-center gap-2">
+        {isNew && (
+          <div 
+            className="size-2 shrink-0 rounded-full bg-red-500 animate-pulse-glow" 
+            title="Recently Added"
+          />
+        )}
         {project.icon ? (
           <i
             className={`${project.icon} text-blue-400 ${isInbox ? 'text-sm' : 'text-lg'} leading-none`}
@@ -132,6 +148,7 @@ function DraggableCard({
           </Badge>
         )}
       </div>
+
       {onCardClick && !readOnly && (
         <div className="absolute top-2 right-2 flex items-center justify-center rounded-full bg-background/80 p-1 text-slate-500 hover:text-slate-900 hover:bg-background">
           <Edit3 size={14} />

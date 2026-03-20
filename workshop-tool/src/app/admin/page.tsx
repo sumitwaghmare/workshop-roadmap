@@ -21,7 +21,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import RoadmapGrid, { ProjectItem } from "@/components/roadmap-grid";
-import { STATUSES, STATUS_COLORS, PRIORITY_COLORS, PROJECT_CATEGORIES, type StatusType } from "@/lib/constants";
+import { 
+  STATUSES, 
+  STATUS_COLORS, 
+  PRIORITY_COLORS, 
+  PROJECT_CATEGORIES, 
+  type StatusType,
+  RULE_MAX_H1_PROJECTS,
+  RULE_MIN_UNPLACED_PERCENTAGE,
+  RULE_CATEGORY_LIMITS
+} from "@/lib/constants";
 import { 
   ClipboardCopy,
   Copy,
@@ -33,7 +42,10 @@ import {
   ChevronRight,
   LayoutGrid,
   Timer,
-  RotateCcw
+  RotateCcw,
+  CheckCircle2,
+  XCircle,
+  AlertCircle
 } from "lucide-react";
 import CountdownTimer from "@/components/countdown-timer";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -103,6 +115,7 @@ interface RoadmapResult {
   hasMajority: boolean;
   pinnedHorizon?: number | null;
   pinnedStatus?: string | null;
+  createdAt?: string | null;
 }
 
 export default function AdminPage() {
@@ -153,8 +166,8 @@ export default function AdminPage() {
 
   // Roadmap view
   const [roadmapData, setRoadmapData] = useState<RoadmapResult[]>([]);
-  const [refreshInterval, setRefreshInterval] = useState(15);
-  const [autoRefresh, setAutoRefresh] = useState(false);
+  const [refreshInterval, setRefreshInterval] = useState(5);
+  const [autoRefresh, setAutoRefresh] = useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [compactRoadmap, setCompactRoadmap] = useState(false);
   const [fitView, setFitView] = useState(false);
@@ -181,17 +194,45 @@ export default function AdminPage() {
 
   // --- Data loaders (declared before useEffects) ---
   const loadSessions = useCallback(async () => {
-    const res = await fetch("/api/sessions");
-    const data = await res.json();
-    setSessions(data);
-    if (data.length > 0) {
-      setActiveSession((prev) => prev || data[0]);
+    try {
+      const res = await fetch("/api/sessions");
+      if (!res.ok) {
+        console.error("Failed to fetch sessions:", res.statusText);
+        setSessions([]);
+        return;
+      }
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setSessions(data);
+        if (data.length > 0) {
+          setActiveSession((prev) => prev || data[0]);
+        }
+      } else {
+        console.error("Invalid sessions data format:", data);
+        setSessions([]);
+      }
+    } catch (error) {
+      console.error("Error loading sessions:", error);
+      setSessions([]);
     }
   }, []);
 
   const loadProjects = useCallback(async (sessionId: string) => {
     const res = await fetch(`/api/projects?sessionId=${sessionId}`);
-    setProjects(await res.json());
+    const newProjects: Project[] = await res.json();
+    
+    setProjects((prev) => {
+      const added = newProjects.filter(np => !prev.some(pp => pp.id === np.id));
+      if (prev.length > 0 && added.length > 0) {
+        added.forEach(p => {
+          toast.success(`New project available: ${p.name}`, {
+            description: "A group or admin has added a new project.",
+            icon: <div className="size-2 rounded-full bg-blue-500 animate-pulse-glow" />,
+          });
+        });
+      }
+      return newProjects;
+    });
   }, []);
 
   const loadGroups = useCallback(async (sessionId: string) => {
@@ -240,11 +281,13 @@ export default function AdminPage() {
   useEffect(() => {
     if (!autoRefresh || !activeSession) return;
     const interval = setInterval(() => {
+      loadProjects(activeSession.id);
+      loadGroups(activeSession.id);
       loadPlacements(activeSession.id);
       loadRoadmap(activeSession.id, yAxisEnabled, filteredGroupId);
     }, refreshInterval * 1000 || 5000);
     return () => clearInterval(interval);
-  }, [autoRefresh, refreshInterval, activeSession, loadPlacements, loadRoadmap, yAxisEnabled, filteredGroupId]);
+  }, [autoRefresh, refreshInterval, activeSession, loadProjects, loadGroups, loadPlacements, loadRoadmap, yAxisEnabled, filteredGroupId]);
 
   // CRUD: Sessions
   const createSession = async () => {
@@ -683,6 +726,13 @@ export default function AdminPage() {
 
   if (!authenticated) return null;
 
+  const horizon1Count = (roadmapData as RoadmapResult[]).filter((r) => r.horizon === 0).length;
+  const totalProjectsCount = projects.length;
+  const minUnplacedRequired = Math.ceil(totalProjectsCount * RULE_MIN_UNPLACED_PERCENTAGE);
+  const killBoxCount = (roadmapData as RoadmapResult[]).filter((r) => 
+    r.horizon === null || (r.status && (r.status.toLowerCase().includes("kill") || r.status.toLowerCase().includes("defer")))
+  ).length;
+
   return (
     <div className="min-h-screen p-4 md:p-6 flex flex-col">
       {/* Header */}
@@ -701,13 +751,13 @@ export default function AdminPage() {
                 if (val === "NEW_SESSION") {
                   setIsNewSessionDialogOpen(true);
                 } else {
-                  const s = sessions.find((s) => s.id === val);
+                  const s = Array.isArray(sessions) ? sessions.find((s) => s.id === val) : null;
                   setActiveSession(s || null);
                 }
               }}
             >
               <option value="" disabled>Select Session...</option>
-              {sessions.map((s) => (
+              {Array.isArray(sessions) && sessions.map((s) => (
                 <option key={s.id} value={s.id} className="bg-background text-foreground">
                   {s.name} {s.active ? "🟢" : "🔴"}
                 </option>
@@ -1497,6 +1547,78 @@ Group 3: Product`}
                   ))}
                 </div>
 
+                {/* Rules */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-4 animate-in fade-in slide-in-from-top-4 duration-500 delay-150 fill-mode-both">
+                  {/* Rule 1 */}
+                  <div className={`rounded-xl border p-3 text-xs flex items-start gap-2.5 transition-colors glass ${
+                    horizon1Count <= RULE_MAX_H1_PROJECTS 
+                      ? 'border-green-500/30 bg-green-500/10 text-green-700 dark:text-green-400' 
+                      : horizon1Count <= RULE_MAX_H1_PROJECTS + 2
+                        ? 'border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400'
+                        : 'border-destructive/30 bg-destructive/10 text-destructive'
+                  }`}>
+                    <div className={`mt-0.5 p-1 rounded-full shrink-0 ${
+                      horizon1Count <= RULE_MAX_H1_PROJECTS 
+                        ? 'bg-green-500/20' 
+                        : horizon1Count <= RULE_MAX_H1_PROJECTS + 2
+                          ? 'bg-amber-500/20'
+                          : 'bg-destructive/20'
+                    }`}>
+                      {horizon1Count <= RULE_MAX_H1_PROJECTS ? <CheckCircle2 className="w-3.5 h-3.5" /> : horizon1Count <= RULE_MAX_H1_PROJECTS + 2 ? <AlertCircle className="w-3.5 h-3.5" /> : <XCircle className="w-3.5 h-3.5" />}
+                    </div>
+                    <div>
+                      <strong className="block mb-0.5 text-foreground">Rule 1: H1 Cap</strong>
+                      <span className="text-[10px] opacity-80">Max {RULE_MAX_H1_PROJECTS} total in Horizon 1.</span>
+                      <div className="mt-1.5 font-bold">
+                        Current: {horizon1Count} / {RULE_MAX_H1_PROJECTS}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Rule 2 */}
+                  <div className={`rounded-xl border p-3 text-xs flex items-start gap-2.5 transition-colors glass ${
+                    killBoxCount >= minUnplacedRequired 
+                      ? 'border-green-500/30 bg-green-500/10 text-green-700 dark:text-green-400' 
+                      : 'border-destructive/30 bg-destructive/10 text-destructive'
+                  }`}>
+                    <div className={`mt-0.5 p-1 rounded-full shrink-0 ${killBoxCount >= minUnplacedRequired ? 'bg-green-500/20' : 'bg-destructive/20'}`}>
+                      {killBoxCount >= minUnplacedRequired ? <CheckCircle2 className="w-3.5 h-3.5" /> : <AlertCircle className="w-3.5 h-3.5" />}
+                    </div>
+                    <div>
+                      <strong className="block mb-0.5 text-foreground">Rule 2: Kill Box</strong>
+                      <span className="text-[10px] opacity-80">Min {RULE_MIN_UNPLACED_PERCENTAGE * 100}% in Inbox or Kill/Defer.</span>
+                      <div className="mt-1.5 font-bold">
+                        Current: {killBoxCount} / {minUnplacedRequired} req
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Rule 3: Category Limits */}
+                  {Object.entries(RULE_CATEGORY_LIMITS).map(([category, limit]) => {
+                    const currentH1InCategory = (roadmapData as RoadmapResult[])
+                      .filter(r => r.category === category && r.horizon === 0).length;
+                    const isValid = currentH1InCategory <= limit;
+                    return (
+                      <div key={category} className={`rounded-xl border p-3 text-xs flex items-start gap-2.5 transition-colors glass ${
+                        isValid 
+                          ? 'border-green-500/30 bg-green-500/10 text-green-700 dark:text-green-400' 
+                          : 'border-destructive/30 bg-destructive/10 text-destructive'
+                      }`}>
+                        <div className={`mt-0.5 p-1 rounded-full shrink-0 ${isValid ? 'bg-green-500/20' : 'bg-destructive/20'}`}>
+                          {isValid ? <CheckCircle2 className="w-3.5 h-3.5" /> : <XCircle className="w-3.5 h-3.5" />}
+                        </div>
+                        <div>
+                          <strong className="block mb-0.5 text-foreground">Rule 3: {category}</strong>
+                          <span className="text-[10px] opacity-80">Max {limit} in Horizon 1.</span>
+                          <div className="mt-1.5 font-bold">
+                            Current: {currentH1InCategory} / {limit}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
                 <RoadmapGrid
                   projects={(roadmapData as RoadmapResult[])
                     .filter((r) => r.horizon !== null && (!yAxisEnabled || r.status !== null))
@@ -1514,6 +1636,7 @@ Group 3: Product`}
                       agreedGroups: r.agreedGroups,
                       isPlaced: true,
                       isPinned: r.pinnedHorizon !== null && r.pinnedHorizon !== undefined && !!r.pinnedStatus,
+                      createdAt: r.createdAt,
                     }))}
                   inboxProjects={(roadmapData as RoadmapResult[])
                     .filter((r) => r.horizon === null || (yAxisEnabled && r.status === null))
@@ -1529,6 +1652,7 @@ Group 3: Product`}
                       agreedGroups: r.agreedGroups,
                       isPlaced: false,
                       isPinned: r.pinnedHorizon !== null && r.pinnedHorizon !== undefined && !!r.pinnedStatus,
+                      createdAt: r.createdAt,
                     }))}
                   onDragEnd={handleFinalDragEnd}
                   onCardClick={activeSession && !activeSession.active ? openRoadmapItemDetails : undefined}
