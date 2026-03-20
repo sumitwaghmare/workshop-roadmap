@@ -15,13 +15,13 @@ export async function PATCH(
   try {
     await ensureProjectFields();
     const { id } = await params;
-    const { name, description, icon, priority, bu, owner, timeline, category, pinnedHorizon, pinnedStatus } = await req.json();
+    const { name, description, icon, priority, bu, owner, timeline, category, pinnedHorizon, pinnedStatus, spocCtg, spocBu } = await req.json();
 
     // Dynamically build the update query because pinnedHorizon might be correctly passed as null.
     // However, keeping with the original pattern:
     await query(
-      "UPDATE Project SET name = ?, description = ?, icon = ?, priority = ?, bu = ?, owner = ?, timeline = ?, category = ?, pinnedHorizon = ?, pinnedStatus = ? WHERE id = ?",
-      [name, description, icon || null, priority || null, bu || null, owner || null, timeline || null, category || null, pinnedHorizon !== undefined ? pinnedHorizon : null, pinnedStatus || null, id]
+      "UPDATE Project SET name = ?, description = ?, icon = ?, priority = ?, bu = ?, owner = ?, timeline = ?, category = ?, pinnedHorizon = ?, pinnedStatus = ?, spocCtg = ?, spocBu = ? WHERE id = ?",
+      [name, description, icon || null, priority || null, bu || null, owner || null, timeline || null, category || null, pinnedHorizon !== undefined ? pinnedHorizon : null, pinnedStatus || null, spocCtg || null, spocBu || null, id]
     );
 
     const [project] = await query<Record<string, unknown>>("SELECT * FROM Project WHERE id = ?", [id]);

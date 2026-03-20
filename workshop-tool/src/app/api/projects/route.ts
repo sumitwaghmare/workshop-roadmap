@@ -14,7 +14,7 @@ export async function GET(req: Request) {
 
   try {
     const projects = await query<Record<string, unknown>>(
-      "SELECT id, sessionId, name, description, icon, priority, bu, owner, timeline, category, createdBy, createdAt, pinnedHorizon, pinnedStatus FROM Project WHERE sessionId = ? ORDER BY createdAt ASC",
+      "SELECT id, sessionId, name, description, icon, priority, bu, owner, timeline, category, createdBy, createdAt, pinnedHorizon, pinnedStatus, spocCtg, spocBu FROM Project WHERE sessionId = ? ORDER BY createdAt ASC",
       [sessionId]
     );
     return NextResponse.json(projects);
@@ -27,11 +27,11 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     await ensureProjectFields();
-    const { sessionId, name, description, icon, priority, bu, owner, timeline, category, createdBy, pinnedHorizon, pinnedStatus } = await req.json();
+    const { sessionId, name, description, icon, priority, bu, owner, timeline, category, createdBy, pinnedHorizon, pinnedStatus, spocCtg, spocBu } = await req.json();
     const id = uuidv4();
     
     await query(
-      "INSERT INTO Project (id, sessionId, name, description, icon, priority, bu, owner, timeline, category, createdBy, createdAt, pinnedHorizon, pinnedStatus) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO Project (id, sessionId, name, description, icon, priority, bu, owner, timeline, category, createdBy, createdAt, pinnedHorizon, pinnedStatus, spocCtg, spocBu) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
       [
         id,
         sessionId,
@@ -47,6 +47,8 @@ export async function POST(req: Request) {
         new Date(),
         pinnedHorizon !== undefined ? pinnedHorizon : null,
         pinnedStatus || null,
+        spocCtg || null,
+        spocBu || null,
       ]
     );
 

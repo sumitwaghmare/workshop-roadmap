@@ -33,6 +33,8 @@ export interface ProjectItem {
   agreedGroups?: string[];
   isPlaced?: boolean;
   isPinned?: boolean;
+  spocCtg?: string | null;
+  spocBu?: string | null;
   createdAt?: string | null;
 }
 

@@ -80,6 +80,8 @@ interface Project {
   createdAt?: string | null;
   pinnedHorizon?: number | null;
   pinnedStatus?: string | null;
+  spocCtg?: string | null;
+  spocBu?: string | null;
 }
 
 interface Group {
@@ -115,6 +117,8 @@ interface RoadmapResult {
   hasMajority: boolean;
   pinnedHorizon?: number | null;
   pinnedStatus?: string | null;
+  spocCtg?: string | null;
+  spocBu?: string | null;
   createdAt?: string | null;
 }
 
@@ -141,6 +145,8 @@ export default function AdminPage() {
   const [projectBu, setProjectBu] = useState("");
   const [projectPinnedHorizon, setProjectPinnedHorizon] = useState("");
   const [projectPinnedStatus, setProjectPinnedStatus] = useState("");
+  const [projectSpocCtg, setProjectSpocCtg] = useState("");
+  const [projectSpocBu, setProjectSpocBu] = useState("");
 
   const stripIconTag = (val: string) => {
     if (!val) return val;
@@ -191,6 +197,8 @@ export default function AdminPage() {
   const [detailBu, setDetailBu] = useState<string | null>(null);
   const [detailOwner, setDetailOwner] = useState<string | null>(null);
   const [detailTimeline, setDetailTimeline] = useState<string | null>(null);
+  const [detailSpocCtg, setDetailSpocCtg] = useState<string | null>(null);
+  const [detailSpocBu, setDetailSpocBu] = useState<string | null>(null);
 
   // --- Data loaders (declared before useEffects) ---
   const loadSessions = useCallback(async () => {
@@ -339,6 +347,8 @@ export default function AdminPage() {
           bu: projectBu || null,
           pinnedHorizon: projectPinnedHorizon !== "" ? parseInt(projectPinnedHorizon, 10) : null,
           pinnedStatus: projectPinnedStatus || null,
+          spocCtg: projectSpocCtg || null,
+          spocBu: projectSpocBu || null,
         }),
       });
       toast.success("Project updated");
@@ -357,6 +367,8 @@ export default function AdminPage() {
           bu: projectBu || null,
           pinnedHorizon: projectPinnedHorizon !== "" ? parseInt(projectPinnedHorizon, 10) : null,
           pinnedStatus: projectPinnedStatus || null,
+          spocCtg: projectSpocCtg || null,
+          spocBu: projectSpocBu || null,
         }),
       });
       toast.success("Project added");
@@ -371,6 +383,8 @@ export default function AdminPage() {
     setProjectBu("");
     setProjectPinnedHorizon("");
     setProjectPinnedStatus("");
+    setProjectSpocCtg("");
+    setProjectSpocBu("");
     loadProjects(activeSession.id);
   };
 
@@ -528,6 +542,8 @@ export default function AdminPage() {
     setDetailBu(roadmapItem.bu ?? "");
     setDetailOwner(roadmapItem.owner ?? "");
     setDetailTimeline(roadmapItem.timeline ?? "");
+    setDetailSpocCtg(roadmapItem.spocCtg ?? "");
+    setDetailSpocBu(roadmapItem.spocBu ?? "");
     setDetailsDialogOpen(true);
   };
 
@@ -544,6 +560,8 @@ export default function AdminPage() {
       bu: detailBu?.trim() || null,
       owner: detailOwner?.trim() || null,
       timeline: detailTimeline?.trim() || null,
+      spocCtg: detailSpocCtg?.trim() || null,
+      spocBu: detailSpocBu?.trim() || null,
     };
 
     // Update project metadata
@@ -1105,6 +1123,8 @@ export default function AdminPage() {
                     setProjectDesc("");
                     setProjectPinnedHorizon("");
                     setProjectPinnedStatus("");
+                    setProjectSpocCtg("");
+                    setProjectSpocBu("");
                     setProjectDialogOpen(true);
                   }}
                 >
@@ -1163,6 +1183,18 @@ export default function AdminPage() {
                           <div className="text-xs text-muted-foreground mt-1">
                             Added by <span className="font-medium text-foreground">{p.createdBy || "admin"}</span>
                           </div>
+                          <div className="flex gap-4 mt-2">
+                             {p.spocCtg && (
+                               <div className="text-[10px] bg-slate-500/10 px-2 py-0.5 rounded text-slate-500 font-bold uppercase tracking-wider">
+                                 SPOC CTG: {p.spocCtg}
+                               </div>
+                             )}
+                             {p.spocBu && (
+                               <div className="text-[10px] bg-slate-500/10 px-2 py-0.5 rounded text-slate-500 font-bold uppercase tracking-wider">
+                                 SPOC BU: {p.spocBu}
+                               </div>
+                             )}
+                          </div>
                           {p.pinnedHorizon !== null && p.pinnedHorizon !== undefined && p.pinnedStatus && (
                             <div className="text-xs text-amber-500 font-bold flex items-center gap-1.5 mt-2 bg-amber-500/10 px-2 py-1 rounded-md w-fit border border-amber-500/20">
                               <Lock size={12} /> Pinned to {p.pinnedStatus} / H{p.pinnedHorizon + 1}
@@ -1183,8 +1215,10 @@ export default function AdminPage() {
                             setProjectCategory(p.category || "");
                             setProjectBu(p.bu || "");
                             setProjectPinnedHorizon(p.pinnedHorizon !== null && p.pinnedHorizon !== undefined ? String(p.pinnedHorizon) : "");
-                            setProjectPinnedStatus(p.pinnedStatus || "");
-                            setProjectDialogOpen(true);
+                             setProjectPinnedStatus(p.pinnedStatus || "");
+                             setProjectSpocCtg(p.spocCtg || "");
+                             setProjectSpocBu(p.spocBu || "");
+                             setProjectDialogOpen(true);
                           }}
                         >
                           Edit
@@ -1803,6 +1837,22 @@ Group 3: Product`}
                   ))}
                 </select>
               </div>
+              <div className="space-y-2">
+                <Label>SPOC CTG</Label>
+                <Input
+                  value={projectSpocCtg}
+                  onChange={(e) => setProjectSpocCtg(e.target.value)}
+                  placeholder="SPOC CTG name"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>SPOC BU</Label>
+                <Input
+                  value={projectSpocBu}
+                  onChange={(e) => setProjectSpocBu(e.target.value)}
+                  placeholder="SPOC BU name"
+                />
+              </div>
             </div>
           </div>
           <DialogFooter>
@@ -1916,6 +1966,22 @@ Group 3: Product`}
                   value={detailTimeline || ""}
                   onChange={(e) => setDetailTimeline(e.target.value)}
                   placeholder="e.g., Q1-Q2 2026"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>SPOC CTG</Label>
+                <Input
+                  value={detailSpocCtg || ""}
+                  onChange={(e) => setDetailSpocCtg(e.target.value)}
+                  placeholder="SPOC CTG name"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>SPOC BU</Label>
+                <Input
+                  value={detailSpocBu || ""}
+                  onChange={(e) => setDetailSpocBu(e.target.value)}
+                  placeholder="SPOC BU name"
                 />
               </div>
             </div>
