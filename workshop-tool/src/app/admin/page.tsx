@@ -45,7 +45,8 @@ import {
   RotateCcw,
   CheckCircle2,
   XCircle,
-  AlertCircle
+  AlertCircle,
+  Printer
 } from "lucide-react";
 import CountdownTimer from "@/components/countdown-timer";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -184,6 +185,7 @@ export default function AdminPage() {
   const [filteredUser, setFilteredUser] = useState<string | null>(null);
   const [filteredCategory, setFilteredCategory] = useState<string | null>(null);
   const [filteredGroupId, setFilteredGroupId] = useState<string | null>(null);
+  const [tableMode, setTableMode] = useState<"groups" | "consolidated">("groups");
 
   // Roadmap Item Details (locked session editing)
   const [selectedRoadmapItem, setSelectedRoadmapItem] = useState<RoadmapResult | null>(null);
@@ -227,7 +229,8 @@ export default function AdminPage() {
 
   const loadProjects = useCallback(async (sessionId: string) => {
     const res = await fetch(`/api/projects?sessionId=${sessionId}`);
-    const newProjects: Project[] = await res.json();
+    const data = await res.json();
+    const newProjects: Project[] = Array.isArray(data) ? data : [];
     
     setProjects((prev) => {
       const added = newProjects.filter(np => !prev.some(pp => pp.id === np.id));
@@ -245,19 +248,21 @@ export default function AdminPage() {
 
   const loadGroups = useCallback(async (sessionId: string) => {
     const res = await fetch(`/api/groups?sessionId=${sessionId}`);
-    setGroups(await res.json());
+    const data = await res.json();
+    setGroups(Array.isArray(data) ? data : []);
   }, []);
 
   const loadPlacements = useCallback(async (sessionId: string) => {
     const res = await fetch(`/api/placements?sessionId=${sessionId}`);
-    setPlacements(await res.json());
+    const data = await res.json();
+    setPlacements(Array.isArray(data) ? data : []);
   }, []);
 
   const loadRoadmap = useCallback(async (sessionId: string, currentYAxis: boolean, groupId: string | null = null) => {
     const url = `/api/roadmap/${sessionId}?yAxis=${currentYAxis}${groupId ? `&groupId=${groupId}` : ""}`;
     const res = await fetch(url);
     const data = await res.json();
-    setRoadmapData(data || []);
+    setRoadmapData(Array.isArray(data) ? data : []);
   }, []);
 
   // Check auth
@@ -753,9 +758,37 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen p-4 md:p-6 flex flex-col">
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media print {
+          .print\\:hidden { display: none !important; }
+          .no-print { display: none !important; }
+          body { background: white !important; padding: 0 !important; }
+          .min-h-screen { min-height: 0 !important; padding: 0 !important; }
+          .premium-table { 
+            width: 100% !important; 
+            border: 1px solid #e2e8f0 !important;
+            border-collapse: collapse !important;
+            color: black !important;
+          }
+          .premium-table th, .premium-table td {
+            border: 1px solid #e2e8f0 !important;
+            padding: 12px 8px !important;
+            color: black !important;
+            background: white !important;
+          }
+          .premium-table th {
+            background-color: #f8fafc !important;
+            font-weight: bold !important;
+          }
+          /* Hide standard dashboard elements during print */
+          header, footer, aside, nav, .TabsList, [role="tablist"], button:not(.print-visible) {
+            display: none !important;
+          }
+        }
+      ` }} />
       {/* Header */}
       <div className={`${fitView && activeTab === "roadmap" ? "hidden" : "mb-6"} flex flex-wrap items-center justify-between gap-4 border-b border-border/50 pb-4`}>
-        <div>
+        <div className="print:hidden">
           <h1 className="text-4xl font-extrabold text-blue-500 tracking-tight">Workshop Roadmap</h1>
           <p className="text-sm text-slate-500 dark:text-slate-300 font-bold">Admin Dashboard</p>
         </div>
@@ -860,7 +893,7 @@ export default function AdminPage() {
       {activeSession && (
         <div className="flex-1 flex min-h-0">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col lg:flex-row gap-8 relative h-full min-h-0">
-            <TabsList className={`flex lg:flex-col h-full min-h-0 bg-muted/50 p-1.5 gap-2 border border-border/50 rounded-xl transition-all duration-300 ease-in-out shrink-0 overflow-x-auto overflow-y-auto lg:overflow-visible ${sidebarCollapsed ? 'lg:w-16' : 'lg:w-64'} ${fitView && activeTab === "roadmap" ? 'hidden' : ''}`}>
+            <TabsList className={`flex lg:flex-col h-full min-h-0 bg-muted/50 p-1.5 gap-2 border border-border/50 rounded-xl transition-all duration-300 ease-in-out shrink-0 overflow-x-auto overflow-y-auto lg:overflow-visible ${sidebarCollapsed ? 'lg:w-16' : 'lg:w-64'} ${fitView && activeTab === "roadmap" ? 'hidden' : ''} print:hidden`}>
             <div className="hidden lg:flex justify-end mb-2 px-2 pt-1">
               <Button 
                 variant="ghost" 
@@ -1404,14 +1437,38 @@ Group 3: Product`}
 
           {/* === TABLE VIEW === */}
           <TabsContent value="table" className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between print:hidden">
               <div>
                 <h2 className="text-xl font-semibold">Table View</h2>
-                <p className="text-sm text-muted-foreground">
-                  See how each group has ranked every project
-                </p>
+                <div className="flex items-center gap-2 mt-1 bg-muted/50 p-1 rounded-lg border border-border/50">
+                  <Button 
+                    variant={tableMode === "groups" ? "default" : "ghost"} 
+                    size="sm" 
+                    onClick={() => setTableMode("groups")}
+                    className={`h-7 px-3 rounded-md text-[10px] uppercase font-black tracking-widest transition-all ${
+                      tableMode === "groups" ? "shadow-sm" : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Group Placements
+                  </Button>
+                  <Button 
+                    variant={tableMode === "consolidated" ? "default" : "ghost"} 
+                    size="sm" 
+                    onClick={() => setTableMode("consolidated")}
+                    className={`h-7 px-3 rounded-md text-[10px] uppercase font-black tracking-widest transition-all ${
+                      tableMode === "consolidated" ? "shadow-sm" : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Consolidated View
+                  </Button>
+                </div>
               </div>
               <div className="flex items-center gap-3">
+                {tableMode === "consolidated" && (
+                    <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-2 border-blue-500/30 hover:border-blue-500/60 bg-blue-500/5 text-blue-600 dark:text-blue-400">
+                      <Printer className="size-4" /> Print Results
+                    </Button>
+                )}
                 <div className="flex items-center gap-2 border-r border-border pr-3 mr-1">
                   <label className="text-muted-foreground text-sm cursor-pointer whitespace-nowrap">Y-Axis:</label>
                   <input
@@ -1428,60 +1485,111 @@ Group 3: Product`}
               </div>
             </div>
 
-            <div className="overflow-x-auto rounded-lg border border-border bg-card">
-              <Table className="premium-table">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="min-w-[200px]">Project</TableHead>
-                    {groups.map((g) => (
-                      <TableHead key={g.id} className="min-w-[140px] text-center">
-                        {g.name}
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {projects.map((p) => {
-                    const priorityColor = p.priority && PRIORITY_COLORS[p.priority] ? PRIORITY_COLORS[p.priority] : null;
-                    return (
-                      <TableRow 
-                        key={p.id}
-                        style={priorityColor ? { borderLeftColor: priorityColor.border, borderLeftWidth: '4px' } : {}}
-                      >
-                        <TableCell className="font-medium">{p.name}</TableCell>
-                        {groups.map((g) => {
-                          const placement = getPlacementForCell(p.id, g.id);
-                          const text = formatPlacement(placement);
-                          const status = placement?.status as StatusType | undefined;
-                          return (
-                            <TableCell key={g.id} className="text-center">
-                            {yAxisEnabled && status && STATUS_COLORS[status] ? (
-                              <Badge
-                                className="text-xs"
-                                style={{
-                                  backgroundColor: STATUS_COLORS[status].bg,
-                                  color: STATUS_COLORS[status].text,
-                                  borderColor: STATUS_COLORS[status].border,
-                                }}
-                              >
-                                {text}
-                              </Badge>
-                            ) : status && !yAxisEnabled && (placement?.horizon !== null) ? (
-                              <Badge variant="outline" className="text-xs">
-                                {text}
-                              </Badge>
-                            ) : (
-                              <span className="text-muted-foreground">{text}</span>
-                            )}
-                          </TableCell>
-                        );
-                      })}
+            {tableMode === "groups" ? (
+              <div className="overflow-x-auto rounded-lg border border-border bg-card">
+                <Table className="premium-table">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="min-w-[200px]">Project</TableHead>
+                      {groups.map((g) => (
+                        <TableHead key={g.id} className="min-w-[140px] text-center">
+                          {g.name}
+                        </TableHead>
+                      ))}
                     </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
+                  </TableHeader>
+                  <TableBody>
+                    {projects.map((p) => {
+                      const priorityColor = p.priority && PRIORITY_COLORS[p.priority] ? PRIORITY_COLORS[p.priority] : null;
+                      return (
+                        <TableRow 
+                          key={p.id}
+                          style={priorityColor ? { borderLeftColor: priorityColor.border, borderLeftWidth: '4px' } : {}}
+                        >
+                          <TableCell className="font-medium">{p.name}</TableCell>
+                          {groups.map((g) => {
+                            const placement = getPlacementForCell(p.id, g.id);
+                            const text = formatPlacement(placement);
+                            const status = placement?.status as StatusType | undefined;
+                            return (
+                              <TableCell key={g.id} className="text-center">
+                              {yAxisEnabled && status && STATUS_COLORS[status] ? (
+                                <Badge
+                                  className="text-xs"
+                                  style={{
+                                    backgroundColor: STATUS_COLORS[status].bg,
+                                    color: STATUS_COLORS[status].text,
+                                    borderColor: STATUS_COLORS[status].border,
+                                  }}
+                                >
+                                  {text}
+                                </Badge>
+                              ) : status && !yAxisEnabled && (placement?.horizon !== null) ? (
+                                <Badge variant="outline" className="text-xs">
+                                  {text}
+                                </Badge>
+                              ) : (
+                                <span className="text-muted-foreground">{text}</span>
+                              )}
+                            </TableCell>
+                          );
+                        })}
+                      </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <div className="overflow-x-auto rounded-lg border border-border bg-card print:border-none print:shadow-none">
+                <div className="hidden print:block mb-6">
+                  <h1 className="text-2xl font-bold text-center">Consolidated Workshop Roadmap</h1>
+                  <p className="text-center text-muted-foreground">{activeSession?.name} — {new Date().toLocaleDateString()}</p>
+                </div>
+                <Table className="premium-table print:text-black">
+                  <TableHeader className="print:bg-slate-100">
+                    <TableRow>
+                      <TableHead className="min-w-[200px]">Project</TableHead>
+                      <TableHead className="w-[150px]">Quadrant</TableHead>
+                      <TableHead className="w-[120px]">SPOC CTG</TableHead>
+                      <TableHead className="w-[120px]">SPOC BU</TableHead>
+                      <TableHead className="min-w-[300px]">Project Description</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {roadmapData.filter(item => item.horizon !== null).map((item) => (
+                      <TableRow key={item.id} className="print:break-inside-avoid">
+                        <TableCell className="font-bold align-top">{item.name}</TableCell>
+                        <TableCell className="align-top">
+                          {item.status ? (
+                            <div className="flex flex-col gap-1">
+                                <span className="font-semibold">{item.status}</span>
+                                <span className="text-xs text-muted-foreground">Horizon { (item.horizon ?? 0) + 1 }</span>
+                            </div>
+                          ) : item.horizon !== null ? (
+                            <span className="font-medium">H{item.horizon + 1}</span>
+                          ) : (
+                            <span className="text-sm text-muted-foreground italic">Inbox / Unplaced</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="align-top">{item.spocCtg || "—"}</TableCell>
+                        <TableCell className="align-top">{item.spocBu || "—"}</TableCell>
+                        <TableCell className="text-sm align-top whitespace-pre-wrap leading-relaxed">
+                          {item.description || "—"}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {roadmapData.length === 0 && (
+                        <TableRow>
+                            <TableCell colSpan={5} className="text-center py-10 text-muted-foreground italic">
+                                No projects found in this session.
+                            </TableCell>
+                        </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
           </TabsContent>
 
           {/* === ROADMAP VIEW === */}
