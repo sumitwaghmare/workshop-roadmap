@@ -46,7 +46,8 @@ import {
   CheckCircle2,
   XCircle,
   AlertCircle,
-  Printer
+  Printer,
+  ArrowUp
 } from "lucide-react";
 import CountdownTimer from "@/components/countdown-timer";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -201,6 +202,7 @@ export default function AdminPage() {
   const [detailTimeline, setDetailTimeline] = useState<string | null>(null);
   const [detailSpocCtg, setDetailSpocCtg] = useState<string | null>(null);
   const [detailSpocBu, setDetailSpocBu] = useState<string | null>(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   // --- Data loaders (declared before useEffects) ---
   const loadSessions = useCallback(async () => {
@@ -289,6 +291,15 @@ export default function AdminPage() {
       loadRoadmap(activeSession.id, yAxisEnabled, filteredGroupId);
     }
   }, [activeSession, authenticated, loadProjects, loadGroups, loadPlacements, loadRoadmap, yAxisEnabled, filteredGroupId]);
+
+  // Scroll to top visibility
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 300);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Auto refresh
   useEffect(() => {
@@ -737,6 +748,10 @@ export default function AdminPage() {
     if (!p || p.horizon === null) return "—";
     if (!yAxisEnabled || !p.status) return `H${(p.horizon ?? 0) + 1}`;
     return `${p.status} / H${(p.horizon ?? 0) + 1}`;
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   if (loading) {
@@ -2104,6 +2119,17 @@ Group 3: Product`}
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {showScrollTop && (
+        <Button
+          className="fixed bottom-6 right-6 h-12 w-12 rounded-full shadow-2xl z-50 print:hidden transition-transform hover:scale-110"
+          onClick={scrollToTop}
+          size="icon"
+          title="Scroll to Top"
+        >
+          <ArrowUp className="h-6 w-6" />
+        </Button>
+      )}
     </div>
   );
 }
