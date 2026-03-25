@@ -1521,7 +1521,44 @@ Group 3: Product`}
                           key={p.id}
                           style={priorityColor ? { borderLeftColor: priorityColor.border, borderLeftWidth: '4px' } : {}}
                         >
-                          <TableCell className="font-medium">{p.name}</TableCell>
+                          <TableCell className="font-medium group relative">
+                            <span className="cursor-help border-b border-dotted border-muted-foreground/50">{p.name}</span>
+                            {/* Simple Tooltip for Table */}
+                            <div className="absolute left-1/4 bottom-full mb-2 w-72 scale-0 rounded-xl border border-border bg-popover p-3 text-xs font-normal text-popover-foreground shadow-2xl transition-all group-hover:scale-100 z-[100] pointer-events-none origin-bottom glass text-left">
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="font-bold text-blue-500 text-sm truncate pr-2">{p.name}</div>
+                                {p.category && (
+                                  <Badge variant="secondary" className="px-1.5 py-0 text-[9px] h-4">
+                                    {p.category}
+                                  </Badge>
+                                )}
+                              </div>
+                              
+                              {p.description ? (
+                                <div className="text-muted-foreground leading-relaxed mb-3 line-clamp-4">{p.description}</div>
+                              ) : (
+                                <div className="italic text-muted-foreground/60 mb-3">No description available</div>
+                              )}
+
+                              <div className="flex flex-wrap gap-2 pt-2 border-t border-border/50">
+                                {p.priority && (
+                                  <div className="flex items-center gap-1">
+                                    <span className="text-[10px] text-muted-foreground">Priority:</span>
+                                    <span className="font-bold capitalize" style={{ color: PRIORITY_COLORS[p.priority as keyof typeof PRIORITY_COLORS]?.border }}>
+                                      {p.priority.replace(/-/g, " ")}
+                                    </span>
+                                  </div>
+                                )}
+                                {p.bu && (
+                                  <div className="flex items-center gap-1">
+                                    <span className="text-[10px] text-muted-foreground">BU:</span>
+                                    <span className="font-bold">{p.bu}</span>
+                                  </div>
+                                )}
+                              </div>
+                              <div className="absolute -bottom-1.5 left-4 h-3 w-3 rotate-45 border-b border-r border-border bg-popover" />
+                            </div>
+                          </TableCell>
                           {groups.map((g) => {
                             const placement = getPlacementForCell(p.id, g.id);
                             const text = formatPlacement(placement);

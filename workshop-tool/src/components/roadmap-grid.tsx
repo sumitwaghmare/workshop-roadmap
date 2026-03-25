@@ -91,103 +91,136 @@ function DraggableCard({
     if (!project.createdAt) return false;
     const createdDate = new Date(project.createdAt).getTime();
     const now = new Date().getTime();
-    // Use 60 minutes to be safe against different timezones or clock drifts
     return Math.abs(now - createdDate) < 60 * 60 * 1000;
   }, [project.createdAt]);
 
   return (
-    <div
-      ref={setNodeRef}
-      {...listeners}
-      {...attributes}
-      onClick={() => {
-        if (!readOnly && !isDragging && onCardClick) {
-          onCardClick(project);
-        }
-      }}
-      onDoubleClick={() => {
-        if (!readOnly && !isDragging && onCardDoubleClick) {
-          onCardDoubleClick(project);
-        }
-      }}
-      style={{
-        ...dragStyle,
-        ...(priorityColor ? { borderColor: priorityColor.border, backgroundColor: priorityColor.bg } : {})
-      }}
-      className={`group relative rounded-lg border ${priorityColor ? 'border-opacity-100' : 'border-border'} bg-card/50 ${cardPadding} ${fontSize} transition-all hover:bg-card hover:border-primary/30 hover:shadow-[0_0_15px_rgba(59,130,246,0.2)] ${
-        readOnly ? "cursor-default" : "cursor-grab active:cursor-grabbing"
-      } ${isDragging ? "z-50 ring-2 ring-primary bg-accent" : ""}`}
-    >
-      {/* Custom Tooltip */}
-      <div className="absolute bottom-full left-1/2 mb-2 w-64 -translate-x-1/2 scale-0 rounded-lg border border-border bg-popover p-2 text-xs font-normal text-popover-foreground shadow-xl transition-all group-hover:scale-100 z-[100] pointer-events-none">
-        <div className="font-bold mb-1 text-blue-500">{project.name}</div>
+    <div className="group relative">
+      {/* Custom Tooltip - Positioned BELOW the card to avoid header clipping */}
+      <div className="absolute top-full left-1/2 mt-2 w-72 -translate-x-1/2 opacity-0 -translate-y-1 invisible rounded-xl border border-border bg-popover p-3 text-xs font-normal text-popover-foreground shadow-2xl transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0 group-hover:visible z-[110] pointer-events-none origin-bottom glass">
+        <div className="flex items-center justify-between mb-2 text-left">
+          <div className="font-bold text-blue-500 text-sm truncate pr-2">{project.name}</div>
+          {project.category && (
+            <Badge variant="secondary" className="px-1.5 py-0 text-[9px] h-4">
+              {project.category}
+            </Badge>
+          )}
+        </div>
+        
         {project.description ? (
-          <div className="text-muted-foreground leading-relaxed">{project.description}</div>
+          <div className="text-muted-foreground text-left leading-relaxed mb-3 line-clamp-4">{project.description}</div>
         ) : (
-          <div className="italic text-muted-foreground/60">No description available</div>
+          <div className="italic text-muted-foreground/60 text-left mb-3">No description available</div>
         )}
-        <div className="absolute -bottom-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-b border-r border-border bg-popover" />
-      </div>
 
-      <div className="flex items-center gap-2">
-        {isNew && (
-          <div 
-            className="size-2 shrink-0 rounded-full bg-red-500 animate-pulse-glow" 
-            title="Recently Added"
-          />
-        )}
-        {project.icon ? (
-          <i
-            className={`${project.icon} text-blue-400 ${isInbox ? 'text-sm' : 'text-lg'} leading-none`}
-            aria-hidden="true"
-          />
-        ) : null}
-        <span className="truncate font-medium">{project.name}</span>
-        {project.isPinned && <span title="Pinned by Admin"><Lock size={12} className="text-amber-500 mb-0.5" /></span>}
-        {project.category && (
-          <Badge className="mt-1 text-[10px]" variant="secondary">
-            {project.category}
-          </Badge>
-        )}
-      </div>
-
-      {onCardClick && !readOnly && (
-        <div className="absolute top-2 right-2 flex items-center justify-center rounded-full bg-background/80 p-1 text-slate-500 hover:text-slate-900 hover:bg-background">
-          <Edit3 size={14} />
+        <div className="flex flex-wrap gap-2 pt-2 border-t border-border/50 text-left">
+          {project.priority && (
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] text-muted-foreground">Priority:</span>
+              <span className="font-bold capitalize text-[10px]" style={{ color: PRIORITY_COLORS[project.priority]?.border }}>
+                {project.priority.replace(/-/g, " ")}
+              </span>
+            </div>
+          )}
+          {project.bu && (
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] text-muted-foreground">BU:</span>
+              <span className="font-bold text-[10px]">{project.bu}</span>
+            </div>
+          )}
+          {project.owner && (
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] text-muted-foreground">Owner:</span>
+              <span className="font-bold text-[10px]">{project.owner}</span>
+            </div>
+          )}
         </div>
-      )}
-      {project.isPlaced && !readOnly && !project.isPinned && !isDragging && onCardDoubleClick && (
-        <button
-          type="button"
-          onPointerDown={(e) => e.stopPropagation()} // Prevents dnd-kit from intercepting the click as a drag
-          onClick={(e) => {
-            e.stopPropagation(); // Prevents the card's overall onClick (edit) from firing
+        
+        <div className="absolute -top-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-t border-l border-border bg-popover" />
+      </div>
+
+      <div
+        ref={setNodeRef}
+        {...listeners}
+        {...attributes}
+        title={project.description || project.name}
+        onClick={() => {
+          if (!readOnly && !isDragging && onCardClick) {
+            onCardClick(project);
+          }
+        }}
+        onDoubleClick={() => {
+          if (!readOnly && !isDragging && onCardDoubleClick) {
             onCardDoubleClick(project);
-          }}
-          className="absolute bottom-1.5 right-1.5 z-10 flex items-center justify-center rounded-md bg-background/80 p-1 text-muted-foreground transition-all hover:bg-red-500/20 hover:text-red-500 opacity-60 hover:opacity-100"
-          title="Move back to Inbox"
-        >
-          <Trash2 size={13} />
-        </button>
-      )}
-      {showGroupBadges && project.agreedGroups && project.agreedGroups.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-1.5">
-          {project.agreedGroups.map((gn, i) => {
-            // Extract number from "Group 1" or use initial
-            const match = gn.match(/\d+/);
-            const label = match ? `G${match[0]}` : gn.charAt(0).toUpperCase();
-            return (
-              <div
-                key={i}
-                title={gn}
-                className="flex size-5 items-center justify-center rounded-full bg-blue-500/20 text-[9px] font-bold text-blue-400 border border-blue-500/30 cursor-help"
-              >
-                {label}
-              </div>
-            );
-          })}
+          }
+        }}
+        style={{
+          ...dragStyle,
+          ...(priorityColor ? { borderColor: priorityColor.border, backgroundColor: priorityColor.bg } : {})
+        }}
+        className={`relative rounded-lg border ${priorityColor ? 'border-opacity-100' : 'border-border'} bg-card/50 ${cardPadding} ${fontSize} transition-all hover:bg-card hover:border-primary/30 hover:shadow-[0_0_15px_rgba(59,130,246,0.2)] ${
+          readOnly ? "cursor-default" : "cursor-grab active:cursor-grabbing"
+        } ${isDragging ? "z-50 ring-2 ring-primary bg-accent" : ""}`}
+      >
+        <div className="flex items-center gap-2">
+          {isNew && (
+            <div 
+              className="size-2 shrink-0 rounded-full bg-red-500 animate-pulse-glow" 
+              title="Recently Added"
+            />
+          )}
+          {project.icon ? (
+            <i
+              className={`${project.icon} text-blue-400 ${isInbox ? 'text-sm' : 'text-lg'} leading-none`}
+              aria-hidden="true"
+            />
+          ) : null}
+          <span className="truncate font-medium">{project.name}</span>
+          {project.isPinned && <span title="Pinned by Admin"><Lock size={12} className="text-amber-500 mb-0.5" /></span>}
+          {project.category && (
+            <Badge className="mt-1 text-[10px]" variant="secondary">
+              {project.category}
+            </Badge>
+          )}
         </div>
-      )}
+
+        {onCardClick && !readOnly && (
+          <div className="absolute top-2 right-2 flex items-center justify-center rounded-full bg-background/80 p-1 text-slate-500 hover:text-slate-900 hover:bg-background">
+            <Edit3 size={14} />
+          </div>
+        )}
+        {project.isPlaced && !readOnly && !project.isPinned && !isDragging && onCardDoubleClick && (
+          <button
+            type="button"
+            onPointerDown={(e) => e.stopPropagation()} 
+            onClick={(e) => {
+              e.stopPropagation(); 
+              onCardDoubleClick(project);
+            }}
+            className="absolute bottom-1.5 right-1.5 z-10 flex items-center justify-center rounded-md bg-background/80 p-1 text-muted-foreground transition-all hover:bg-red-500/20 hover:text-red-500 opacity-60 hover:opacity-100"
+            title="Move back to Inbox"
+          >
+            <Trash2 size={13} />
+          </button>
+        )}
+        {showGroupBadges && project.agreedGroups && project.agreedGroups.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {project.agreedGroups.map((gn, i) => {
+              const match = gn.match(/\d+/);
+              const label = match ? `G${match[0]}` : gn.charAt(0).toUpperCase();
+              return (
+                <div
+                  key={i}
+                  title={gn}
+                  className="flex size-5 items-center justify-center rounded-full bg-blue-500/20 text-[9px] font-bold text-blue-400 border border-blue-500/30 cursor-help"
+                >
+                  {label}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -212,7 +245,7 @@ function DroppableCell({
   return (
     <div
       ref={setNodeRef}
-      className={`flex ${compact ? 'min-h-[60px] p-1.5' : 'min-h-[180px] p-3'} flex-col gap-2 rounded-xl border transition-all relative overflow-hidden`}
+      className={`flex ${compact ? 'min-h-[100px] p-1.5 pt-12' : 'min-h-[220px] p-3 pt-16'} flex-col gap-2 rounded-xl border transition-all relative`}
       style={{
         background: isOver ? (status === "ANY_STATUS" ? "var(--accent)" : `${colors.bg.replace("0.15", "0.4")}`) : colors.bg,
         borderColor: isOver ? colors.border : "var(--color-border)",
@@ -221,7 +254,7 @@ function DroppableCell({
     >
       {isOver && (
         <div 
-          className="absolute inset-0 pointer-events-none opacity-20 animate-pulse" 
+          className="absolute inset-0 pointer-events-none opacity-20 animate-pulse rounded-xl" 
           style={{ background: `radial-gradient(circle at center, ${colors.border}, transparent)` }}
         />
       )}
@@ -267,8 +300,8 @@ function InboxDropZone({
         )}
       </div>
       <div 
-        className={`px-4 pb-4 overflow-hidden transition-all duration-500 ease-in-out ${
-          isExpanded ? "max-h-[2000px]" : "max-h-[105px]"
+        className={`px-4 pb-4 transition-all duration-500 ease-in-out pt-12 ${
+          isExpanded ? "max-h-[2000px]" : "max-h-[160px]"
         }`}
       >
         <div className="flex flex-wrap gap-2">{children}</div>
