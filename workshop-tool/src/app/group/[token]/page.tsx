@@ -166,7 +166,6 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
       }
     }
 
-    // Check category limits for Horizon 1
     if (horizon === 0 && !isCurrentlyH1) {
       const project = data.projects.find(p => p.id === projectId);
       if (project?.category) {
@@ -179,7 +178,9 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
               return placement?.horizon === 0;
             }).length;
           if (currentH1InCategory >= limit) {
-            toast.error(`Rule 3: Maximum ${limit} ${project.category} projects allowed in Horizon 1.`);
+            const ruleIndex = Object.keys(RULE_CATEGORY_LIMITS).indexOf(project.category);
+            const ruleNum = ruleIndex !== -1 ? 3 + ruleIndex : 3;
+            toast.error(`Rule ${ruleNum}: Maximum ${limit} ${project.category} projects allowed in Horizon 1.`);
             return;
           }
         }
@@ -417,8 +418,8 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
             </div>
           </div>
 
-          {/* Rule 3: Category Limits */}
-          {Object.entries(RULE_CATEGORY_LIMITS).map(([category, limit]) => {
+          {/* Category Limits */}
+          {Object.entries(RULE_CATEGORY_LIMITS).map(([category, limit], index) => {
             const currentH1InCategory = data.projects
               .filter(p => p.category === category)
               .filter(p => {
@@ -426,6 +427,7 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
                 return placement?.horizon === 0;
               }).length;
             const isValid = currentH1InCategory <= limit;
+            const ruleNum = 3 + index;
             return (
               <div key={category} className={`rounded-xl border p-4 text-sm flex items-start gap-3 transition-colors glass ${
                 isValid 
@@ -436,7 +438,7 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
                   {isValid ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
                 </div>
                 <div>
-                  <strong className="block mb-1 text-foreground">Rule 3: {category} Limit</strong>
+                  <strong className="block mb-1 text-foreground">Rule {ruleNum}: {category} Limit</strong>
                   Maximum {limit} {category} projects allowed in Horizon 1.
                   <div className="mt-2 font-medium">
                     Current: {currentH1InCategory} / {limit}

@@ -1787,11 +1787,12 @@ Group 3: Product`}
                     </div>
                   </div>
 
-                  {/* Rule 3: Category Limits */}
-                  {Object.entries(RULE_CATEGORY_LIMITS).map(([category, limit]) => {
+                  {/* Category Limits */}
+                  {Object.entries(RULE_CATEGORY_LIMITS).map(([category, limit], index) => {
                     const currentH1InCategory = (roadmapData as RoadmapResult[])
                       .filter(r => r.category === category && r.horizon === 0).length;
                     const isValid = currentH1InCategory <= limit;
+                    const ruleNum = 3 + index;
                     return (
                       <div key={category} className={`rounded-xl border p-3 text-xs flex items-start gap-2.5 transition-colors glass ${
                         isValid 
@@ -1802,7 +1803,7 @@ Group 3: Product`}
                           {isValid ? <CheckCircle2 className="w-3.5 h-3.5" /> : <XCircle className="w-3.5 h-3.5" />}
                         </div>
                         <div>
-                          <strong className="block mb-0.5 text-foreground">Rule 3: {category}</strong>
+                          <strong className="block mb-0.5 text-foreground">Rule {ruleNum}: {category} Limit</strong>
                           <span className="text-[10px] opacity-80">Max {limit} in Horizon 1.</span>
                           <div className="mt-1.5 font-bold">
                             Current: {currentH1InCategory} / {limit}
