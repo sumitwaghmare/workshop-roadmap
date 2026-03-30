@@ -54,6 +54,7 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
   const [newProjectName, setNewProjectName] = useState("");
   const [newProjectDesc, setNewProjectDesc] = useState("");
   const [newProjectCategory, setNewProjectCategory] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
 
   // Local placements for immediate UI updates
   const [localPlacements, setLocalPlacements] = useState<Map<string, { status: string | null; horizon: number | null }>>(
@@ -320,6 +321,10 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
       createdAt: p.createdAt,
     }));
 
+  const filteredInboxProjects = selectedCategory
+    ? inboxProjects.filter((p) => p.category === selectedCategory)
+    : inboxProjects;
+
   const horizon1Count = placedProjects.filter((p) => p.horizon === 0).length;
   const totalProjectsCount = data.projects.length;
   const minUnplacedRequired = Math.ceil(totalProjectsCount * RULE_MIN_UNPLACED_PERCENTAGE);
@@ -443,12 +448,38 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
         </div>
       )}
 
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-sm font-semibold text-foreground">Inbox category:</span>
+        <Button
+          size="sm"
+          variant={selectedCategory === "" ? "secondary" : "outline"}
+          onClick={() => setSelectedCategory("")}
+        >
+          All
+        </Button>
+        {PROJECT_CATEGORIES.map((ctg) => (
+          <Button
+            key={ctg.value}
+            size="sm"
+            variant={selectedCategory === ctg.value ? "secondary" : "outline"}
+            onClick={() => setSelectedCategory(ctg.value)}
+          >
+            {ctg.label}
+          </Button>
+        ))}
+        {selectedCategory && (
+          <span className="rounded-md border border-border px-2 py-1 text-xs text-muted-foreground">
+            {filteredInboxProjects.length} of {inboxProjects.length} in {selectedCategory}
+          </span>
+        )}
+      </div>
+
       {data.session.id && (
         <CountdownTimer sessionId={data.session.id} variant="floating" />
       )}
       <RoadmapGrid
         projects={placedProjects}
-        inboxProjects={inboxProjects}
+        inboxProjects={filteredInboxProjects}
         onDragEnd={handleDragEnd}
         onCardDoubleClick={handleCardDoubleClick}
         readOnly={!data.session.active}
