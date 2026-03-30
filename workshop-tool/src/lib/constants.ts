@@ -8,25 +8,25 @@ export const HORIZONS = [
 ] as const;
 
 export const STATUS_COLORS: Record<StatusType, { bg: string; text: string; border: string }> = {
-  PROTECT: { 
-    bg: "var(--status-protect-bg)", 
-    text: "var(--status-protect)", 
-    border: "var(--status-protect)" 
+  PROTECT: {
+    bg: "var(--status-protect-bg)",
+    text: "var(--status-protect)",
+    border: "var(--status-protect)"
   },
-  GROW: { 
-    bg: "var(--status-grow-bg)", 
-    text: "var(--status-grow)", 
-    border: "var(--status-grow)" 
+  GROW: {
+    bg: "var(--status-grow-bg)",
+    text: "var(--status-grow)",
+    border: "var(--status-grow)"
   },
-  EXPAND: { 
-    bg: "var(--status-expand-bg)", 
-    text: "var(--status-expand)", 
-    border: "var(--status-expand)" 
+  EXPAND: {
+    bg: "var(--status-expand-bg)",
+    text: "var(--status-expand)",
+    border: "var(--status-expand)"
   },
-  REIMAGINE: { 
-    bg: "var(--status-reimagine-bg)", 
-    text: "var(--status-reimagine)", 
-    border: "var(--status-reimagine)" 
+  REIMAGINE: {
+    bg: "var(--status-reimagine-bg)",
+    text: "var(--status-reimagine)",
+    border: "var(--status-reimagine)"
   },
 };
 
@@ -55,10 +55,12 @@ export const PROJECT_CATEGORIES = [
 export type ProjectCategory = (typeof PROJECT_CATEGORIES)[number]["value"];
 
 // The fraction of total groups that must agree on a placement for it to be considered consensus.
-export const MAJORITY_THRESHOLD = 0.5;
+export const MAJORITY_THRESHOLD = 0.3;
 
 // Validation Rules for group placements
 export const RULE_MAX_H1_PROJECTS = 12;
+export const RULE_MAX_H2_PROJECTS = 12;
+export const RULE_MAX_H3_PROJECTS = 12;
 export const RULE_MIN_UNPLACED_PERCENTAGE = 0.2; // 20%
 export const RULE_CATEGORY_LIMITS: Record<string, number> = {
   NPD: 5,

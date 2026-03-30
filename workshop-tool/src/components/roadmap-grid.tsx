@@ -15,7 +15,7 @@ import {
 } from "@dnd-kit/core";
 import { Edit3, Trash2, Lock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { STATUSES, HORIZONS, STATUS_COLORS, HORIZON_COLORS, PRIORITY_COLORS, StatusType, RULE_MAX_H1_PROJECTS } from "@/lib/constants";
+import { STATUSES, HORIZONS, STATUS_COLORS, HORIZON_COLORS, PRIORITY_COLORS, StatusType, RULE_MAX_H1_PROJECTS, RULE_MAX_H2_PROJECTS, RULE_MAX_H3_PROJECTS } from "@/lib/constants";
 
 // --- Types ---
 export interface ProjectItem {
@@ -445,7 +445,7 @@ export default function RoadmapGrid({
             <div /> {/* empty corner */}
             {visibleHorizons.map((h) => {
               const count = projects.filter(p => p.horizon === h.index).length;
-              const limit = horizonLimits ? horizonLimits[h.index] : (h.index === 0 ? RULE_MAX_H1_PROJECTS : null);
+              const limit = horizonLimits ? horizonLimits[h.index] : (h.index === 0 ? RULE_MAX_H1_PROJECTS : h.index === 1 ? RULE_MAX_H2_PROJECTS : h.index === 2 ? RULE_MAX_H3_PROJECTS : null);
               const isOverLimit = limit !== null && limit !== undefined && count > limit;
               const isSeverelyOverLimit = limit !== null && limit !== undefined && count > limit + 2;
 
