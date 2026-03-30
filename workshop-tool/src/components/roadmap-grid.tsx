@@ -300,7 +300,7 @@ function InboxDropZone({
         )}
       </div>
       <div 
-        className={`px-4 pb-4 transition-all duration-500 ease-in-out pt-12 ${
+        className={`px-4 pb-4 transition-all duration-500 ease-in-out pt-12 overflow-hidden ${
           isExpanded ? "max-h-[2000px]" : "max-h-[160px]"
         }`}
       >
