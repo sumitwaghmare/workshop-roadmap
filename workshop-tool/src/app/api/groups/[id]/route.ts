@@ -14,7 +14,13 @@ export async function DELETE(
 
   try {
     const { id } = await params;
+    
+    // Clean up associated placements
+    await query("DELETE FROM Placement WHERE groupId = ?", [id]);
+
+    // Delete the group
     await query("DELETE FROM \`Group\` WHERE id = ?", [id]);
+    
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
     console.error("DELETE /api/groups/[id] error:", error);
