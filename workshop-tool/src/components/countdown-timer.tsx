@@ -32,7 +32,7 @@ export default function CountdownTimer({ sessionId, variant = 'admin', onTimeUp 
   const [remaining, setRemaining] = useState<number>(0);
   const [isUrgent, setIsUrgent] = useState(false);
 
-  const syncInterval = variant === 'admin' ? 2000 : 15000;
+  const syncInterval = variant === 'admin' ? 5000 : 30000;
   const isUninitializedTimer = (value: TimerState) => {
     return value.status === 'stopped' && value.startedAt === null && value.elapsedAtPause === 0 && value.duration === 300;
   };

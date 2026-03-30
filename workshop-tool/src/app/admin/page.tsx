@@ -32,6 +32,10 @@ import {
   RULE_CATEGORY_LIMITS
 } from "@/lib/constants";
 import { 
+  getCachedData,
+  setCachedData
+} from "@/lib/utils";
+import { 
   ClipboardCopy,
   Copy,
   Lock,
@@ -178,6 +182,12 @@ export default function AdminPage() {
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [compactRoadmap, setCompactRoadmap] = useState(false);
+
+  // Loading states to prevent duplicate calls
+  const [loadingProjects, setLoadingProjects] = useState(false);
+  const [loadingGroups, setLoadingGroups] = useState(false);
+  const [loadingPlacements, setLoadingPlacements] = useState(false);
+  const [loadingRoadmap, setLoadingRoadmap] = useState(false);
   const [fitView, setFitView] = useState(false);
   const [yAxisEnabled, setYAxisEnabled] = useState(true);
   const [activeTab, setActiveTab] = useState<"projects" | "groups" | "table" | "roadmap" | "timer">("projects");
@@ -230,42 +240,83 @@ export default function AdminPage() {
   }, []);
 
   const loadProjects = useCallback(async (sessionId: string) => {
-    const res = await fetch(`/api/projects?sessionId=${sessionId}`);
-    const data = await res.json();
-    const newProjects: Project[] = Array.isArray(data) ? data : [];
-    
-    setProjects((prev) => {
-      const added = newProjects.filter(np => !prev.some(pp => pp.id === np.id));
-      if (prev.length > 0 && added.length > 0) {
-        added.forEach(p => {
-          toast.success(`New project available: ${p.name}`, {
-            description: "A group or admin has added a new project.",
-            icon: <div className="size-2 rounded-full bg-blue-500 animate-pulse-glow" />,
+    if (loadingProjects) return; // Prevent duplicate calls
+    const cacheKey = `projects-${sessionId}`;
+    const cached = getCachedData(cacheKey);
+    if (cached) {
+      setProjects(cached);
+      return;
+    }
+
+    setLoadingProjects(true);
+    try {
+      const res = await fetch(`/api/projects?sessionId=${sessionId}`);
+      const data = await res.json();
+      const newProjects: Project[] = Array.isArray(data) ? data : [];
+      
+      setProjects((prev) => {
+        const added = newProjects.filter(np => !prev.some(pp => pp.id === np.id));
+        if (prev.length > 0 && added.length > 0) {
+          added.forEach(p => {
+            toast.success(`New project available: ${p.name}`, {
+              description: "A group or admin has added a new project.",
+              icon: <div className="size-2 rounded-full bg-blue-500 animate-pulse-glow" />,
+            });
           });
-        });
-      }
-      return newProjects;
-    });
-  }, []);
+        }
+        return newProjects;
+      });
+      setCachedData(cacheKey, newProjects);
+    } finally {
+      setLoadingProjects(false);
+    }
+  }, [loadingProjects]);
 
   const loadGroups = useCallback(async (sessionId: string) => {
-    const res = await fetch(`/api/groups?sessionId=${sessionId}`);
-    const data = await res.json();
-    setGroups(Array.isArray(data) ? data : []);
-  }, []);
+    if (loadingGroups) return; // Prevent duplicate calls
+    setLoadingGroups(true);
+    try {
+      const res = await fetch(`/api/groups?sessionId=${sessionId}`);
+      const data = await res.json();
+      setGroups(Array.isArray(data) ? data : []);
+    } finally {
+      setLoadingGroups(false);
+    }
+  }, [loadingGroups]);
 
   const loadPlacements = useCallback(async (sessionId: string) => {
-    const res = await fetch(`/api/placements?sessionId=${sessionId}`);
-    const data = await res.json();
-    setPlacements(Array.isArray(data) ? data : []);
-  }, []);
+    if (loadingPlacements) return; // Prevent duplicate calls
+    setLoadingPlacements(true);
+    try {
+      const res = await fetch(`/api/placements?sessionId=${sessionId}`);
+      const data = await res.json();
+      setPlacements(Array.isArray(data) ? data : []);
+    } finally {
+      setLoadingPlacements(false);
+    }
+  }, [loadingPlacements]);
 
   const loadRoadmap = useCallback(async (sessionId: string, currentYAxis: boolean, groupId: string | null = null) => {
-    const url = `/api/roadmap/${sessionId}?yAxis=${currentYAxis}${groupId ? `&groupId=${groupId}` : ""}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    setRoadmapData(Array.isArray(data) ? data : []);
-  }, []);
+    if (loadingRoadmap) return; // Prevent duplicate calls
+    const cacheKey = `roadmap-${sessionId}-${currentYAxis}-${groupId || 'all'}`;
+    const cached = getCachedData(cacheKey);
+    if (cached) {
+      setRoadmapData(cached);
+      return;
+    }
+
+    setLoadingRoadmap(true);
+    try {
+      const url = `/api/roadmap/${sessionId}?yAxis=${currentYAxis}${groupId ? `&groupId=${groupId}` : ""}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      const roadmapData = Array.isArray(data) ? data : [];
+      setRoadmapData(roadmapData);
+      setCachedData(cacheKey, roadmapData);
+    } finally {
+      setLoadingRoadmap(false);
+    }
+  }, [loadingRoadmap]);
 
   // Check auth
   useEffect(() => {
@@ -309,7 +360,7 @@ export default function AdminPage() {
       loadGroups(activeSession.id);
       loadPlacements(activeSession.id);
       loadRoadmap(activeSession.id, yAxisEnabled, filteredGroupId);
-    }, refreshInterval * 1000 || 5000);
+    }, refreshInterval * 1000 || 15000);
     return () => clearInterval(interval);
   }, [autoRefresh, refreshInterval, activeSession, loadProjects, loadGroups, loadPlacements, loadRoadmap, yAxisEnabled, filteredGroupId]);
 

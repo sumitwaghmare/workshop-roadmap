@@ -87,8 +87,8 @@ export async function GET(
           projectId: project.id,
           groupId: g.id,
           groupName: g.name,
-          horizon: project.pinnedHorizon,
-          status: project.pinnedStatus,
+          horizon: project.pinnedHorizon!,
+          status: project.pinnedStatus!,
         }));
       }
 

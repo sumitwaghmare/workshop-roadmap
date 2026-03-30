@@ -116,7 +116,7 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
           });
         }
       } catch { /* ignore */ }
-    }, 5000);
+    }, 15000);
     return () => clearInterval(interval);
   }, [data?.session?.id, data?.session?.active, data?.projects, token]);
 
