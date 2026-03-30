@@ -19,21 +19,42 @@ interface CountdownTimerProps {
 }
 
 export default function CountdownTimer({ sessionId, variant = 'admin', onTimeUp }: CountdownTimerProps) {
-  const [timer, setTimer] = useState<TimerState | null>(null);
+  const [timer, setTimer] = useState<TimerState | null>(() => {
+    if (typeof window === "undefined") return null;
+    const stored = window.localStorage.getItem(`workshop-timer:${sessionId}`);
+    if (!stored) return null;
+    try {
+      return JSON.parse(stored) as TimerState;
+    } catch {
+      return null;
+    }
+  });
   const [remaining, setRemaining] = useState<number>(0);
   const [isUrgent, setIsUrgent] = useState(false);
+
+  const syncInterval = variant === 'admin' ? 2000 : 15000;
+  const isUninitializedTimer = (value: TimerState) => {
+    return value.status === 'stopped' && value.startedAt === null && value.elapsedAtPause === 0 && value.duration === 300;
+  };
 
   const fetchTimer = useCallback(async () => {
     try {
       const res = await fetch(`/api/timer?sessionId=${sessionId}`);
       if (res.ok) {
         const data: TimerState = await res.json();
+
+        // Prevent transient in-memory server reset from clobbering a running client timer.
+        if (timer && timer.status === 'running' && isUninitializedTimer(data) && !data.startedAt) {
+          return;
+        }
+
         setTimer(data);
+        window.localStorage.setItem(`workshop-timer:${sessionId}`, JSON.stringify(data));
       }
     } catch (e) {
       console.error("Failed to fetch timer", e);
     }
-  }, [sessionId]);
+  }, [sessionId, timer]);
 
   useEffect(() => {
     let mounted = true;
@@ -41,12 +62,12 @@ export default function CountdownTimer({ sessionId, variant = 'admin', onTimeUp 
       if (mounted) await fetchTimer();
     };
     initialFetch();
-    const interval = setInterval(fetchTimer, 2000); // Poll every 2s for sync
+    const interval = setInterval(fetchTimer, syncInterval); // Poll every 15s for non-admin clients, 2s for admin.
     return () => {
       mounted = false;
       clearInterval(interval);
     };
-  }, [fetchTimer]);
+  }, [fetchTimer, syncInterval]);
 
   useEffect(() => {
     if (!timer) return;
