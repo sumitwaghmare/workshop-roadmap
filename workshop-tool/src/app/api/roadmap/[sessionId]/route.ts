@@ -32,12 +32,12 @@ export async function GET(
     );
     const sessionActive = sessionRows[0]?.active ?? false;
 
-    // 2. Get total group count for this session
-    const groupRows = await query<{ total: number }>(
-      "SELECT COUNT(*) as total FROM `Group` WHERE sessionId = ?",
+    // 2. Get group details for this session (needed for pinned project consensus)
+    const groups = await query<{ id: string; name: string }>(
+      "SELECT id, name FROM `Group` WHERE sessionId = ?",
       [sessionId]
     );
-    const totalGroups = groupRows[0]?.total || 0;
+    const totalGroups = groups.length;
 
     // 3. Get all projects in this session
     const projects = await query<{
@@ -52,9 +52,11 @@ export async function GET(
       category?: string | null;
       spocCtg?: string | null;
       spocBu?: string | null;
+      pinnedHorizon?: number | null;
+      pinnedStatus?: string | null;
       createdAt: string | null;
     }>(
-      "SELECT id, name, description, icon, priority, bu, owner, timeline, category, spocCtg, spocBu, createdAt FROM Project WHERE sessionId = ?",
+      "SELECT id, name, description, icon, priority, bu, owner, timeline, category, spocCtg, spocBu, pinnedHorizon, pinnedStatus, createdAt FROM Project WHERE sessionId = ?",
       [sessionId]
     );
 
@@ -75,9 +77,20 @@ export async function GET(
 
     // 6. Compute roadmap for each project
     const roadmap = projects.map((project) => {
-      const projectPlacements = placements.filter(
-        (p) => p.projectId === project.id
-      );
+      const isPinned = project.pinnedHorizon !== null && project.pinnedStatus !== null;
+
+      let projectPlacements = placements.filter((p) => p.projectId === project.id);
+
+      // If the project is admin-pinned, treat it as pre-agreed placement in every group.
+      if (isPinned) {
+        projectPlacements = groups.map((g) => ({
+          projectId: project.id,
+          groupId: g.id,
+          groupName: g.name,
+          horizon: project.pinnedHorizon,
+          status: project.pinnedStatus,
+        }));
+      }
 
       const final = finalPlacements.find((f) => f.projectId === project.id);
 
@@ -117,12 +130,23 @@ export async function GET(
       }
 
       // DETERMINISTIC LOGIC:
-      // If groupId is provided: Show EXACTLY what that group chose.
+      // If groupId is provided: Show EXACTLY what that group chose (or pinned fallback).
       // Else if session is ACTIVE: Only use majority consensus (Consolidated Roadmap).
       // Else if session is LOCKED: Use manual override (Final Roadmap), fallback to majority.
       let horizon: number | null = null;
       let status: string | null = null;
       const hasMajority = !!majorityCell;
+
+      if (groupId && !groupSpecificPlacement && isPinned) {
+        // If pinned projects have no explicit per-group placement record, still show pin
+        groupSpecificPlacement = {
+          projectId: project.id,
+          groupId,
+          groupName: groups.find((g) => g.id === groupId)?.name || "",
+          horizon: project.pinnedHorizon,
+          status: project.pinnedStatus,
+        } as unknown as typeof placements[number];
+      }
 
       if (groupId) {
         // Group-specific view
