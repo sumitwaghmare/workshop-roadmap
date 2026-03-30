@@ -30,6 +30,13 @@ export const STATUS_COLORS: Record<StatusType, { bg: string; text: string; borde
   },
 };
 
+export const STATUS_DEFINITIONS: Record<StatusType, string> = {
+  PROTECT: "Maintain and secure current operations, mitigating risks and defending market share.",
+  GROW: "Scale existing products within current markets to drive increased revenue and volume.",
+  EXPAND: "Leverage capabilities to enter adjacent markets, new segments, or new channels.",
+  REIMAGINE: "Explore transformational innovations and entirely new business models for the future.",
+};
+
 export const HORIZON_COLORS = [
   { border: "#3b82f6", text: "#3b82f6" },
   { border: "#8b5cf6", text: "#8b5cf6" },

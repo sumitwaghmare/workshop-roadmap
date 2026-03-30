@@ -15,7 +15,7 @@ import {
 } from "@dnd-kit/core";
 import { Edit3, Trash2, Lock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { STATUSES, HORIZONS, STATUS_COLORS, HORIZON_COLORS, PRIORITY_COLORS, StatusType, RULE_MAX_H1_PROJECTS, RULE_MAX_H2_PROJECTS, RULE_MAX_H3_PROJECTS } from "@/lib/constants";
+import { STATUSES, HORIZONS, STATUS_COLORS, HORIZON_COLORS, PRIORITY_COLORS, StatusType, RULE_MAX_H1_PROJECTS, RULE_MAX_H2_PROJECTS, RULE_MAX_H3_PROJECTS, STATUS_DEFINITIONS } from "@/lib/constants";
 
 // --- Types ---
 export interface ProjectItem {
@@ -485,7 +485,7 @@ export default function RoadmapGrid({
               <React.Fragment key={status}>
                 {/* Row label */}
                 <div
-                  className={`flex items-center justify-center rounded-xl ${compact ? 'px-1.5 py-2' : 'px-3 py-4'} text-center font-bold uppercase tracking-wider`}
+                  className={`flex flex-col items-center justify-center gap-1.5 rounded-xl ${compact ? 'px-1.5 py-2' : 'px-3 py-4'} text-center tracking-wider`}
                   style={status === "ANY_STATUS" ? {
                     background: "var(--muted)",
                     color: "var(--muted-foreground)",
@@ -503,8 +503,17 @@ export default function RoadmapGrid({
                     letterSpacing: compact ? "1px" : "2px",
                     fontSize: compact ? "11px" : "14px",
                   }}
+                  title={status !== "ANY_STATUS" ? STATUS_DEFINITIONS[status as StatusType] : undefined}
                 >
-                  {status === "ANY_STATUS" ? "PLACED" : status}
+                  <span className="font-bold uppercase whitespace-nowrap">{status === "ANY_STATUS" ? "PLACED" : status}</span>
+                  {status !== "ANY_STATUS" && !compact && (
+                    <span 
+                      className="text-[10px] font-normal leading-snug opacity-80 normal-case"
+                      style={{ letterSpacing: "normal" }}
+                    >
+                      {STATUS_DEFINITIONS[status as StatusType]}
+                    </span>
+                  )}
                 </div>
 
                 {/* Cells */}
