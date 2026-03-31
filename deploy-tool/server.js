@@ -66,6 +66,49 @@ function run(cmd) {
   });
 }
 
+/**
+ * Clean robocopy output for UI display.
+ * Strips absolute source/target path prefixes and normalizes markers.
+ */
+function cleanRobocopyOutput(output, source, target) {
+  if (!output) return "";
+
+  const normSource = source.toLowerCase().replace(/\\/g, "/");
+  const normTarget = target.toLowerCase().replace(/\\/g, "/");
+
+  const lines = output.split(/\r?\n/);
+  const cleaned = lines.map(line => {
+    let l = line.trim();
+    if (!l) return null;
+
+    let normL = l.toLowerCase().replace(/\\/g, "/");
+    let found = false;
+
+    if (normL.includes(normSource)) {
+      const idx = normL.indexOf(normSource);
+      l = l.substring(0, idx) + l.substring(idx + source.length);
+      found = true;
+    }
+    
+    normL = l.toLowerCase().replace(/\\/g, "/");
+    if (normL.includes(normTarget)) {
+      const idx = normL.indexOf(normTarget);
+      l = l.substring(0, idx) + l.substring(idx + target.length);
+      found = true;
+    }
+
+    if (!found) return l;
+
+    // Clean up markers and leading slashes
+    l = l.replace(/(\*.*?\*\s+)[\\\/]+/, "$1");
+    l = l.replace(/^[\\\/]+/, "");
+    
+    return l.trim();
+  }).filter(l => l && l.length > 0);
+
+  return [...new Set(cleaned)].join("\n");
+}
+
 // ─── API Routes ─────────────────────────────────────────────────────
 
 /** Return current config */
@@ -107,7 +150,8 @@ app.post("/api/preview", async (_req, res) => {
         output += r.stdout;
         if (r.stderr) output += r.stderr;
       }
-      results.push({ target, output: output.trim() });
+      const cleaned = cleanRobocopyOutput(output.trim(), cfg.source, target);
+      results.push({ target, output: cleaned });
     }
 
     res.json({ results });
@@ -144,7 +188,8 @@ app.post("/api/deploy", async (_req, res) => {
       }
 
       logContent += output + "\n";
-      results.push({ target, output: output.trim() });
+      const cleaned = cleanRobocopyOutput(output.trim(), cfg.source, target);
+      results.push({ target, output: cleaned });
     }
 
     logContent += `\n${"=".repeat(60)}\nDeployment Finished: ${new Date().toLocaleString()}\n`;
