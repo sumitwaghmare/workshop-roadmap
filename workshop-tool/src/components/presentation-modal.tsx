@@ -193,7 +193,7 @@ export default function PresentationModal({
                 <div className="flex items-center gap-2 text-muted-foreground font-black uppercase tracking-widest text-xs">
                   <Info size={14} /> Description
                 </div>
-                <p className="text-2xl leading-relaxed text-foreground/90 font-medium bg-muted/20 p-8 rounded-3xl border border-border/50 shadow-inner">
+                <p className="text-2xl leading-relaxed text-foreground/90 font-medium bg-muted/20 p-8 rounded-3xl border border-border/50 shadow-inner max-h-[450px] overflow-y-auto whitespace-pre-wrap scrollbar-thin scrollbar-thumb-blue-500/20 scrollbar-track-transparent">
                   {currentProject.description || "No description provided for this project."}
                 </p>
               </div>
