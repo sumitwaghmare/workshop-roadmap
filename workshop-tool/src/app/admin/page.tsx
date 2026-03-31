@@ -55,6 +55,7 @@ import {
 } from "lucide-react";
 import CountdownTimer from "@/components/countdown-timer";
 import { ThemeToggle } from "@/components/theme-toggle";
+import PresentationModal from "@/components/presentation-modal";
 
 const PRIORITY_OPTIONS = [
   { value: "to-plan", label: "To Plan" },
@@ -213,6 +214,7 @@ export default function AdminPage() {
   const [detailSpocCtg, setDetailSpocCtg] = useState<string | null>(null);
   const [detailSpocBu, setDetailSpocBu] = useState<string | null>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [isPresenting, setIsPresenting] = useState(false);
 
   // --- Data loaders (declared before useEffects) ---
   const loadSessions = useCallback(async () => {
@@ -1229,6 +1231,14 @@ export default function AdminPage() {
                 >
                   + Add Project
                 </Button>
+                <Button 
+                  variant="outline" 
+                  className="bg-blue-600 hover:bg-blue-500 text-white border-blue-600 shadow-lg shadow-blue-500/20"
+                  onClick={() => setIsPresenting(true)}
+                  disabled={projects.length === 0}
+                >
+                   Launch Presentation
+                </Button>
               </div>
             </div>
 
@@ -2218,6 +2228,45 @@ Group 3: Product`}
         >
           <ArrowUp className="h-6 w-6" />
         </Button>
+      )}
+
+      {/* Presentation Modal */}
+      {isPresenting && (
+        <PresentationModal
+          isOpen={isPresenting}
+          onClose={() => setIsPresenting(false)}
+          projects={projects
+            .filter(p => {
+              let match = true;
+              if (filteredBu) {
+                if (filteredBu === "None") match = match && !p.bu;
+                else match = match && p.bu === filteredBu;
+              }
+              if (filteredPriority) {
+                if (filteredPriority === "None") match = match && !p.priority;
+                else match = match && p.priority === filteredPriority;
+              }
+              if (filteredCategory) {
+                if (filteredCategory === "None") match = match && !p.category;
+                else match = match && p.category === filteredCategory;
+              }
+              if (filteredUser) {
+                const user = p.createdBy || "admin";
+                match = match && user === filteredUser;
+              }
+              return match;
+            })
+            .map(p => {
+              // Merge with roadmap data to get horizon/status if available
+              const roadmapItem = (roadmapData as RoadmapResult[]).find(r => r.id === p.id);
+              return {
+                ...p,
+                horizon: roadmapItem?.horizon ?? null,
+                status: roadmapItem?.status ?? null
+              };
+            })
+          }
+        />
       )}
     </div>
   );
