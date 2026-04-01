@@ -198,6 +198,7 @@ export default function AdminPage() {
   const [filteredCategory, setFilteredCategory] = useState<string | null>(null);
   const [filteredSpocBu, setFilteredSpocBu] = useState<string | null>(null);
   const [filteredSpocCtg, setFilteredSpocCtg] = useState<string | null>(null);
+  const [filteredPinned, setFilteredPinned] = useState(false);
   const [filteredGroupId, setFilteredGroupId] = useState<string | null>(null);
   const [tableMode, setTableMode] = useState<"groups" | "consolidated">("groups");
 
@@ -1078,12 +1079,30 @@ export default function AdminPage() {
                       setFilteredCategory(null);
                       setFilteredSpocBu(null);
                       setFilteredSpocCtg(null);
+                      setFilteredPinned(false);
                     }}
                     className="block w-full text-left"
                   >
-                    <p className={`text-xs ${(!filteredBu && !filteredPriority && !filteredCategory && !filteredUser && !filteredSpocBu && !filteredSpocCtg) ? 'text-blue-500 font-bold' : 'text-muted-foreground'} hover:text-blue-400 transition-colors`}>{projects.length} Projects</p>
+                    <p className={`text-xs ${(!filteredBu && !filteredPriority && !filteredCategory && !filteredUser && !filteredSpocBu && !filteredSpocCtg && !filteredPinned) ? 'text-blue-500 font-bold' : 'text-muted-foreground'} hover:text-blue-400 transition-colors`}>{projects.length} Projects</p>
                   </button>
-                  <p className="text-xs text-muted-foreground mb-4">{groups.length} Groups</p>
+                  {(() => {
+                    const pinnedCount = projects.filter(p => p.pinnedHorizon !== null && p.pinnedHorizon !== undefined && !!p.pinnedStatus).length;
+                    if (pinnedCount === 0) return null;
+                    return (
+                      <button 
+                        onClick={() => {
+                          setFilteredPinned(!filteredPinned);
+                          setActiveTab("projects");
+                        }}
+                        className={`block w-full text-left mt-1`}
+                      >
+                        <p className={`text-[10px] ${filteredPinned ? 'text-amber-500 font-bold' : 'text-muted-foreground'} hover:text-amber-400 transition-colors flex items-center gap-1`}>
+                          <Lock size={10} /> {pinnedCount} Pinned Projects
+                        </p>
+                      </button>
+                    );
+                  })()}
+                  <p className="text-xs text-muted-foreground mb-4 mt-2">{groups.length} Groups</p>
                   
                   <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-1">Business Units</p>
                   <div className="mb-3">
@@ -1309,14 +1328,15 @@ export default function AdminPage() {
                   {filteredUser && <span className="text-blue-500 ml-1">[{filteredUser}]</span>}
                   {filteredSpocBu && <span className="text-blue-500 ml-1">[{filteredSpocBu}]</span>}
                   {filteredSpocCtg && <span className="text-blue-500 ml-1">[{filteredSpocCtg}]</span>}
+                  {filteredPinned && <span className="text-amber-500 ml-1">[Pinned]</span>}
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  {filteredBu || filteredPriority || filteredCategory || filteredUser || filteredSpocBu || filteredSpocCtg ? `Showing filtered projects` : 'Manage the list of projects/initiatives for this session'}
+                  {filteredBu || filteredPriority || filteredCategory || filteredUser || filteredSpocBu || filteredSpocCtg || filteredPinned ? `Showing filtered projects` : 'Manage the list of projects/initiatives for this session'}
                 </p>
               </div>
               <div className="flex gap-2">
-                {(filteredBu || filteredPriority || filteredCategory || filteredUser || filteredSpocBu || filteredSpocCtg) && (
-                  <Button variant="ghost" onClick={() => { setFilteredBu(null); setFilteredPriority(null); setFilteredCategory(null); setFilteredUser(null); setFilteredSpocBu(null); setFilteredSpocCtg(null); }}>
+                {(filteredBu || filteredPriority || filteredCategory || filteredUser || filteredSpocBu || filteredSpocCtg || filteredPinned) && (
+                  <Button variant="ghost" onClick={() => { setFilteredBu(null); setFilteredPriority(null); setFilteredCategory(null); setFilteredUser(null); setFilteredSpocBu(null); setFilteredSpocCtg(null); setFilteredPinned(false); }}>
                     Clear Filters
                   </Button>
                 )}
@@ -1372,6 +1392,9 @@ export default function AdminPage() {
                   if (filteredSpocCtg) {
                     if (filteredSpocCtg === "None") match = match && !p.spocCtg;
                     else match = match && p.spocCtg === filteredSpocCtg;
+                  }
+                  if (filteredPinned) {
+                    match = match && p.pinnedHorizon !== null && p.pinnedHorizon !== undefined && !!p.pinnedStatus;
                   }
                   return match;
                 })
@@ -2445,6 +2468,9 @@ Group 3: Product`}
               if (filteredSpocCtg) {
                 if (filteredSpocCtg === "None") match = match && !p.spocCtg;
                 else match = match && p.spocCtg === filteredSpocCtg;
+              }
+              if (filteredPinned) {
+                match = match && p.pinnedHorizon !== null && p.pinnedHorizon !== undefined && !!p.pinnedStatus;
               }
               return match;
             })
