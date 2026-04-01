@@ -825,6 +825,16 @@ export default function AdminPage() {
     r.horizon === null || (r.status && (r.status.toLowerCase().includes("kill") || r.status.toLowerCase().includes("defer")))
   ).length;
 
+  const matrixBUOrder = ["ADL", "MCD", "TCD"];
+  const extraBUs = Array.from(new Set(projects.map((p) => p.bu?.trim() || "None"))).filter(
+    (bu) => bu && !matrixBUOrder.includes(bu) && bu !== "None"
+  );
+  const buColumns = [...matrixBUOrder, ...extraBUs, "None"];
+  const priorityMatrixRows = [
+    ...PRIORITY_OPTIONS,
+    { value: "none", label: "No Priority" },
+  ];
+
   return (
     <div className="min-h-screen p-4 md:p-6 flex flex-col">
       <style dangerouslySetInnerHTML={{ __html: `
@@ -1019,6 +1029,15 @@ export default function AdminPage() {
               <div className="h-2 w-2 rounded-full bg-slate-300 dark:bg-slate-600 group-data-[state=active]:bg-white shrink-0"></div>
               {!sidebarCollapsed && <span>Roadmap View</span>}
               {sidebarCollapsed && <span className="lg:hidden">Roadmap View</span>}
+            </TabsTrigger>
+            <TabsTrigger 
+              value="matrix" 
+              className={`w-full justify-start gap-3 data-[state=active]:bg-emerald-600 data-[state=active]:text-white text-muted-foreground hover:text-foreground rounded-lg px-4 py-3 transition-all font-bold group ${sidebarCollapsed ? 'px-2' : ''}`}
+              title={sidebarCollapsed ? "BU/Priority Matrix" : ""}
+            >
+              <div className="h-2 w-2 rounded-full bg-slate-300 dark:bg-slate-600 group-data-[state=active]:bg-white shrink-0"></div>
+              {!sidebarCollapsed && <span>BU / Priority Matrix</span>}
+              {sidebarCollapsed && <span className="lg:hidden">BU Matrix</span>}
             </TabsTrigger>
             {!sidebarCollapsed && (
               <div className="mt-auto hidden lg:block p-4 space-y-4">
@@ -1383,6 +1402,62 @@ export default function AdminPage() {
                   No projects yet. Click &quot;+ Add Project&quot; to get started.
                 </div>
               )}
+            </div>
+          </TabsContent>
+
+          {/* === BU x Priority Matrix TAB === */}
+          <TabsContent value="matrix" className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold">BU x Priority Matrix</h2>
+                <p className="text-sm text-muted-foreground">Visualize project distribution over BU (ADL/MCD/TCD) and Priority.</p>
+              </div>
+              <div className="text-xs text-muted-foreground">Total Projects: {projects.length}</div>
+            </div>
+
+            <div className="overflow-x-auto rounded-lg border border-border bg-card p-2">
+              <table className="w-full min-w-[700px] table-fixed text-sm">
+                <thead>
+                  <tr className="bg-slate-100 dark:bg-slate-800">
+                    <th className="border border-border p-2 text-left">Priority \ BU</th>
+                    {buColumns.map((bu) => (
+                      <th key={bu} className="border border-border p-2 text-left">
+                        {bu}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {priorityMatrixRows.map((priorityRow) => (
+                    <tr key={priorityRow.value} className="hover:bg-slate-50 dark:hover:bg-slate-900">
+                      <td className="border border-border p-2 font-semibold">{priorityRow.label}</td>
+                      {buColumns.map((bu) => {
+                        const cellProjects = projects.filter((p) => {
+                          const projectBu = p.bu?.trim() || "None";
+                          const projectPriority = p.priority || "none";
+                          return projectBu === bu && projectPriority === priorityRow.value;
+                        });
+
+                        return (
+                          <td key={`${priorityRow.value}-${bu}`} className="border border-border p-2 align-top">
+                            <div className="text-xs text-muted-foreground mb-1">{cellProjects.length} item{cellProjects.length === 1 ? "" : "s"}</div>
+                            <ul className="space-y-1 max-h-40 overflow-y-auto">
+                              {cellProjects.slice(0, 6).map((project) => (
+                                <li key={project.id} className="rounded-md px-2 py-0.5 bg-blue-50 text-[11px] text-blue-700 dark:bg-blue-900/30 dark:text-blue-200">
+                                  {project.name}
+                                </li>
+                              ))}
+                              {cellProjects.length > 6 && (
+                                <li className="text-[11px] text-muted-foreground">+{cellProjects.length - 6} more</li>
+                              )}
+                            </ul>
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </TabsContent>
 
