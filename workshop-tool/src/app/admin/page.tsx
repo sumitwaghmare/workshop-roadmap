@@ -216,6 +216,7 @@ export default function AdminPage() {
   const [detailSpocBu, setDetailSpocBu] = useState<string | null>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isPresenting, setIsPresenting] = useState(false);
+  const [expandedCells, setExpandedCells] = useState<Record<string, boolean>>({});
 
   // --- Data loaders (declared before useEffects) ---
   const loadSessions = useCallback(async () => {
@@ -860,9 +861,34 @@ export default function AdminPage() {
             font-weight: bold !important;
           }
           /* Hide standard dashboard elements during print */
-          header, footer, aside, nav, .TabsList, [role="tablist"], button:not(.print-visible) {
+          header, footer, aside, nav, .TabsList, [role="tablist"], button:not(.print-visible), .no-print-force {
             display: none !important;
           }
+          /* Matrix specific print optimizations */
+          .matrix-table {
+            width: 100% !important;
+            table-layout: auto !important; /* Allow columns to adjust to content */
+            font-size: 10px !important;
+            border-collapse: collapse !important;
+          }
+          .matrix-table th, .matrix-table td {
+            padding: 4px !important;
+            border: 1px solid #cbd5e1 !important;
+            word-break: break-word !important;
+          }
+          .matrix-table ul {
+            max-height: none !important;
+            overflow: visible !important;
+          }
+          .matrix-table li {
+            background: transparent !important;
+            color: black !important;
+            border: 1px solid #e2e8f0 !important;
+            margin-bottom: 2px !important;
+            padding: 1px 4px !important;
+            page-break-inside: avoid !important;
+          }
+          .expand-toggle { display: none !important; }
         }
       ` }} />
       {/* Header */}
@@ -1416,10 +1442,10 @@ export default function AdminPage() {
             </div>
 
             <div className="overflow-x-auto rounded-lg border border-border bg-card p-2">
-              <table className="w-full min-w-[700px] table-fixed text-sm">
+              <table className="w-full min-w-[700px] table-fixed text-sm matrix-table">
                 <thead>
                   <tr className="bg-slate-100 dark:bg-slate-800">
-                    <th className="border border-border p-2 text-left">Priority \ BU</th>
+                    <th className="border border-border p-2 text-left w-32">Priority \ BU</th>
                     {buColumns.map((bu) => (
                       <th key={bu} className="border border-border p-2 text-left">
                         {bu}
@@ -1430,7 +1456,7 @@ export default function AdminPage() {
                 <tbody>
                   {priorityMatrixRows.map((priorityRow) => (
                     <tr key={priorityRow.value} className="hover:bg-slate-50 dark:hover:bg-slate-900">
-                      <td className="border border-border p-2 font-semibold">{priorityRow.label}</td>
+                      <td className="border border-border p-2 font-semibold bg-slate-50/50 dark:bg-slate-900/50">{priorityRow.label}</td>
                       {buColumns.map((bu) => {
                         const cellProjects = projects.filter((p) => {
                           const projectBu = p.bu?.trim() || "None";
@@ -1438,18 +1464,35 @@ export default function AdminPage() {
                           return projectBu === bu && projectPriority === priorityRow.value;
                         });
 
+                        const cellKey = `${priorityRow.value}-${bu}`;
+                        const isExpanded = expandedCells[cellKey];
+                        const displayProjects = isExpanded ? cellProjects : cellProjects.slice(0, 6);
+
                         return (
-                          <td key={`${priorityRow.value}-${bu}`} className="border border-border p-2 align-top">
-                            <div className="text-xs text-muted-foreground mb-1">{cellProjects.length} item{cellProjects.length === 1 ? "" : "s"}</div>
-                            <ul className="space-y-1 max-h-40 overflow-y-auto">
-                              {cellProjects.slice(0, 6).map((project) => (
-                                <li key={project.id} className="rounded-md px-2 py-0.5 bg-blue-50 text-[11px] text-blue-700 dark:bg-blue-900/30 dark:text-blue-200">
+                          <td key={cellKey} className="border border-border p-2 align-top">
+                            <div className="flex items-center justify-between mb-1.5">
+                              <span className="text-[10px] font-bold uppercase tracking-tight text-muted-foreground/70">
+                                {cellProjects.length} {cellProjects.length === 1 ? "item" : "items"}
+                              </span>
+                              {cellProjects.length > 6 && (
+                                <button 
+                                  onClick={() => setExpandedCells(prev => ({ ...prev, [cellKey]: !prev[cellKey] }))}
+                                  className="text-[10px] font-bold text-blue-500 hover:text-blue-600 transition-colors bg-blue-500/10 px-1.5 py-0.5 rounded expand-toggle shadow-sm"
+                                >
+                                  {isExpanded ? "Show less" : `+${cellProjects.length - 6} more`}
+                                </button>
+                              )}
+                            </div>
+                            <ul className={`space-y-1 ${!isExpanded ? "max-h-48" : ""} overflow-y-auto transition-all duration-300`}>
+                              {displayProjects.map((project) => (
+                                <li 
+                                  key={project.id} 
+                                  className="rounded-md px-2 py-1 bg-blue-50 text-[11px] text-blue-700 dark:bg-blue-900/30 dark:text-blue-200 border border-blue-100/50 dark:border-blue-800/50 leading-tight break-words"
+                                  title={project.name}
+                                >
                                   {project.name}
                                 </li>
                               ))}
-                              {cellProjects.length > 6 && (
-                                <li className="text-[11px] text-muted-foreground">+{cellProjects.length - 6} more</li>
-                              )}
                             </ul>
                           </td>
                         );
