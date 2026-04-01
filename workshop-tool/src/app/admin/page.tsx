@@ -197,6 +197,7 @@ export default function AdminPage() {
   const [filteredUser, setFilteredUser] = useState<string | null>(null);
   const [filteredCategory, setFilteredCategory] = useState<string | null>(null);
   const [filteredSpocBu, setFilteredSpocBu] = useState<string | null>(null);
+  const [filteredSpocCtg, setFilteredSpocCtg] = useState<string | null>(null);
   const [filteredGroupId, setFilteredGroupId] = useState<string | null>(null);
   const [tableMode, setTableMode] = useState<"groups" | "consolidated">("groups");
 
@@ -1076,10 +1077,11 @@ export default function AdminPage() {
                       setFilteredUser(null);
                       setFilteredCategory(null);
                       setFilteredSpocBu(null);
+                      setFilteredSpocCtg(null);
                     }}
                     className="block w-full text-left"
                   >
-                    <p className={`text-xs ${(!filteredBu && !filteredPriority && !filteredCategory && !filteredUser && !filteredSpocBu) ? 'text-blue-500 font-bold' : 'text-muted-foreground'} hover:text-blue-400 transition-colors`}>{projects.length} Projects</p>
+                    <p className={`text-xs ${(!filteredBu && !filteredPriority && !filteredCategory && !filteredUser && !filteredSpocBu && !filteredSpocCtg) ? 'text-blue-500 font-bold' : 'text-muted-foreground'} hover:text-blue-400 transition-colors`}>{projects.length} Projects</p>
                   </button>
                   <p className="text-xs text-muted-foreground mb-4">{groups.length} Groups</p>
                   
@@ -1195,6 +1197,32 @@ export default function AdminPage() {
                     })()}
                   </div>
 
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-1">SPOC CTG</p>
+                  <div className="mb-3">
+                    {Object.entries(
+                      projects.reduce((acc, p) => {
+                        const sctg = p.spocCtg || "None";
+                        acc[sctg] = (acc[sctg] || 0) + 1;
+                        return acc;
+                      }, {} as Record<string, number>)
+                    ).map(([sctg, count]) => (
+                      <button
+                        key={sctg}
+                        onClick={() => {
+                          setFilteredSpocCtg(sctg);
+                          setActiveTab("projects");
+                        }}
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium mr-1 mb-1 transition-all ${
+                          filteredSpocCtg === sctg 
+                            ? 'bg-blue-600 text-white' 
+                            : 'bg-blue-500/10 text-blue-500 hover:bg-blue-500/20'
+                        }`}
+                      >
+                        {sctg} ({count})
+                      </button>
+                    ))}
+                  </div>
+
                   <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-1">SPOC BU</p>
                   <div className="mb-3">
                     {Object.entries(
@@ -1280,14 +1308,15 @@ export default function AdminPage() {
                   )}
                   {filteredUser && <span className="text-blue-500 ml-1">[{filteredUser}]</span>}
                   {filteredSpocBu && <span className="text-blue-500 ml-1">[{filteredSpocBu}]</span>}
+                  {filteredSpocCtg && <span className="text-blue-500 ml-1">[{filteredSpocCtg}]</span>}
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  {filteredBu || filteredPriority || filteredCategory || filteredUser || filteredSpocBu ? `Showing filtered projects` : 'Manage the list of projects/initiatives for this session'}
+                  {filteredBu || filteredPriority || filteredCategory || filteredUser || filteredSpocBu || filteredSpocCtg ? `Showing filtered projects` : 'Manage the list of projects/initiatives for this session'}
                 </p>
               </div>
               <div className="flex gap-2">
-                {(filteredBu || filteredPriority || filteredCategory || filteredUser || filteredSpocBu) && (
-                  <Button variant="ghost" onClick={() => { setFilteredBu(null); setFilteredPriority(null); setFilteredCategory(null); setFilteredUser(null); setFilteredSpocBu(null); }}>
+                {(filteredBu || filteredPriority || filteredCategory || filteredUser || filteredSpocBu || filteredSpocCtg) && (
+                  <Button variant="ghost" onClick={() => { setFilteredBu(null); setFilteredPriority(null); setFilteredCategory(null); setFilteredUser(null); setFilteredSpocBu(null); setFilteredSpocCtg(null); }}>
                     Clear Filters
                   </Button>
                 )}
@@ -1339,6 +1368,10 @@ export default function AdminPage() {
                   if (filteredSpocBu) {
                     if (filteredSpocBu === "None") match = match && !p.spocBu;
                     else match = match && p.spocBu === filteredSpocBu;
+                  }
+                  if (filteredSpocCtg) {
+                    if (filteredSpocCtg === "None") match = match && !p.spocCtg;
+                    else match = match && p.spocCtg === filteredSpocCtg;
                   }
                   return match;
                 })
@@ -2408,6 +2441,10 @@ Group 3: Product`}
               if (filteredSpocBu) {
                 if (filteredSpocBu === "None") match = match && !p.spocBu;
                 else match = match && p.spocBu === filteredSpocBu;
+              }
+              if (filteredSpocCtg) {
+                if (filteredSpocCtg === "None") match = match && !p.spocCtg;
+                else match = match && p.spocCtg === filteredSpocCtg;
               }
               return match;
             })
