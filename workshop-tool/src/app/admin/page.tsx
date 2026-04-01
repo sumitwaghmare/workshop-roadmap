@@ -1510,51 +1510,59 @@ export default function AdminPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {priorityMatrixRows.map((priorityRow) => (
-                    <tr key={priorityRow.value} className="hover:bg-slate-50 dark:hover:bg-slate-900">
-                      <td className="border border-border p-2 font-semibold bg-slate-50/50 dark:bg-slate-900/50">{priorityRow.label}</td>
-                      {buColumns.map((bu) => {
-                        const cellProjects = projects.filter((p) => {
-                          const projectBu = p.bu?.trim() || "None";
-                          const projectPriority = p.priority || "none";
-                          return projectBu === bu && projectPriority === priorityRow.value;
-                        });
+                  {priorityMatrixRows.map((priorityRow) => {
+                    const pColor = PRIORITY_COLORS[priorityRow.value as keyof typeof PRIORITY_COLORS];
+                    const rowBg = pColor ? pColor.bg : "";
+                    
+                    return (
+                      <tr 
+                        key={priorityRow.value} 
+                        className="hover:opacity-95 transition-opacity"
+                        style={rowBg ? { backgroundColor: rowBg } : {}}
+                      >
+                        <td className="border border-border p-2 font-semibold bg-slate-50/20 dark:bg-slate-900/40 backdrop-blur-[2px]">{priorityRow.label}</td>
+                        {buColumns.map((bu) => {
+                          const cellProjects = projects.filter((p) => {
+                            const projectBu = p.bu?.trim() || "None";
+                            const projectPriority = p.priority || "none";
+                            return projectBu === bu && projectPriority === priorityRow.value;
+                          });
 
-                        const cellKey = `${priorityRow.value}-${bu}`;
-                        const isExpanded = expandedCells[cellKey];
-                        const displayProjects = isExpanded ? cellProjects : cellProjects.slice(0, 6);
+                          const cellKey = `${priorityRow.value}-${bu}`;
+                          const isExpanded = expandedCells[cellKey];
 
-                        return (
-                          <td key={cellKey} className="border border-border p-2 align-top">
-                            <div className="flex items-center justify-between mb-1.5">
-                              <span className="text-[10px] font-bold uppercase tracking-tight text-muted-foreground/70">
-                                {cellProjects.length} {cellProjects.length === 1 ? "item" : "items"}
-                              </span>
-                              {cellProjects.length > 6 && (
-                                <button 
-                                  onClick={() => setExpandedCells(prev => ({ ...prev, [cellKey]: !prev[cellKey] }))}
-                                  className="text-[10px] font-bold text-blue-500 hover:text-blue-600 transition-colors bg-blue-500/10 px-1.5 py-0.5 rounded expand-toggle shadow-sm"
-                                >
-                                  {isExpanded ? "Show less" : `+${cellProjects.length - 6} more`}
-                                </button>
-                              )}
-                            </div>
-                            <ul className={`space-y-1 ${!isExpanded ? "max-h-48" : ""} overflow-y-auto transition-all duration-300`}>
-                              {displayProjects.map((project) => (
-                                <li 
-                                  key={project.id} 
-                                  className="rounded-md px-2 py-1 bg-blue-50 text-[11px] text-blue-700 dark:bg-blue-900/30 dark:text-blue-200 border border-blue-100/50 dark:border-blue-800/50 leading-tight break-words"
-                                  title={project.name}
-                                >
-                                  {project.name}
-                                </li>
-                              ))}
-                            </ul>
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  ))}
+                          return (
+                            <td key={cellKey} className="border border-border p-2 align-top">
+                              <div className="flex items-center justify-between mb-1.5 print:mb-1">
+                                <span className="text-[10px] font-bold uppercase tracking-tight text-muted-foreground/70 print:text-black print:text-[8px]">
+                                  {cellProjects.length} {cellProjects.length === 1 ? "item" : "items"}
+                                </span>
+                                {cellProjects.length > 6 && (
+                                  <button 
+                                    onClick={() => setExpandedCells(prev => ({ ...prev, [cellKey]: !prev[cellKey] }))}
+                                    className="text-[10px] font-bold text-blue-500 hover:text-blue-600 transition-colors bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded expand-toggle shadow-sm border border-blue-500/20"
+                                  >
+                                    {isExpanded ? "Show less" : `+${cellProjects.length - 6} more`}
+                                  </button>
+                                )}
+                              </div>
+                              <ul className={`space-y-1 ${!isExpanded ? "max-h-48 screen-only-scroll" : ""} overflow-y-auto transition-all duration-300 print:max-h-none print:overflow-visible`}>
+                                {cellProjects.map((project) => (
+                                  <li 
+                                    key={project.id} 
+                                    className="rounded-md px-2 py-1 bg-white/90 dark:bg-slate-950/50 text-[11px] text-slate-900 dark:text-slate-100 border border-black/5 dark:border-white/10 leading-tight break-words shadow-sm backdrop-blur-sm print:bg-white print:text-black print:border-slate-200 print:shadow-none print:backdrop-blur-none print:text-[9px] print:py-0.5"
+                                    title={project.name}
+                                  >
+                                    {project.name}
+                                  </li>
+                                ))}
+                              </ul>
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
