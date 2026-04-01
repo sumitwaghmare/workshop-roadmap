@@ -28,6 +28,12 @@ interface Project {
   pinnedHorizon?: number | null;
   pinnedStatus?: string | null;
   createdAt?: string | null;
+  createdBy?: string | null;
+  spocBu?: string | null;
+  bu?: string | null;
+  owner?: string | null;
+  timeline?: string | null;
+  spocCtg?: string | null;
 }
 
 interface Placement {
@@ -55,6 +61,13 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
   const [newProjectDesc, setNewProjectDesc] = useState("");
   const [newProjectCategory, setNewProjectCategory] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
+  
+  // Project Details Modal state
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editDesc, setEditDesc] = useState("");
+  const [editSpocBu, setEditSpocBu] = useState("");
 
   // Local placements for immediate UI updates
   const [localPlacements, setLocalPlacements] = useState<Map<string, { status: string | null; horizon: number | null }>>(
@@ -216,7 +229,47 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
     }
   };
 
-  const handleCardDoubleClick = async (item: { id: string; status?: string | null; horizon?: number | null }) => {
+  const handleUpdateProject = async () => {
+    if (!selectedProject || !data) return;
+    try {
+      const res = await fetch(`/api/projects/${selectedProject.id}`, {
+        method: "PATCH",
+        headers: { 
+          "Content-Type": "application/json",
+          "x-group-token": token
+        },
+        body: JSON.stringify({
+          ...selectedProject,
+          name: editName,
+          description: editDesc,
+          spocBu: editSpocBu,
+        }),
+      });
+      if (res.ok) {
+        toast.success("Project updated successfully");
+        setDetailsDialogOpen(false);
+        loadData(); // Refresh data
+      } else {
+        const err = await res.json();
+        toast.error(err.error || "Failed to update project");
+      }
+    } catch {
+      toast.error("Failed to update project");
+    }
+  };
+
+  const handleCardDoubleClick = (project: { id: string }) => {
+    const fullProject = data?.projects.find(p => p.id === project.id);
+    if (fullProject) {
+      setSelectedProject(fullProject);
+      setEditName(fullProject.name);
+      setEditDesc(fullProject.description || "");
+      setEditSpocBu(fullProject.spocBu || "");
+      setDetailsDialogOpen(true);
+    }
+  };
+
+  const handleMoveToInbox = async (item: { id: string; status?: string | null; horizon?: number | null }) => {
     if (!data?.session?.active) return;
     
     // If the project is currently placed in the grid, move it back to inbox
@@ -484,8 +537,85 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
         inboxProjects={filteredInboxProjects}
         onDragEnd={handleDragEnd}
         onCardDoubleClick={handleCardDoubleClick}
+        onMoveToInbox={handleMoveToInbox}
         readOnly={!data.session.active}
       />
+
+      {/* Project Details Dialog */}
+      <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
+        <DialogContent className="glass border-border shadow-2xl backdrop-blur-2xl sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Project Details</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-name">Project Name</Label>
+              <Input
+                id="edit-name"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                disabled={selectedProject?.createdBy !== data.group.name || !data.session.active}
+                className="bg-background/50"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-desc">Description</Label>
+              <Textarea
+                id="edit-desc"
+                value={editDesc}
+                onChange={(e) => setEditDesc(e.target.value)}
+                disabled={selectedProject?.createdBy !== data.group.name || !data.session.active}
+                rows={4}
+                className="bg-background/50"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-spoc">BU SPOC</Label>
+              <Input
+                id="edit-spoc"
+                value={editSpocBu}
+                onChange={(e) => setEditSpocBu(e.target.value)}
+                disabled={selectedProject?.createdBy !== data.group.name || !data.session.active}
+                placeholder="e.g., John Doe (BU Name)"
+                className="bg-background/50"
+              />
+            </div>
+            <div className="grid grid-cols-3 gap-4 border-t border-border/50 pt-4">
+              <div className="space-y-1">
+                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Priority</Label>
+                <div className="text-sm font-medium capitalize h-9 flex items-center px-3 rounded-md bg-muted/30 border border-border/30 text-foreground/80">
+                  {selectedProject?.priority?.replace(/-/g, " ") || "—"}
+                </div>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Category</Label>
+                <div className="text-sm font-medium h-9 flex items-center px-3 rounded-md bg-muted/30 border border-border/30 text-foreground/80">
+                  {selectedProject?.category || "—"}
+                </div>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">BU</Label>
+                <div className="text-sm font-medium h-9 flex items-center px-3 rounded-md bg-muted/30 border border-border/30 text-foreground/80">
+                  {selectedProject?.bu || "—"}
+                </div>
+              </div>
+            </div>
+            {selectedProject?.createdBy !== data.group.name && (
+              <p className="text-[10px] text-muted-foreground italic">
+                * Only the group that added this project ({selectedProject?.createdBy}) can edit its details.
+              </p>
+            )}
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setDetailsDialogOpen(false)}>
+              {selectedProject?.createdBy === data.group.name && data.session.active ? "Cancel" : "Close"}
+            </Button>
+            {selectedProject?.createdBy === data.group.name && data.session.active && (
+              <Button onClick={handleUpdateProject}>Save Changes</Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Add Project Dialog */}
       <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>

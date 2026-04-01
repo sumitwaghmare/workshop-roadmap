@@ -42,8 +42,14 @@ export async function GET(
       pinnedHorizon: number | null;
       pinnedStatus: string | null;
       createdAt: string | null;
+      createdBy: string | null;
+      bu: string | null;
+      owner: string | null;
+      timeline: string | null;
+      spocCtg: string | null;
+      spocBu: string | null;
     }>(
-      "SELECT id, name, description, icon, priority, category, pinnedHorizon, pinnedStatus, createdAt FROM Project WHERE sessionId = ?",
+      "SELECT id, name, description, icon, priority, category, pinnedHorizon, pinnedStatus, createdAt, createdBy, bu, owner, timeline, spocCtg, spocBu FROM Project WHERE sessionId = ?",
       [sessionId]
     );
 

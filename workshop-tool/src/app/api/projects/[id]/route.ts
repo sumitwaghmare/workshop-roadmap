@@ -8,13 +8,35 @@ export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!(await isAdmin())) {
+  const { id } = await params;
+  const groupToken = req.headers.get("x-group-token");
+  let authorized = await isAdmin();
+
+  if (!authorized && groupToken) {
+    // Check if the group token is valid and matches the project's creator
+    const groupRows = await query<{ name: string }>(
+      "SELECT name FROM `Group` WHERE token = ?",
+      [groupToken]
+    );
+
+    if (groupRows.length > 0) {
+      const groupName = groupRows[0].name;
+      const projectRows = await query<{ createdBy: string }>(
+        "SELECT createdBy FROM Project WHERE id = ?",
+        [id]
+      );
+      if (projectRows.length > 0 && projectRows[0].createdBy === groupName) {
+        authorized = true;
+      }
+    }
+  }
+
+  if (!authorized) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
     await ensureProjectFields();
-    const { id } = await params;
     const { name, description, icon, priority, bu, owner, timeline, category, pinnedHorizon, pinnedStatus, spocCtg, spocBu } = await req.json();
 
     // Dynamically build the update query because pinnedHorizon might be correctly passed as null.

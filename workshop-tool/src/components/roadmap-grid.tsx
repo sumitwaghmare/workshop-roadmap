@@ -50,6 +50,7 @@ interface RoadmapGridProps {
   yAxisEnabled?: boolean;
   onCardClick?: (project: ProjectItem) => void;
   onCardDoubleClick?: (project: ProjectItem) => void;
+  onMoveToInbox?: (project: ProjectItem) => void;
   horizonLimits?: Record<number, number>;
   allowInboxExpansion?: boolean;
 }
@@ -62,6 +63,7 @@ function DraggableCard({
   compact,
   onCardClick,
   onCardDoubleClick,
+  onMoveToInbox,
   isInbox = false,
 }: {
   project: ProjectItem;
@@ -70,6 +72,7 @@ function DraggableCard({
   compact?: boolean;
   onCardClick?: (project: ProjectItem) => void;
   onCardDoubleClick?: (project: ProjectItem) => void;
+  onMoveToInbox?: (project: ProjectItem) => void;
   isInbox?: boolean;
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
@@ -189,13 +192,13 @@ function DraggableCard({
             <Edit3 size={14} />
           </div>
         )}
-        {project.isPlaced && !readOnly && !project.isPinned && !isDragging && onCardDoubleClick && (
+        {project.isPlaced && !readOnly && !project.isPinned && !isDragging && onMoveToInbox && (
           <button
             type="button"
             onPointerDown={(e) => e.stopPropagation()} 
             onClick={(e) => {
               e.stopPropagation(); 
-              onCardDoubleClick(project);
+              onMoveToInbox(project);
             }}
             className="absolute bottom-1.5 right-1.5 z-10 flex items-center justify-center rounded-md bg-background/80 p-1 text-muted-foreground transition-all hover:bg-red-500/20 hover:text-red-500 opacity-60 hover:opacity-100"
             title="Move back to Inbox"
@@ -323,6 +326,7 @@ export default function RoadmapGrid({
   yAxisEnabled = true,
   onCardClick,
   onCardDoubleClick,
+  onMoveToInbox,
   horizonLimits,
   allowInboxExpansion = false,
 }: RoadmapGridProps) {
@@ -427,6 +431,7 @@ export default function RoadmapGrid({
               compact={compact}
               onCardClick={onCardClick}
               onCardDoubleClick={onCardDoubleClick}
+              onMoveToInbox={onMoveToInbox}
               isInbox={true}
             />
           ))}
@@ -536,6 +541,7 @@ export default function RoadmapGrid({
                           compact={compact}
                           onCardClick={onCardClick}
                           onCardDoubleClick={onCardDoubleClick}
+                          onMoveToInbox={onMoveToInbox}
                         />
                       ))}
                     </DroppableCell>
