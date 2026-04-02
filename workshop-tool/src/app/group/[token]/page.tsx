@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Textarea } from "@/components/ui/textarea";
 import RoadmapGrid from "@/components/roadmap-grid";
 import CountdownTimer from "@/components/countdown-timer";
+import { CTGQualificationWizard } from "@/components/ctg-qualification-wizard";
 import { 
   PROJECT_CATEGORIES, 
   RULE_MAX_H1_PROJECTS, 
@@ -68,6 +69,7 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
   const [editName, setEditName] = useState("");
   const [editDesc, setEditDesc] = useState("");
   const [editSpocBu, setEditSpocBu] = useState("");
+  const [showCtgWizard, setShowCtgWizard] = useState(false);
 
   // Local placements for immediate UI updates
   const [localPlacements, setLocalPlacements] = useState<Map<string, { status: string | null; horizon: number | null }>>(
@@ -265,6 +267,7 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
       setEditName(fullProject.name);
       setEditDesc(fullProject.description || "");
       setEditSpocBu(fullProject.spocBu || "");
+      setShowCtgWizard(false);
       setDetailsDialogOpen(true);
     }
   };
@@ -542,12 +545,31 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
       />
 
       {/* Project Details Dialog */}
-      <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
+      <Dialog open={detailsDialogOpen} onOpenChange={(open) => {
+        setDetailsDialogOpen(open);
+        if (!open) setShowCtgWizard(false);
+      }}>
         <DialogContent className="glass border-border shadow-2xl backdrop-blur-2xl sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Project Details</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
+          {showCtgWizard ? (
+            <CTGQualificationWizard 
+              projectName={selectedProject?.name || ""} 
+              onClose={() => setShowCtgWizard(false)} 
+            />
+          ) : (
+            <>
+              <DialogHeader className="flex flex-row items-center justify-between space-y-0">
+                <DialogTitle>Project Details</DialogTitle>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setShowCtgWizard(true)}
+                  className="h-8 text-[10px] uppercase tracking-tighter font-bold bg-primary/5 hover:bg-primary/10 border-primary/20"
+                >
+                  <span className="mr-1.5 size-1.5 rounded-full bg-primary animate-pulse" />
+                  CTG Qualification?
+                </Button>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="edit-name">Project Name</Label>
               <Input
@@ -606,14 +628,16 @@ export default function GroupPage({ params }: { params: Promise<{ token: string 
               </p>
             )}
           </div>
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setDetailsDialogOpen(false)}>
-              {selectedProject?.createdBy === data.group.name && data.session.active ? "Cancel" : "Close"}
-            </Button>
-            {selectedProject?.createdBy === data.group.name && data.session.active && (
-              <Button onClick={handleUpdateProject}>Save Changes</Button>
-            )}
-          </DialogFooter>
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button variant="outline" onClick={() => setDetailsDialogOpen(false)}>
+                {selectedProject?.createdBy === data.group.name && data.session.active ? "Cancel" : "Close"}
+              </Button>
+              {selectedProject?.createdBy === data.group.name && data.session.active && (
+                <Button onClick={handleUpdateProject}>Save Changes</Button>
+              )}
+            </DialogFooter>
+          </>
+          )}
         </DialogContent>
       </Dialog>
 
