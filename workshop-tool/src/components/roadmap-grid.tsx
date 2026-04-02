@@ -99,49 +99,6 @@ function DraggableCard({
 
   return (
     <div className="group relative">
-      {/* Custom Tooltip - Positioned BELOW the card to avoid header clipping */}
-      <div className="absolute top-full left-1/2 mt-2 w-72 -translate-x-1/2 opacity-0 -translate-y-1 invisible rounded-xl border border-border bg-popover p-3 text-xs font-normal text-popover-foreground shadow-2xl transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0 group-hover:visible z-[110] pointer-events-none origin-bottom glass">
-        <div className="flex items-center justify-between mb-2 text-left">
-          <div className="font-bold text-blue-500 text-sm truncate pr-2">{project.name}</div>
-          {project.category && (
-            <Badge variant="secondary" className="px-1.5 py-0 text-[9px] h-4">
-              {project.category}
-            </Badge>
-          )}
-        </div>
-        
-        {project.description ? (
-          <div className="text-muted-foreground text-left leading-relaxed mb-3 line-clamp-4">{project.description}</div>
-        ) : (
-          <div className="italic text-muted-foreground/60 text-left mb-3">No description available</div>
-        )}
-
-        <div className="flex flex-wrap gap-2 pt-2 border-t border-border/50 text-left">
-          {project.priority && (
-            <div className="flex items-center gap-1">
-              <span className="text-[10px] text-muted-foreground">Priority:</span>
-              <span className="font-bold capitalize text-[10px]" style={{ color: PRIORITY_COLORS[project.priority]?.border }}>
-                {project.priority.replace(/-/g, " ")}
-              </span>
-            </div>
-          )}
-          {project.bu && (
-            <div className="flex items-center gap-1">
-              <span className="text-[10px] text-muted-foreground">BU:</span>
-              <span className="font-bold text-[10px]">{project.bu}</span>
-            </div>
-          )}
-          {project.owner && (
-            <div className="flex items-center gap-1">
-              <span className="text-[10px] text-muted-foreground">Owner:</span>
-              <span className="font-bold text-[10px]">{project.owner}</span>
-            </div>
-          )}
-        </div>
-        
-        <div className="absolute -top-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-t border-l border-border bg-popover" />
-      </div>
-
       <div
         ref={setNodeRef}
         {...listeners}

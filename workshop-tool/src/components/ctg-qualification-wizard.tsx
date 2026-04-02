@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { 
-  CheckCircle2, 
-  AlertCircle, 
+import {
+  CheckCircle2,
+  AlertCircle,
   RotateCcw,
   Lightbulb,
   Microscope,
@@ -130,13 +130,13 @@ export function CTGQualificationWizard({ onClose, projectName }: CTGQualificatio
         icon = <Factory className="w-10 h-10 text-amber-500" />;
         gateLabel = "Gate 0: Sustaining & Quality Filter";
         gateDesc = "Immediate routing for sustaining projects";
-        question = "Does this project fix a field quality issue, a manufacturing tolerance, or a supply chain defect (e.g., Table Hardness, Boring Bar TIR)?";
+        question = "Does this project fix a field quality issue, a manufacturing tolerance, or a supply chain defect?";
         break;
       case "GATE0_Q2":
         icon = <Factory className="w-10 h-10 text-amber-500" />;
         gateLabel = "Gate 0: Sustaining & Quality Filter";
         gateDesc = "Immediate routing for sustaining projects";
-        question = "Is this purely a cost-reduction exercise (VAVE), sheet-metal redesign, or swapping to an existing standard component (e.g., Pneumatic Chucks, Footprint reduction)?";
+        question = "Is this purely a cost-reduction exercise (VAVE), sheet-metal redesign, or swapping to an existing standard component?";
         break;
       case "GATE1_Q3":
         icon = <Microscope className="w-10 h-10 text-purple-500" />;
@@ -148,7 +148,7 @@ export function CTGQualificationWizard({ onClose, projectName }: CTGQualificatio
         icon = <Cpu className="w-10 h-10 text-emerald-500" />;
         gateLabel = "Gate 2: The Leap-Frog Filter";
         gateDesc = "Track A: R&D Pipeline";
-        question = "Does this project introduce net-new physics, advanced control algorithms (AI/Sensor Fusion), or open entirely new strategic markets (e.g., Semiconductor, Hydrostatics) operating at TRL 2 to TRL 6?";
+        question = "Does this project introduce net-new physics, advanced control algorithms (AI/Sensor Fusion), or open entirely new strategic markets (e.g., Semiconductor, Aerospace) operating at TRL 2 to TRL 6?";
         break;
     }
 
@@ -173,16 +173,16 @@ export function CTGQualificationWizard({ onClose, projectName }: CTGQualificatio
         </div>
 
         <div className="grid grid-cols-2 gap-4 pt-4">
-          <Button 
-            size="lg" 
-            variant="outline" 
+          <Button
+            size="lg"
+            variant="outline"
             onClick={() => handleAnswer(false)}
             className="h-16 text-lg font-bold border-2 hover:bg-muted/50 hover:border-primary/50 transition-all rounded-xl"
           >
             No
           </Button>
-          <Button 
-            size="lg" 
+          <Button
+            size="lg"
             onClick={() => handleAnswer(true)}
             className="h-16 text-lg font-bold shadow-lg shadow-primary/20 rounded-xl"
           >
@@ -201,11 +201,10 @@ export function CTGQualificationWizard({ onClose, projectName }: CTGQualificatio
 
     return (
       <div className="space-y-6 py-4 animate-in fade-in zoom-in-95 duration-500">
-        <div className={`rounded-2xl border p-6 text-center shadow-xl glass transition-all ${
-          isPositive 
-            ? 'border-emerald-500/30 bg-emerald-500/5 dark:bg-emerald-500/10' 
-            : 'border-amber-500/30 bg-amber-500/5 dark:bg-amber-500/10'
-        }`}>
+        <div className={`rounded-2xl border p-6 text-center shadow-xl glass transition-all ${isPositive
+          ? 'border-emerald-500/30 bg-emerald-500/5 dark:bg-emerald-500/10'
+          : 'border-amber-500/30 bg-amber-500/5 dark:bg-amber-500/10'
+          }`}>
           <div className="mb-4 flex justify-center">
             {isPositive ? (
               <div className="rounded-full bg-emerald-500/20 p-4 text-emerald-500 animate-pulse-glow">
@@ -217,7 +216,7 @@ export function CTGQualificationWizard({ onClose, projectName }: CTGQualificatio
               </div>
             )}
           </div>
-          
+
           <h2 className={`text-2xl font-bold mb-2 ${isPositive ? 'text-emerald-500' : 'text-amber-500'}`}>
             {recommendation.title}
           </h2>
@@ -256,12 +255,12 @@ export function CTGQualificationWizard({ onClose, projectName }: CTGQualificatio
           <h2 className="text-lg font-bold truncate max-w-[305px]">{projectName}</h2>
         </div>
         {state.step !== "GATE0_Q1" && state.step !== "RESULT" && (
-           <Button variant="ghost" size="sm" onClick={reset} className="text-xs h-7 gap-1">
-             <RotateCcw size={12} /> Reset
-           </Button>
+          <Button variant="ghost" size="sm" onClick={reset} className="text-xs h-7 gap-1">
+            <RotateCcw size={12} /> Reset
+          </Button>
         )}
       </div>
-      
+
       {state.step === "RESULT" ? renderResult() : renderQuestion()}
 
       <div className="flex items-center justify-center pt-2">
@@ -271,13 +270,12 @@ export function CTGQualificationWizard({ onClose, projectName }: CTGQualificatio
             const currentIndex = steps.indexOf(state.step);
             const active = i === currentIndex;
             const completed = i < currentIndex;
-            
+
             return (
-              <div 
-                key={s} 
-                className={`h-1.5 rounded-full transition-all duration-500 ${
-                  active ? 'w-8 bg-primary shadow-[0_0_8px_rgba(59,130,246,0.5)]' : completed ? 'w-4 bg-primary/40' : 'w-1.5 bg-muted'
-                }`} 
+              <div
+                key={s}
+                className={`h-1.5 rounded-full transition-all duration-500 ${active ? 'w-8 bg-primary shadow-[0_0_8px_rgba(59,130,246,0.5)]' : completed ? 'w-4 bg-primary/40' : 'w-1.5 bg-muted'
+                  }`}
               />
             );
           })}
