@@ -925,15 +925,30 @@ export default function AdminPage() {
             word-break: break-word !important;
             color: black !important;
             background: white !important;
+            opacity: 1 !important;
           }
           .matrix-table th {
             background-color: #f8fafc !important;
             font-weight: bold !important;
             color: black !important;
           }
+          /* Target the specific Horizon label cells in the first column */
+          .matrix-table td:first-child {
+            background-color: #f1f5f9 !important; /* Specific solid light grey for headers */
+            font-weight: bold !important;
+            color: black !important;
+            min-width: 100px !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+          }
           .matrix-table * {
             opacity: 1 !important;
             color: black !important;
+            background-color: transparent !important; /* Allow cell bg to show through */
+          }
+          /* Ensure cells with text don't have transparent backgrounds that hide text */
+          .matrix-table td > div {
+            background: transparent !important;
           }
           .matrix-table ul {
             max-height: none !important;
