@@ -26,6 +26,8 @@ import {
   STATUS_COLORS, 
   PRIORITY_COLORS, 
   PROJECT_CATEGORIES, 
+  HORIZONS,
+  HORIZON_COLORS,
   type StatusType,
   RULE_MAX_H1_PROJECTS,
   RULE_MIN_UNPLACED_PERCENTAGE,
@@ -51,6 +53,7 @@ import {
   XCircle,
   AlertCircle,
   Printer,
+  FileDown,
   ArrowUp
 } from "lucide-react";
 import CountdownTimer from "@/components/countdown-timer";
@@ -216,6 +219,7 @@ export default function AdminPage() {
   const [detailTimeline, setDetailTimeline] = useState<string | null>(null);
   const [detailSpocCtg, setDetailSpocCtg] = useState<string | null>(null);
   const [detailSpocBu, setDetailSpocBu] = useState<string | null>(null);
+  const [detailHorizon, setDetailHorizon] = useState<string | null>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isPresenting, setIsPresenting] = useState(false);
   const [expandedCells, setExpandedCells] = useState<Record<string, boolean>>({});
@@ -617,6 +621,7 @@ export default function AdminPage() {
     setDetailTimeline(roadmapItem.timeline ?? "");
     setDetailSpocCtg(roadmapItem.spocCtg ?? "");
     setDetailSpocBu(roadmapItem.spocBu ?? "");
+    setDetailHorizon(roadmapItem.horizon !== null ? String(roadmapItem.horizon) : "");
     setDetailsDialogOpen(true);
   };
 
@@ -646,7 +651,7 @@ export default function AdminPage() {
 
     // Update final placement status (if session is locked)
     if (!activeSession.active) {
-      const horizon = selectedRoadmapItem.horizon;
+      const horizon = detailHorizon !== "" ? parseInt(detailHorizon!, 10) : null;
       const status = detailStatus || null;
       await fetch(`/api/final/${activeSession.id}`, {
         method: "PUT",
@@ -811,6 +816,42 @@ export default function AdminPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const exportConsolidatedCSV = () => {
+    if (!roadmapData || roadmapData.length === 0) return;
+
+    const headers = ["Project_Name", "Description", "SPOC_BU", "SPOC_CTG", "Horizon"];
+    const rows = roadmapData.map((p) => {
+      const horizonLabel = p.horizon === null 
+        ? "Unplaced" 
+        : HORIZONS.find(h => h.index === p.horizon)?.name || `H${p.horizon + 1}`;
+      
+      const escapeCSV = (str: string | null | undefined) => {
+        if (!str) return "";
+        const cleaned = str.replace(/"/g, '""').replace(/\n/g, ' ');
+        return `"${cleaned}"`;
+      };
+
+      return [
+        escapeCSV(p.name),
+        escapeCSV(p.description),
+        escapeCSV(p.spocBu),
+        escapeCSV(p.spocCtg),
+        escapeCSV(horizonLabel)
+      ].join(",");
+    });
+
+    const csvContent = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `consolidated_roadmap_${activeSession?.name || 'export'}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -836,6 +877,11 @@ export default function AdminPage() {
   const priorityMatrixRows = [
     ...PRIORITY_OPTIONS,
     { value: "none", label: "No Priority" },
+  ];
+
+  const horizonMatrixRows = [
+    ...HORIZONS.map((h) => ({ value: h.index, label: h.name })),
+    { value: -1, label: "Unplaced / Inbox" },
   ];
 
   return (
@@ -877,6 +923,17 @@ export default function AdminPage() {
             padding: 4px !important;
             border: 1px solid #cbd5e1 !important;
             word-break: break-word !important;
+            color: black !important;
+            background: white !important;
+          }
+          .matrix-table th {
+            background-color: #f8fafc !important;
+            font-weight: bold !important;
+            color: black !important;
+          }
+          .matrix-table * {
+            opacity: 1 !important;
+            color: black !important;
           }
           .matrix-table ul {
             max-height: none !important;
@@ -889,6 +946,7 @@ export default function AdminPage() {
             margin-bottom: 2px !important;
             padding: 1px 4px !important;
             page-break-inside: avoid !important;
+            opacity: 1 !important;
           }
           .expand-toggle { display: none !important; }
         }
@@ -1066,6 +1124,15 @@ export default function AdminPage() {
               <div className="h-2 w-2 rounded-full bg-slate-300 dark:bg-slate-600 group-data-[state=active]:bg-white shrink-0"></div>
               {!sidebarCollapsed && <span>BU / Priority Matrix</span>}
               {sidebarCollapsed && <span className="lg:hidden">BU Matrix</span>}
+            </TabsTrigger>
+            <TabsTrigger 
+              value="consolidated-matrix" 
+              className={`w-full justify-start gap-3 data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-muted-foreground hover:text-foreground rounded-lg px-4 py-3 transition-all font-bold group ${sidebarCollapsed ? 'px-2' : ''}`}
+              title={sidebarCollapsed ? "Consolidated Matrix" : ""}
+            >
+              <div className="h-2 w-2 rounded-full bg-slate-300 dark:bg-slate-600 group-data-[state=active]:bg-white shrink-0"></div>
+              {!sidebarCollapsed && <span>Consolidated Matrix</span>}
+              {sidebarCollapsed && <span className="lg:hidden">Cons. Matrix</span>}
             </TabsTrigger>
             {!sidebarCollapsed && (
               <div className="mt-auto hidden lg:block p-4 space-y-4">
@@ -1546,12 +1613,119 @@ export default function AdminPage() {
                                   </button>
                                 )}
                               </div>
+                               <ul className={`space-y-1 ${!isExpanded ? "max-h-48 screen-only-scroll" : ""} overflow-y-auto transition-all duration-300 print:max-h-none print:overflow-visible`}>
+                                {cellProjects.map((project) => (
+                                  <li 
+                                    key={project.id} 
+                                    className="rounded-md px-2 py-1 bg-white/90 dark:bg-slate-950/50 text-[11px] text-slate-900 dark:text-slate-100 border border-black/5 dark:border-white/10 leading-tight break-words shadow-sm backdrop-blur-sm print:bg-white print:text-black print:border-slate-200 print:shadow-none print:backdrop-blur-none print:text-[9px] print:py-0.5"
+                                    title={`${project.name}${(() => {
+                                      const rd = roadmapData.find(r => r.id === project.id);
+                                      return rd?.agreedGroups?.length ? `\n\nVoted by: ${rd.agreedGroups.join(', ')}` : '';
+                                    })()}`}
+                                  >
+                                    {project.name}
+                                  </li>
+                                ))}
+                              </ul>
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </TabsContent>
+
+          {/* === Consolidated Matrix TAB (BU x Horizon) === */}
+          <TabsContent value="consolidated-matrix" className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold">Consolidated Roadmap Matrix</h2>
+                <p className="text-sm text-muted-foreground">Visualize final project distribution over BU and Horizon.</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={exportConsolidatedCSV}
+                  className="gap-2 border-emerald-500/30 hover:border-emerald-500/60 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400 no-print"
+                >
+                  <FileDown className="size-4" /> Export CSV
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-2 border-indigo-500/30 hover:border-indigo-500/60 bg-indigo-500/5 text-indigo-600 dark:text-indigo-400 no-print">
+                  <Printer className="size-4" /> Print Matrix
+                </Button>
+                <div className="text-xs text-muted-foreground">Total Projects: {projects.length}</div>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto rounded-lg border border-border bg-card p-2">
+              <table className="w-full min-w-[700px] table-fixed text-sm matrix-table">
+                <thead>
+                  <tr className="bg-slate-100 dark:bg-slate-800">
+                    <th className="border border-border p-2 text-left w-32">Horizon \ BU</th>
+                    {buColumns.map((bu) => (
+                      <th key={bu} className="border border-border p-2 text-left">
+                        {bu}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {horizonMatrixRows.map((horizonRow) => {
+                    const hIndex = horizonRow.value;
+                    const hColor = hIndex >= 0 && hIndex < HORIZON_COLORS.length ? HORIZON_COLORS[hIndex] : null;
+                    const rowBg = hColor ? `${hColor.border}20` : "";
+
+                    return (
+                      <tr 
+                        key={String(horizonRow.value)} 
+                        className="hover:opacity-95 transition-opacity"
+                        style={rowBg ? { backgroundColor: rowBg } : {}}
+                      >
+                        <td className="border border-border p-2 font-semibold bg-slate-50/20 dark:bg-slate-900/40 backdrop-blur-[2px]">
+                           <div className="flex flex-col">
+                             <span>{horizonRow.label}</span>
+                             {hIndex >= 0 && hIndex < 3 && (
+                               <span className="text-[10px] font-normal opacity-70">
+                                 {hIndex === 0 ? "Core" : hIndex === 1 ? "Adjacency" : "Transformational"}
+                               </span>
+                             )}
+                           </div>
+                        </td>
+                        {buColumns.map((bu) => {
+                          const cellProjects = roadmapData.filter((p) => {
+                            const projectBu = p.bu?.trim() || "None";
+                            const projectHorizon = p.horizon === null ? -1 : p.horizon;
+                            return projectBu === bu && projectHorizon === hIndex;
+                          });
+
+                          const cellKey = `cons-${horizonRow.value}-${bu}`;
+                          const isExpanded = expandedCells[cellKey];
+
+                          return (
+                            <td key={cellKey} className="border border-border p-2 align-top">
+                              <div className="flex items-center justify-between mb-1.5 print:mb-1">
+                                <span className="text-[10px] font-bold uppercase tracking-tight text-muted-foreground/70 print:text-black print:text-[8px]">
+                                  {cellProjects.length} {cellProjects.length === 1 ? "item" : "items"}
+                                </span>
+                                {cellProjects.length > 6 && (
+                                  <button 
+                                    onClick={() => setExpandedCells(prev => ({ ...prev, [cellKey]: !prev[cellKey] }))}
+                                    className="text-[10px] font-bold text-indigo-500 hover:text-indigo-600 transition-colors bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded expand-toggle shadow-sm border border-indigo-500/20"
+                                  >
+                                    {isExpanded ? "Show less" : `+${cellProjects.length - 6} more`}
+                                  </button>
+                                )}
+                              </div>
                               <ul className={`space-y-1 ${!isExpanded ? "max-h-48 screen-only-scroll" : ""} overflow-y-auto transition-all duration-300 print:max-h-none print:overflow-visible`}>
                                 {cellProjects.map((project) => (
                                   <li 
                                     key={project.id} 
                                     className="rounded-md px-2 py-1 bg-white/90 dark:bg-slate-950/50 text-[11px] text-slate-900 dark:text-slate-100 border border-black/5 dark:border-white/10 leading-tight break-words shadow-sm backdrop-blur-sm print:bg-white print:text-black print:border-slate-200 print:shadow-none print:backdrop-blur-none print:text-[9px] print:py-0.5"
-                                    title={project.name}
+                                    title={`${project.name}${project.agreedGroups?.length ? `\n\nVoted by: ${project.agreedGroups.join(', ')}` : ''}`}
                                   >
                                     {project.name}
                                   </li>
@@ -1815,12 +1989,11 @@ Group 3: Product`}
                               ) : (
                                 <div className="italic text-muted-foreground/60 mb-3">No description available</div>
                               )}
-
                               <div className="flex flex-wrap gap-2 pt-2 border-t border-border/50">
                                 {p.priority && (
                                   <div className="flex items-center gap-1">
                                     <span className="text-[10px] text-muted-foreground">Priority:</span>
-                                    <span className="font-bold capitalize" style={{ color: PRIORITY_COLORS[p.priority as keyof typeof PRIORITY_COLORS]?.border }}>
+                                    <span className="font-bold capitalize text-[10px]" style={{ color: PRIORITY_COLORS[p.priority as keyof typeof PRIORITY_COLORS]?.border }}>
                                       {p.priority.replace(/-/g, " ")}
                                     </span>
                                   </div>
@@ -1828,10 +2001,24 @@ Group 3: Product`}
                                 {p.bu && (
                                   <div className="flex items-center gap-1">
                                     <span className="text-[10px] text-muted-foreground">BU:</span>
-                                    <span className="font-bold">{p.bu}</span>
+                                    <span className="font-bold text-[10px]">{p.bu}</span>
                                   </div>
                                 )}
                               </div>
+                              {(() => {
+                                const rd = roadmapData.find(r => r.id === p.id);
+                                if (!rd || !rd.agreedGroups || rd.agreedGroups.length === 0) return null;
+                                return (
+                                  <div className="mt-2 pt-2 border-t border-border/50">
+                                    <div className="text-[9px] text-muted-foreground uppercase tracking-wider font-bold mb-1">Voted By:</div>
+                                    <div className="flex flex-wrap gap-1">
+                                      {rd.agreedGroups.map((g, idx) => (
+                                        <span key={idx} className="bg-blue-500/10 text-blue-500 px-1.5 py-0.5 rounded-[4px] text-[9px] font-bold border border-blue-500/20">{g}</span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                );
+                              })()}
                               <div className="absolute -bottom-1.5 left-4 h-3 w-3 rotate-45 border-b border-r border-border bg-popover" />
                             </div>
                           </TableCell>
@@ -1985,6 +2172,23 @@ Group 3: Product`}
                         title="Enable Y-axis (Status) grouping"
                       />
                     </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => {
+                        setEditProject(null);
+                        setProjectName("");
+                        setProjectDesc("");
+                        setProjectPinnedHorizon("");
+                        setProjectPinnedStatus("");
+                        setProjectSpocCtg("");
+                        setProjectSpocBu("");
+                        setProjectDialogOpen(true);
+                      }}
+                      className="gap-2 border-blue-500/30 hover:border-blue-500/60 bg-blue-500/5 text-blue-600 dark:text-blue-400"
+                    >
+                      <Plus className="size-4" /> Add Project
+                    </Button>
                     <Button variant="outline" size="sm" onClick={() => activeSession && loadRoadmap(activeSession.id, yAxisEnabled, filteredGroupId)}>
                       Refresh Now
                     </Button>
@@ -2349,6 +2553,19 @@ Group 3: Product`}
                       {s}
                     </option>
                   ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Horizon</Label>
+                <select
+                  value={detailHorizon || ""}
+                  onChange={(e) => setDetailHorizon(e.target.value)}
+                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 outline-none"
+                >
+                  <option value="">Inbox (Unplaced)</option>
+                  <option value="0">Horizon 1</option>
+                  <option value="1">Horizon 2</option>
+                  <option value="2">Horizon 3</option>
                 </select>
               </div>
               <div className="space-y-2">

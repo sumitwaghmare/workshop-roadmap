@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 import { NextResponse } from "next/server";
 import { query, ensureProjectFields } from "@/lib/db";
+import { MAJORITY_THRESHOLD } from "@/lib/constants";
 
 export async function GET(
   _req: Request,
@@ -114,13 +115,41 @@ export async function GET(
         counts[key].groups.push(p.groupName);
       });
 
-      // Find majority cell (>= 50%)
+      // Find majority cell based on "Max Horizon" rule:
+      // 1. Check if total votes for the project (anywhere on roadmap) > threshold
+      // 2. If yes, place in the furthest (max) horizon voted for.
       let majorityCell: { horizon: number; status: string | null; groups: string[] } | null = null;
-      for (const key in counts) {
-        if (counts[key].groups.length >= totalGroups / 2) {
-          majorityCell = counts[key];
-          break;
+      
+      const validPlacements = projectPlacements.filter(p => p.horizon !== null && (!yAxisEnabled || p.status !== null));
+      const totalValidVotes = validPlacements.length;
+
+      if (totalValidVotes > totalGroups * MAJORITY_THRESHOLD) {
+        // Calculate max horizon from all valid votes
+        const horizons = validPlacements.map(p => p.horizon as number);
+        const maxHorizon = Math.max(...horizons);
+        
+        // Find most frequent status among those who voted for the max horizon
+        const maxHorizonVotes = validPlacements.filter(p => p.horizon === maxHorizon);
+        const statusCounts: Record<string, number> = {};
+        maxHorizonVotes.forEach(p => {
+          const s = p.status || "UNKNOWN";
+          statusCounts[s] = (statusCounts[s] || 0) + 1;
+        });
+        
+        let bestStatus: string | null = null;
+        let maxStatusCount = -1;
+        for (const s in statusCounts) {
+          if (statusCounts[s] > maxStatusCount) {
+            maxStatusCount = statusCounts[s];
+            bestStatus = s === "UNKNOWN" ? null : s;
+          }
         }
+
+        majorityCell = { 
+          horizon: maxHorizon, 
+          status: bestStatus, 
+          groups: [...new Set(validPlacements.map(p => p.groupName))] 
+        };
       }
 
       // GROUP FILTER LOGIC (NEW)
