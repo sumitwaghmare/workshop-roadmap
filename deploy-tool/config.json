@@ -4,9 +4,40 @@
     "\\\\acevs125.acedesigners.co.in\\htdocs\\projeX",
     "\\\\acevs125.acedesigners.co.in\\htdocs\\projeX-IT",
     "\\\\acevs125.acedesigners.co.in\\htdocs\\projeX-PMG",
-    "\\\\acevs125.acedesigners.co.in\\htdocs\\jetAdminReport"
+    "\\\\acevs125.acedesigners.co.in\\htdocs\\jetAdminReport",
+    "\\\\acevs125.acedesigners.co.in\\htdocs\\projeX-CTG"
   ],
-  "excludeFiles": ["*.env", "*.json", "*.log"],
-  "excludeDirs": [".git", ".vscode", "node_modules", "cache"],
-  "subfolders": ["partials", "cron"]
+  "excludeFiles": [
+    "*.env",
+    "*.json",
+    "*.log",
+    "log.txt",
+    "*.txt",
+    ".htaccess",
+    "index.php",
+    "check_schema.php",
+    ".env.copy",
+    "db_diagnostic.php",
+    "generate_schema.php",
+    "init_db.php",
+    "light_gantt_app_original.php",
+    "*.sql",
+    "temp_migrate_audit.php",
+    "temp_migrate_qg.php",
+    "test_db_conn.php",
+    "test_php.php",
+    ".env.bk",
+    "inspect_gantt.php",
+    "*.db"
+  ],
+  "excludeDirs": [
+    ".git",
+    ".vscode",
+    "node_modules",
+    "cache"
+  ],
+  "subfolders": [
+    "partials",
+    "cron"
+  ]
 }

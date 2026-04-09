@@ -54,6 +54,36 @@ function buildRobocopyCommands(source, target, opts) {
 }
 
 /**
+ * Build robocopy commands for backing up a target.
+ * Matches the scope of the deployment.
+ */
+function buildBackupCommands(target, backupDir, opts) {
+  const xfFlags = opts.excludeFiles.map((f) => `"${f}"`).join(" ");
+  const xdFlags = [...opts.excludeDirs, "_backups"].map((d) => `"${d}"`).join(" ");
+  const flags = `/R:2 /W:2 /XF ${xfFlags} /XD ${xdFlags} /NJH /NJS /NDL /NS /NC /NP`;
+
+  const cmds = [];
+
+  // Root files only
+  cmds.push(`robocopy "${target}" "${backupDir}" /LEV:1 ${flags}`);
+
+  // Sub-folders (recursive)
+  for (const sub of opts.subfolders) {
+    cmds.push(
+      `robocopy "${target}\\${sub}" "${backupDir}\\${sub}" /E ${flags}`
+    );
+  }
+
+  return cmds;
+}
+
+function getTimestamp() {
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+}
+
+/**
  * Execute a command and return { stdout, stderr, code }.
  * Robocopy returns exit-codes < 8 on success, so we treat < 8 as OK.
  */
@@ -164,36 +194,76 @@ app.post("/api/preview", async (_req, res) => {
 app.post("/api/deploy", async (_req, res) => {
   try {
     const cfg = loadConfig();
-    const timestamp = new Date().toLocaleString();
-    let logContent = `Deployment Started: ${timestamp}\n${"=".repeat(60)}\n\n`;
+    const startTimeStr = new Date().toLocaleString();
+    let globalLogContent = `Deployment Started: ${startTimeStr}\n${"=".repeat(60)}\n\n`;
     const results = [];
 
     for (const target of cfg.targets) {
-      const cmds = buildRobocopyCommands(cfg.source, target, {
+      const runTimestamp = getTimestamp();
+      const backupPath = path.join(target, "_backups", runTimestamp);
+      const localLogPath = path.join(target, "deploy_log.txt");
+
+      let perTargetOutput = `>>> DEPLOYMENT TO: ${target}\n`;
+      perTargetOutput += `Timestamp: ${startTimeStr}\n`;
+      perTargetOutput += `Backup Path: ${backupPath}\n\n`;
+
+      // 1. Perform Backup
+      const backupCmds = buildBackupCommands(target, backupPath, {
+        excludeFiles: cfg.excludeFiles,
+        excludeDirs: cfg.excludeDirs,
+        subfolders: cfg.subfolders,
+      });
+
+      perTargetOutput += "--- BACKUP PHASE ---\n";
+      for (const cmd of backupCmds) {
+        const r = await run(cmd);
+        if (r.code >= 8) {
+          perTargetOutput += `[BACKUP ERROR] code ${r.code} for command: ${cmd}\n`;
+        }
+      }
+
+      // 2. Perform Deployment
+      const deployCmds = buildRobocopyCommands(cfg.source, target, {
         excludeFiles: cfg.excludeFiles,
         excludeDirs: cfg.excludeDirs,
         subfolders: cfg.subfolders,
         listOnly: false,
       });
 
-      let output = `>>> UPDATING TARGET: ${target}\n`;
-      for (const cmd of cmds) {
+      perTargetOutput += "\n--- DEPLOY PHASE ---\n";
+      let deployRawOutput = "";
+      for (const cmd of deployCmds) {
         const r = await run(cmd);
-        output += r.stdout;
-        if (r.stderr) output += r.stderr;
-        // robocopy exit codes < 8 are success
+        deployRawOutput += r.stdout;
+        if (r.stderr) deployRawOutput += r.stderr;
         if (r.code >= 8) {
-          output += `\n[ERROR] robocopy exited with code ${r.code}\n`;
+          deployRawOutput += `\n[DEPLOY ERROR] robocopy exited with code ${r.code}\n`;
         }
       }
 
-      logContent += output + "\n";
-      const cleaned = cleanRobocopyOutput(output.trim(), cfg.source, target);
+      perTargetOutput += deployRawOutput + "\n";
+      
+      // 3. Save Local Log
+      const localLogEntry = `\n${"=".repeat(40)}\n` +
+        `DEPLOYMENT AT: ${startTimeStr}\n` +
+        `BACKUP: ${backupPath}\n` +
+        `CHANGES:\n${cleanRobocopyOutput(deployRawOutput, cfg.source, target)}\n` +
+        `${"=".repeat(40)}\n`;
+      
+      try {
+        fs.appendFileSync(localLogPath, localLogEntry, "utf-8");
+      } catch (logErr) {
+        console.error(`Failed to write local log to ${localLogPath}:`, logErr);
+      }
+
+      // Add to global log and results
+      globalLogContent += perTargetOutput + "\n";
+      const cleaned = cleanRobocopyOutput(deployRawOutput.trim(), cfg.source, target);
       results.push({ target, output: cleaned });
     }
 
-    logContent += `\n${"=".repeat(60)}\nDeployment Finished: ${new Date().toLocaleString()}\n`;
-    fs.writeFileSync(LOG_PATH, logContent, "utf-8");
+    globalLogContent += `\n${"=".repeat(60)}\nDeployment Finished: ${new Date().toLocaleString()}\n`;
+    fs.writeFileSync(LOG_PATH, globalLogContent, "utf-8");
 
     res.json({ results, logFile: LOG_PATH });
   } catch (e) {
